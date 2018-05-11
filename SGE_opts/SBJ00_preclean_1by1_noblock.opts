@@ -1,0 +1,5 @@
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-v plot_psd="1by1",block_prefix=""
+-l mem_free=16G
+-N precln

@@ -1,0 +1,5 @@
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-v an_id="HGm_S_zbtS_trl2to3001_sm0_wn100_stat3",stat_id="corrRT_DifOutTim_WL200_WS50"
+-l mem_free=4G
+-N ANOVAhfa

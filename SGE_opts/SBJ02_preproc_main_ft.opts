@@ -1,0 +1,5 @@
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-v pipeline_id="main_ft"
+-l mem_free=8G
+-N preproc

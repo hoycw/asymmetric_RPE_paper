@@ -1,0 +1,5 @@
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-v pipeline_id="main_ft",an_id="HGm_S_zbtS_trl2to3001_sm0_wn100_stat3",actv_win="100"
+-l mem_free=8G
+-N HFAactv
