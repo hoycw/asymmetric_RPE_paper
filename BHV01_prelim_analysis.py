@@ -1,10 +1,7 @@
 
 # coding: utf-8
 
-# ### This version saves paradigm parameters and does not include some summary variables that can be computed from the main info:
-#     reversal, post_err, score_total, hit_total, block_acc
-
-# In[2]:
+# In[1]:
 
 from __future__ import division
 #get_ipython().magic(u'matplotlib inline')
@@ -17,8 +14,10 @@ import seaborn as sns
 import scipy.io as io
 import pickle
 
+import scipy.stats
 
-# In[1]:
+
+# In[2]:
 
 SBJ = raw_input('Enter SBJ ID to process:')#'IR63'
 
@@ -125,7 +124,7 @@ for ix in range(len(data)):
 # data[data['Block']==3]
 
 
-# # Plot Behavioral Results
+# # Add specific analysis computations
 
 # In[9]:
 
@@ -136,7 +135,8 @@ block_mid_ix = [ix+prdm['n_trials']/2 for ix in block_start_ix[1:]]
 # Add in full_vis + E/H training: 0:4 + 5:19 = 10; 20:34 = 27.5 
 block_mid_ix.insert(0,np.mean([prdm['n_examples']+prdm['n_training'],
          prdm['n_examples']+2*prdm['n_training']]))   #examples
-block_mid_ix.insert(0,np.mean([0, prdm['n_examples']+prdm['n_training']]))   #easy training (would be 12.5 if splitting examples/train)
+block_mid_ix.insert(0,np.mean([0, prdm['n_examples']+prdm['n_training']]))
+#easy training (would be 12.5 if splitting examples/train)
 
 
 # In[10]:
@@ -147,7 +147,20 @@ for ix in range(len(data)):
     data.loc[ix,'Accuracy'] = accuracy[data.loc[ix,'Block'],data.loc[ix,'Condition']]
 
 
-# In[11]:
+# In[19]:
+
+# Break down by post-long and post-short trials
+data['postlong'] = [False if ix==0 else True if data['RT'].iloc[ix-1]>1 else False for ix in range(len(data))]
+
+# Compute change in RT
+data['dRT'] = [0 for ix in range(len(data))]
+for ix in range(len(data)-1):
+    data.loc[ix+1,'dRT'] = data.loc[ix+1,'RT']-data.loc[ix,'RT']
+
+
+# # Plot Full Behavior Across Dataset
+
+# In[21]:
 
 # Accuracy and Tolerance
 f, ax1 = plt.subplots()
@@ -187,26 +200,110 @@ ax2.set_ylim([0, 1])
 plt.title(plot_title)
 
 plt.savefig(results_dir+'BHV/tolerance/'+SBJ+'_tolerance'+fig_type)
-
+plt.close()
 
 # # Plot only real data (exclude examples + training)
 
-# In[12]:
+# In[23]:
 
 data_all = data
-data = data[(data['Block']!=-1) & (data['RT']>0)]
+# Exclude: Training/Examples, non-responses, first trial of each block
+if data[data['RT']<0].shape[0]>0:
+    print 'WARNING: '+str(data[data['RT']<0].shape[0])+' trials with no response!'
+data = data[(data['Block']!=-1) & (data['RT']>0) & (data['ITI']>0)]
 
 
-# In[13]:
+# ## Histogram of all RTs
+
+# In[25]:
 
 # RT Histogram
-ax = sns.distplot(data['RT'],label=SBJ)
+hist = sns.distplot(data['RT'],label=SBJ)
 plt.subplots_adjust(top=0.9)
-ax.legend() # can also get the figure from plt.gcf()
-plt.savefig(results_dir+'BHV/RTs/'+SBJ+'_RT_hist'+fig_type)
+hist.legend() # can also get the figure from plt.gcf()
+plt.savefig(results_dir+'BHV/RTs/histograms/'+SBJ+'_RT_hist'+fig_type)
+plt.close()
 
 
-# In[14]:
+# ## RT Histograms by ITI
+
+# In[124]:
+
+# ANOVA for RT differences across ITI
+itis = np.unique(data['ITI type'])
+if len(prdm['ITIs'])==4:
+    f,iti_p = scipy.stats.f_oneway(data.loc[data['ITI type']==itis[0],('RT')].values,
+                               data.loc[data['ITI type']==itis[1],('RT')].values,
+                               data.loc[data['ITI type']==itis[2],('RT')].values,
+                               data.loc[data['ITI type']==itis[3],('RT')].values)
+elif len(prdm['ITIs'])==3:
+    f,iti_p = scipy.stats.f_oneway(data.loc[data['ITI type']==itis[0],('RT')].values,
+                               data.loc[data['ITI type']==itis[1],('RT')].values,
+                               data.loc[data['ITI type']==itis[2],('RT')].values)
+else:
+    print 'WARNING: some weird paradigm version without 3 or 4 ITIs!'
+# print f, p
+
+
+# In[135]:
+
+f, axes = plt.subplots(1,2)
+
+# RT Histogram
+rt_bins = np.arange(0.7,1.3,0.01)
+for iti in itis:
+    sns.distplot(data['RT'].loc[data['ITI type'] == iti],bins=rt_bins,label=str(round(iti,2)),ax=axes[0])
+axes[0].legend() # can also get the figure from plt.gcf()
+axes[0].set_xlim(min(rt_bins),max(rt_bins))
+
+# Factor Plot
+sns.boxplot(data=data,x='ITI type',y='RT',hue='ITI type',ax=axes[1])
+
+# Add overall title
+plt.subplots_adjust(top=0.9,wspace=0.3)
+f.suptitle(SBJ+' RT by ITI (p='+str(round(iti_p,4))+')') # can also get the figure from plt.gcf()
+
+# Save plot
+plt.savefig(results_dir+'BHV/RTs/hist_ITI/'+SBJ+'_RT_ITI_hist_box'+fig_type)
+plt.close()
+
+
+# ## RT adjustment after being short vs. long
+
+# In[50]:
+
+# t test for RT differences across ITI
+itis = np.unique(data['ITI type'])
+f,postlong_p = scipy.stats.ttest_ind(data.loc[data['postlong']==True,('dRT')].values,
+                            data.loc[data['postlong']==False,('dRT')].values)
+
+
+# In[55]:
+
+f, axes = plt.subplots(1,2)
+
+# RT Histogram
+drt_bins = np.arange(-0.6,0.6,0.025)
+sns.distplot(data['dRT'].loc[data['postlong']==True],bins=drt_bins,label='Post-Long',ax=axes[0])
+sns.distplot(data['dRT'].loc[data['postlong']==False],bins=drt_bins,label='Post-Short',ax=axes[0])
+axes[0].legend() # can also get the figure from plt.gcf()
+axes[0].set_xlim(min(drt_bins),max(drt_bins))
+
+# Factor Plot
+sns.boxplot(data=data,x='postlong',y='dRT',hue='postlong',ax=axes[1])
+
+# Add overall title
+plt.subplots_adjust(top=0.9,wspace=0.3)
+f.suptitle(SBJ+' RT by ITI (p='+str(round(postlong_p,6))+')') # can also get the figure from plt.gcf()
+
+# Save plot
+plt.savefig(results_dir+'BHV/RTs/hist_ITI/'+SBJ+'_dRT_postlong_hist_box'+fig_type)
+plt.close()
+
+
+# ##RT and Accuracy Effects by ITI and across post-error
+
+# In[40]:
 
 # RTs by condition
 # if len(prdm_params['ITIs'])==4:    # target_time v1.8.5+
@@ -220,106 +317,42 @@ plt.savefig(results_dir+'BHV/RTs/'+SBJ+'_RT_hist'+fig_type)
 # else:               # Errors for anything besides len(ITIs)==3,4
 #     assert len(prdm_params['ITIs'])==4
 
-plot = sns.factorplot(data=data,x='ITI type',y='RT',hue='PE',col='Condition',kind='point',
+plot = sns.factorplot(data=data,x='ITI type',y='dRT',hue='PE',col='Condition',kind='point',
                ci=95);#,order=ITI_plot_order
 plt.subplots_adjust(top=0.9)
 plot.fig.suptitle(SBJ) # can also get the figure from plt.gcf()
 
-plt.savefig(results_dir+'BHV/RTs/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
+plt.savefig(results_dir+'BHV/RTs/hist_PE_ITI/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
+plt.close()
 
 
-# In[15]:
-
-# Break kdown by post-long and post-short trials
-data['postlong'] = [False if ix==0 else True if data['RT'].iloc[ix-1]>1 else False for ix in range(len(data))]
-data_PL = data[data['postlong']==True]
-data_PS = data[data['postlong']==False]
-
-
-# In[16]:
-
-plot = sns.factorplot(data=data_PL,x='ITI type',y='RT',hue='PE',col='Condition',kind='point',
-               ci=95,order=prdm['ITIs']);
-plt.subplots_adjust(top=0.9)
-plot.fig.suptitle(SBJ+'_post-long') # can also get the figure from plt.gcf()
-
-# plt.savefig(results_dir+'RT_plots/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
-plot2 = sns.factorplot(data=data_PS,x='ITI type',y='RT',hue='PE',col='Condition',kind='point',
-               ci=95,order=prdm['ITIs']);
-plt.subplots_adjust(top=0.9)
-plot2.fig.suptitle(SBJ+'_post-short') # can also get the figure from plt.gcf()
-
-# plt.savefig(results_dir+'RT_plots/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
-
-
-# In[ ]:
-
-
-
-
-# In[35]:
-
-# ITI Histograms
-# sns.distplot(data['ITI'],bins=np.arange(0.285,1.01,0.01))
-
-
-# # =================================================
-# # OLD SHIT
-# # =================================================
-
-# In[ ]:
-
-# RT_means = {'short': np.empty(2),
-#            'medium': np.empty(2),
-#            'long': np.empty(2)}
-# RT_cnt = {'short': np.empty(2),
-#            'medium': np.empty(2),
-#            'long': np.empty(2)}
-# for ITI_type in ['short','medium','long']:
-#     RT_means[ITI_type][0] = data.loc[(data['PE']==False) & (data['ITI type']==ITI_type),'RT'].mean()
-#     RT_cnt[ITI_type][0] = sum([(data['PE']==False) & (data['ITI type']==ITI_type)]).sum()
-#     RT_means[ITI_type][1] = data.loc[(data['PE']==True) & (data['ITI type']==ITI_type),'RT'].mean()
-#     RT_cnt[ITI_type][1] = sum([(data['PE']==True) & (data['ITI type']==ITI_type)]).sum()
-    
-# print(ITI_type)
-# print('PE: ',data.loc[data['PE']==True,'RT'].mean(),sum(data['PE']==True))
-# print('PC: ',data.loc[data['PE']==False,'RT'].mean(),sum(data['PE']==False))
-
-
-# In[ ]:
-
-# def makeECDF(sample):
-#     def ECDF(x):
-#         N = len(sample)
-#         cumsum = sample<=x
-#         CDF = np.sum(cumsum)/N
-#         return CDF
-#     return ECDF
-
-# ecdf = makeECDF(sample)
-# xs = np.linspace(0,1,len(sample))
-# ys = [ecdf(x) for x in xs]
-# plt.plot(xs,ys)
-# sns.distplot(sample,rug=True,hist=False,kde=False)
-
-
-# In[36]:
-
-# def makeECDF(sample):
-#     def ECDF(x):
-#         N = len(sample)
-#         cumsum = sample<=x
-#         CDF = np.sum(cumsum)/N
-#         return CDF
-#     return ECDF
-
-# ecdf = makeECDF(data['Correct'])
-# xs = np.linspace(0,1,len(data))
-# ys = [ecdf(x) for x in xs]
-# plt.plot(xs,ys)
-
-
-# In[ ]:
-
+### # In[57]:
+### 
+### # WARNING: This doesnt' make sense because I need to go across subjects to get variance in accuracy by ITI
+### # plot = sns.factorplot(data=data,x='ITI type',y='Accuracy',col='Condition',kind='point',sharey=False,
+### #                ci=95);#,order=ITI_plot_order
+### # #plot.set(alpha=0.5)
+### # plt.subplots_adjust(top=0.9)
+### # plot.fig.suptitle(SBJ) # can also get the figure from plt.gcf()
+### 
+### # plt.savefig(results_dir+'BHV/accuracy/'+SBJ+'_acc_PE_ITI_hit'+fig_type)
+### 
+### 
+### # ## Look for behavioral adjustments following short and long responses
+### 
+### # In[41]:
+### 
+### plot = sns.factorplot(data=data_PL,x='ITI type',y='RT',hue='PE',col='Condition',kind='point',
+###                ci=95,order=prdm['ITIs']);
+### plt.subplots_adjust(top=0.9)
+### plot.fig.suptitle(SBJ+'_post-long') # can also get the figure from plt.gcf()
+### 
+### # plt.savefig(results_dir+'RT_plots/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
+### plot2 = sns.factorplot(data=data_PS,x='ITI type',y='RT',hue='PE',col='Condition',kind='point',
+###                ci=95,order=prdm['ITIs']);
+### plt.subplots_adjust(top=0.9)
+### plot2.fig.suptitle(SBJ+'_post-short') # can also get the figure from plt.gcf()
+### 
+### # plt.savefig(results_dir+'RT_plots/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
 
 
