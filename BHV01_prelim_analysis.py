@@ -143,8 +143,10 @@ block_mid_ix.insert(0,np.mean([0, prdm['n_examples']+prdm['n_training']]))
 
 # Compute accuracy per block
 accuracy = data['Hit'].groupby([data['Block'],data['Condition']]).mean()
+acc_ITI = data['Hit'].groupby([data['ITI type'],data['Condition']]).mean()
 for ix in range(len(data)):
     data.loc[ix,'Accuracy'] = accuracy[data.loc[ix,'Block'],data.loc[ix,'Condition']]
+    data.loc[ix,'Acc_ITI'] = acc_ITI[data.loc[ix,'ITI type'],data.loc[ix,'Condition']]
 
 
 # In[19]:
@@ -326,16 +328,16 @@ plt.savefig(results_dir+'BHV/RTs/hist_PE_ITI/'+SBJ+'_RT_PE_ITI_hit'+fig_type)
 plt.close()
 
 
-### # In[57]:
-### 
-### # WARNING: This doesnt' make sense because I need to go across subjects to get variance in accuracy by ITI
-### # plot = sns.factorplot(data=data,x='ITI type',y='Accuracy',col='Condition',kind='point',sharey=False,
-### #                ci=95);#,order=ITI_plot_order
-### # #plot.set(alpha=0.5)
-### # plt.subplots_adjust(top=0.9)
-### # plot.fig.suptitle(SBJ) # can also get the figure from plt.gcf()
-### 
-### # plt.savefig(results_dir+'BHV/accuracy/'+SBJ+'_acc_PE_ITI_hit'+fig_type)
+# In[57]:
+
+# WARNING: I need to go across subjects to get variance in accuracy by ITI
+plot = sns.factorplot(data=data,x='ITI type',y='Acc_ITI',col='Condition',kind='point',sharey=False,
+               ci=95);#,order=ITI_plot_order
+#plot.set(alpha=0.5)
+plt.subplots_adjust(top=0.9)
+plot.fig.suptitle(SBJ) # can also get the figure from plt.gcf()
+
+plt.savefig(results_dir+'BHV/accuracy/'+SBJ+'_acc_ITI'+fig_type)
 ### 
 ### 
 ### # ## Look for behavioral adjustments following short and long responses
