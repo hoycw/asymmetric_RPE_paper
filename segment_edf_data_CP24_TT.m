@@ -4,20 +4,20 @@ addpath('/home/knight/hoycw/Apps/fieldtrip/');
 ft_defaults
 
 %% Edit Information in this section
-data_dir = '/home/knight/hoycw/PRJ_Error/data/CP23/00_raw/'; %location where you want to save the experiment block
+data_dir = '/home/knight/hoycw/PRJ_Error/data/CP24/00_raw/'; %location where you want to save the experiment block
 cd(data_dir);
-path=strcat(data_dir,'CP23_10-1-17.edf'); %location of the edf file 
-my_block_name = 'CP23_raw_targettime.mat'; %task owner and task name
+path=strcat(data_dir,'CP24_Dec6_130.edf'); %location of the edf file 
+my_block_name = 'CP24_raw_targettime.mat'; %task owner and task name
 
 % start time of experimental block:
-H_exp_start = 12;
-M_exp_start = 35;
+H_exp_start = 13;
+M_exp_start = 14;
 S_exp_start = 00;
 
 % end time of experimental block
-H_exp_end = 12;
-M_exp_end = 54;
-S_exp_end = 30;
+H_exp_end = 13;
+M_exp_end = 33;
+S_exp_end = 20;
 
 %% Loading Data
 %  Do NOT edit information in this section
@@ -26,7 +26,9 @@ disp('converting file from .edf to .mat...')
 datafile = ft_read_data(path);
 hdr = ft_read_header(path);
 samplerate = hdr.Fs;
-nSamples = hdr.nSamples
+nSamples = hdr.nSamples;
+block_len = hdr.nSamples/hdr.Fs;
+
 %% Segment Data
 %  Do NOT edit information in this section
 disp('segmenting file into specified block')
@@ -36,9 +38,9 @@ M_block_start = hdr.orig.T0(5);
 S_block_start = hdr.orig.T0(6);
 
 % end time of edf file 
-H_block_end = floor(H_block_start + (nSamples/samplerate)/3600);
-M_block_end = floor(M_block_start + ((nSamples/samplerate)-3600*(H_block_end-H_block_start))/60);
-S_block_end = floor(S_block_start + ((nSamples/samplerate)-3600*(H_block_end-H_block_start)-60*(M_block_end-M_block_start)));
+H_block_end = floor(H_block_start + block_len/3600);
+M_block_end = floor(M_block_start + (block_len-3600*(H_block_end-H_block_start))/60);
+S_block_end = floor(S_block_start + (block_len-3600*(H_block_end-H_block_start)-60*(M_block_end-M_block_start)));
 if S_block_end >= 60
     M_block_end = M_block_end + 1;
     S_block_end = S_block_end - 60;
