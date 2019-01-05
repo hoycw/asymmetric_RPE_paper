@@ -19,7 +19,7 @@ import scipy.stats
 
 # In[2]:
 
-SBJ = raw_input('Enter SBJ ID to process:')#'IR63'
+SBJ = sys.argv[1]#raw_input('Enter SBJ ID to process:')#'IR63'
 
 
 # In[3]:
@@ -29,46 +29,6 @@ results_dir = prj_dir+'results/'
 fig_type = '.png'
 data_dir = prj_dir+'data/'
 sbj_dir  = data_dir+SBJ+'/'
-# paths = {'Rana': '/Users/colinhoy/Code/PRJ_Error/data/logs/',
-#          'Adi': '/Users/colinhoy/Code/PRJ_Error/data/logs/',
-#          'IR57': '/Users/colinhoy/Code/PRJ_Error/data/logs/'}
-logs = {'Rana_1.6': 'Rana2_response_log_20170321103129_DATA.txt',
-        'Adi_1.7': 'adi_response_log_20170321153641.txt',
-        'CP22': '222_response_log_20170609140407.txt',
-        'CP23': '223_response_log_20170930123015.txt',
-        'CP241': '224-1_response_log_20171206121023.txt',
-        'CP242': 'cp24_2_response_log_20171209120902.txt',
-        'IR57': '857_response_log_20170322112243_CWHedit.txt',#CWHedit added n_training, n_examples lines
-        'IR60': '60_response_log_20170613100307.txt',
-        'IR62': 'ir62_response_log_20170713124719.txt',
-        'IR63': 'IR63_response_log_20170921095757.txt',
-        'IR65': '865_response_log_20171207130759.txt',
-        'IR66': 'ir66_response_log_20171219124409.txt',
-        'IR67': 'ir673_response_log_20180124103600.txt',
-        'IR68': 'IR68_response_log_20180124140950.txt',
-        'IR69': '869p2_response_log_20180211111609.txt',#this is 2nd run, another one before!
-        'IR71': '71_response_log_20180221115510.txt',
-        'IR72': 'Ir72_response_log_20180325133520.txt',#2 log files, this has easy, other has hard blocks
-        'IR74': 'ir742_response_log_20180327170333.txt',
-        'IR75': 'IR75_response_log_20180531221813.txt',
-        'IR76': 'IR76_response_log_20180603181356.txt',
-        'IR77': '8772_response_log_20180620124229.txt',#2/3 logs, has 2 easy, 8773 has 2 hards
-        'IR78': 'IR78_response_log_20180628052715.txt',
-        'IR79': 'IR79_response_log_20180710112314.txt',
-        'IR82': 'IR82_response_log_20180928162311.txt',
-        'IR84': 'IR84_response_log_20181025094454.txt',
-        'P1': 'Pilot1_2_response_log_20170412131644.txt',
-        'P2': 'pilot2_response_log_20170412140615.txt',
-        'P3': 'pilot3_response_log_20170413110228.txt',
-        'P4': 'Pilot4_2_response_log_20170418140941.txt',
-        'P5': 'colin_real_response_log_20170412103113.txt',
-        'P6': 'pilot_adi_response_log_20170414122257.txt',
-        'P7': 'pilot_Rana_response_log_20170415155844.txt',
-        'P8': 'Giao_response_log_20170419161340.txt',
-        'P9': 'Sundberg_response_log_20170419150222.txt',
-        'colin_vec': 'colin_circle_wVec_response_log_20171222141248.txt',
-        'colin_novec': 'colin_noVec_response_log_20171222142110.txt'
-       }
 
 
 # ### Load paradigm parameters
@@ -215,6 +175,19 @@ if data[data['RT']<0].shape[0]>0:
 data = data[(data['Block']!=-1) & (data['RT']>0) & (data['ITI']>0)]
 
 
+# ## Histogram of ITIs
+# ITI Histogram
+f,axes = plt.subplots(1,2)
+bins = np.arange(0,1.1,0.01)
+hist_real = sns.distplot(data['ITI'],bins=bins,kde=False,label=SBJ,ax=axes[0])
+hist_adj  = sns.distplot(data['ITI type'],bins=bins,kde=False,label=SBJ,ax=axes[1])
+axes[0].set_xlim([0, 1.1])
+axes[1].set_xlim([0, 1.1])
+plt.subplots_adjust(top=0.93)
+f.suptitle(SBJ)
+plt.savefig(results_dir+'BHV/ITIs/'+SBJ+'_ITI_hist'+fig_type)
+plt.close()
+
 # ## Histogram of all RTs
 
 # In[25]:
@@ -299,7 +272,7 @@ plt.subplots_adjust(top=0.9,wspace=0.3)
 f.suptitle(SBJ+' RT by ITI (p='+str(round(postlong_p,6))+')') # can also get the figure from plt.gcf()
 
 # Save plot
-plt.savefig(results_dir+'BHV/RTs/hist_ITI/'+SBJ+'_dRT_postlong_hist_box'+fig_type)
+plt.savefig(results_dir+'BHV/RTs/hist_dRT/'+SBJ+'_dRT_postlong_hist_box'+fig_type)
 plt.close()
 
 

@@ -19,7 +19,7 @@ import pickle
 
 # In[102]:
 
-SBJ = raw_input('Enter SBJ ID to process:')#'IR63'
+SBJ = sys.argv[1]#raw_input('Enter SBJ ID to process:')#'IR63'
 
 
 # In[103]:
@@ -36,7 +36,7 @@ logs = {'Rana_1.6': 'Rana2_response_log_20170321103129_DATA.txt',
         'Adi_1.7': 'adi_response_log_20170321153641.txt',
         'CP22': '222_response_log_20170609140407.txt',
         'CP23': '223_response_log_20170930123015.txt',
-        'CP241': '224-1_response_log_20171206121023.txt',
+        'CP24': '224_response_log_20171206121023.txt',
         'CP242': 'cp24_2_response_log_20171209120902.txt',
         'CP25': 'CP25_response_log_20180811082953.txt',
         'IR57': '857_response_log_20170322112243_CWHedit.txt',#CWHedit added n_training, n_examples lines
@@ -58,15 +58,15 @@ logs = {'Rana_1.6': 'Rana2_response_log_20170321103129_DATA.txt',
         'IR79': 'IR79_response_log_20180710112314.txt',
         'IR82': 'IR82_response_log_20180928162311.txt',
         'IR84': 'IR84_response_log_20181025094454.txt',
-        'P1': 'Pilot1_2_response_log_20170412131644.txt',
-        'P2': 'pilot2_response_log_20170412140615.txt',
-        'P3': 'pilot3_response_log_20170413110228.txt',
-        'P4': 'Pilot4_2_response_log_20170418140941.txt',
-        'P5': 'colin_real_response_log_20170412103113.txt',
-        'P6': 'pilot_adi_response_log_20170414122257.txt',
-        'P7': 'pilot_Rana_response_log_20170415155844.txt',
-        'P8': 'Giao_response_log_20170419161340.txt',
-        'P9': 'Sundberg_response_log_20170419150222.txt',
+        'BP1': 'Pilot1_2_response_log_20170412131644.txt',
+        'BP2': 'pilot2_response_log_20170412140615.txt',
+        'BP3': 'pilot3_response_log_20170413110228.txt',
+        'BP4': 'Pilot4_2_response_log_20170418140941.txt',
+        'BP5': 'colin_real_response_log_20170412103113.txt',
+        'BP6': 'pilot_adi_response_log_20170414122257.txt',
+        'BP7': 'pilot_Rana_response_log_20170415155844.txt',
+        'BP8': 'Giao_response_log_20170419161340.txt',
+        'BP9': 'Sundberg_response_log_20170419150222.txt',
         'colin_vec': 'colin_circle_wVec_response_log_20171222141248.txt',
         'colin_novec': 'colin_noVec_response_log_20171222142110.txt'
        }
@@ -105,12 +105,12 @@ for line in log:
     
     # ITIs and boundaries between them
     if line.find('ITIs')!=-1:
-        prdm['ITIs'] = [float(string)                     for string in line[line.find('[')+1:line.find(']')].split(',')]
+        prdm['ITIs'] = [float(string) for string in line[line.find('[')+1:line.find(']')].split(',')]
         ITI_bounds = np.mean([prdm['ITIs'][:-1], prdm['ITIs'][1:]],0)
         
     # Tolerance limits/clamps
     if line.find('tolerance_lim')!=-1:
-        prdm['tol_lim'] = [float(string)                          for string in line[line.find('[')+1:line.find(']')].split(',')]
+        prdm['tol_lim'] = [float(string) for string in line[line.find('[')+1:line.find(']')].split(',')]
         
     # Trial count variables
     if line.find('n_blocks')!=-1:
@@ -119,10 +119,22 @@ for line in log:
         prdm['n_trials'] = int(line[line.find('=')+2:])
     if line.find('n_examples')!=-1:
         prdm['n_examples'] = int(line[line.find('=')+2:])
+    elif line.find('n_fullvis')!=-1:
+        prdm['n_examples'] = int(line[line.find('=')+2:])
     if line.find('n_training')!=-1:
         prdm['n_training'] = int(line[line.find('=')+2:])
 
-prdm['trl_len'] = prdm['target']+            prdm['fb_delay']+prdm['fb']
+# Add missing items from early log files
+if 'prdm_name' not in prdm:
+    prdm['prdm_name'] = 'not_logged'
+if 'prdm_version' not in prdm:
+    prdm['prdm_version'] = '<1.8.5'
+if 'n_examples' not in prdm:
+    prdm['n_examples'] = int(-1)
+if 'n_training' not in prdm:
+    prdm['n_training'] = int(-1)
+
+prdm['trl_len'] = prdm['target'] + prdm['fb_delay'] + prdm['fb']
 
 
 # ### Save paradigm parameters
@@ -170,6 +182,10 @@ data = pd.DataFrame({'Block': [line[line.find('B')+1] for line in resp_lines],
                      'Tolerance': [float(line[line.find('tol')+12:line.find('\n')]) for line in resp_lines],
                      'Timestamp': [float(line[:line.find('.')+4]) for line in resp_lines]})
 data['Score'] = [100 if data['Hit'][ix]==1 else -100 for ix in range(len(data))]
+if prdm['prdm_version'][0]=='2':
+    data['Condition'] = [line[line.find('condition')+12:line.find('condition')+16] for line in resp_lines]
+else:
+    data['Condition'] = [line[line.find('_type')+8:line.find('_type')+12] for line in resp_lines]
 
 # Calculate ITIs
 data['ITI'] = [data['Timestamp'][ix]-data['Timestamp'][ix-1]-prdm['trl_len'] if ix!=0 else 0                for ix in range(len(data))]
