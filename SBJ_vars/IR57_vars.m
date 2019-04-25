@@ -9,7 +9,7 @@ SBJ_vars.SBJ        = 'IR57';
 SBJ_vars.raw_file   = {'2017032208_0002.besa'};
 SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
-SBJ_vars.log_file   = {'857_response_log_20170322112243_CWHedit.txt'};
+SBJ_vars.log_fname  = {'857_response_log_20170322112243_CWHedit.txt'};
 
 SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];

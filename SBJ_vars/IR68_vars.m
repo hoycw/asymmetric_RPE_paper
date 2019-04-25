@@ -12,7 +12,7 @@ SBJ_vars.SBJ        = 'IR68';
 SBJ_vars.raw_file   = {'2018012413_0002.besa'};
 SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
-SBJ_vars.log_file   = {'IR68_response_log_20180124140950.txt'};
+SBJ_vars.log_fname  = {'IR68_response_log_20180124140950.txt'};
 
 SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];

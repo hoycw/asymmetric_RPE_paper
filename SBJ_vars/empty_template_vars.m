@@ -9,7 +9,7 @@ SBJ_vars.SBJ        = '';
 SBJ_vars.raw_file   = {''};
 SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
-SBJ_vars.log_file   = {''};
+SBJ_vars.log_fname  = {''};
 
 SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];

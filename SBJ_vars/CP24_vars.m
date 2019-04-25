@@ -12,7 +12,7 @@ SBJ_vars.SBJ        = 'CP24';
 SBJ_vars.raw_file   = {'CP24_Dec6_error_R1.mat','CP24_Dec9_error_R2.mat'};
 SBJ_vars.block_name = {'R1','R2'};
 SBJ_vars.low_srate  = [0,0];
-SBJ_vars.log_file   = {'224_response_log_20171206121023.txt','cp24_2_response_log_20171209120902.txt'};
+SBJ_vars.log_fname  = {'224_response_log_20171206121023.txt','cp24_2_response_log_20171209120902.txt'};
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
