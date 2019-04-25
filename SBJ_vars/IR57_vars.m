@@ -47,9 +47,9 @@ SBJ_vars.ch_lab.ROI    = {'RSM*','RAC*','ROF*','RIN*','RTI*',...
                               'LAM4-5','LAM5-6','LAC*','LOF*'};%LAM4,5 are inferior anterior insula
 % PRJ_Stroop varaince rejected: {'-LOF1-2','-RTI2-3','-RIN4-5'};
 
-SBJ_vars.ch_lab.prefix = ''; %'POL ';    % before every channel except 'EDF Annotations'
-SBJ_vars.ch_lab.suffix = ''; %'-Ref';    % after every channel except 'EDF Annotations'
-SBJ_vars.ch_lab.mislabel = {};
+%SBJ_vars.ch_lab.prefix = ''; %'POL ';    % before every channel except 'EDF Annotations'
+%SBJ_vars.ch_lab.suffix = ''; %'-Ref';    % after every channel except 'EDF Annotations'
+%SBJ_vars.ch_lab.mislabel = {};
 
 % Based on below, LSMA1, RSM1, and RHH5 are left out (no pairs)
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
