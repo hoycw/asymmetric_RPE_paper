@@ -5,10 +5,11 @@ ft_defaults
 %--------------------------------------
 % Basics
 %--------------------------------------
-SBJ_vars.SBJ = 'IR71';
-SBJ_vars.raw_file = '2018022112_0003.besa';
-SBJ_vars.block_prefix = '';
-SBJ_vars.log_file = '71_response_log_20180221115510.txt';
+SBJ_vars.SBJ        = 'IR71';
+SBJ_vars.raw_file   = {'2018022112_0003.besa'};
+SBJ_vars.block_name = {''};
+SBJ_vars.low_srate  = [0];
+SBJ_vars.log_file   = {'71_response_log_20180221115510.txt'};
 
 SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
@@ -16,6 +17,7 @@ SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];
 SBJ_vars.dirs.proc    = [SBJ_vars.dirs.SBJ '04_proc/'];
+SBJ_vars.dirs.recon   = [SBJ_vars.dirs.SBJ '05_recon/'];
 if ~exist(SBJ_vars.dirs.import,'dir')
     mkdir(SBJ_vars.dirs.import);
 end
@@ -27,6 +29,9 @@ if ~exist(SBJ_vars.dirs.events,'dir')
 end
 if ~exist(SBJ_vars.dirs.proc,'dir')
     mkdir(SBJ_vars.dirs.proc);
+end
+if ~exist(SBJ_vars.dirs.recon,'dir')
+    mkdir(SBJ_vars.dirs.recon);
 end
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);

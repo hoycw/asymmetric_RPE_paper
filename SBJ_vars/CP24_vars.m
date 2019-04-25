@@ -14,7 +14,7 @@ SBJ_vars.block_name = {'R1','R2'};
 SBJ_vars.low_srate  = [0,0];
 SBJ_vars.log_file   = {'224_response_log_20171206121023.txt','cp24_2_response_log_20171209120902.txt'};
 
-SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Stroop/data/' SBJ_vars.SBJ '/'];
+SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
