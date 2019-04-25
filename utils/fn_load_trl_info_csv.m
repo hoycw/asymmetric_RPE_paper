@@ -1,4 +1,5 @@
 function [trl_info] = fn_load_trl_info_csv(csv_filename,ignore_trials)
+error('compare to fn_read_behav_csv in PRJ_Error_eeg!');
 %% Load trial info csv exported from python
 %   Also converts from python 0-based to MATLAB 1-based indexing
 % INPUTS:
