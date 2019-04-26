@@ -69,7 +69,7 @@ SBJ_vars.ch_lab.ref_exclude = {... %exclude from the CAR
      'RTO3',...% still correlations about like EOG-ish channels
      'ROF1','ROF2','ROF3','LOF2','LOF3','LOF4',...% EOG big stuff, weak correlations
      'RTO6','RTO7',...% HF noise
-     'RTO8'...% occassional spikes
+     'RTO4','RTO8'...% occassional spikes
      }; %exclude from the CAR
 % emodim ref_exclude:
 %     'RTO3',...% still correlations about like EOG-ish channels
@@ -79,7 +79,7 @@ SBJ_vars.ch_lab.ref_exclude = {... %exclude from the CAR
 %     }; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
     'LTO2',...% spiking
-    'RLF2','RTO4',...% epileptic
+    'RLF2',...% epileptic
     'RTO1','RTO2',...% flat channels, no signal
     'LLF*','LLFP*',...% noisy (on second amplifier)
     'DC01','DC03','DC04','E','EEG Mark1','EEG Mark2','-','Events/Markers',...%not real data
@@ -94,7 +94,7 @@ SBJ_vars.ch_lab.bad = {...
 %    'RTO1','RTO2',...% flat channels, no signal
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1 1 1 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];
+SBJ_vars.ch_lab.bad_code = [1 1 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
