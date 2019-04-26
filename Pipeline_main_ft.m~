@@ -6,8 +6,6 @@ clear all; close all;
 % Set Up Directories
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
-
-%%
 addpath(genpath([root_dir 'PRJ_Error/scripts/']));
 addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
 addpath(ft_dir);
@@ -15,98 +13,107 @@ ft_defaults
 
 %% Step 0 - Processing Variables
 % SBJ = 'IR';
-proc_id = 'main_ft';
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+!!! add fn_compile_einfo(SBJ) after SBJ02_preproc
+pipeline_id = 'main_ft';
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m']);
+
+%% ========================================================================
+%   Step 1- Load SBJ and Processing Variable Structures
+%  ========================================================================
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 
 %% ======================================================================== 
-%   Step 1- Quick Import and Processing for Data Cleaning/Inspection
+%   Step 2- Quick Import and Processing for Data Cleaning/Inspection
 %  ========================================================================
 % FILE TOO BIG, RUNNING THIS VIA SGE
 % SBJ00_cleaning_prep(SBJ,proc_vars.plot_psd);
 
 %% ========================================================================
-%   Step 2- Import Data, Resample, and Save Individual Data Types
+%   Step 3- Import Data, Resample, and Save Individual Data Types
 %  ========================================================================
 % FILE TOO BIG, RUNNING THIS VIA SGE
 % SBJ01_import_data(SBJ,pipeline_id);
 
 %% ========================================================================
-%   Step 3- Preprocess Neural Data
+%   Step 4- Preprocess Neural Data
 %  ========================================================================
-SBJ02_preproc(SBJ,proc_id)
+SBJ02_preproc(SBJ,pipeline_id)
 
 %% ========================================================================
 %   Step 4a- Manually Clean Photodiode Trace: Load & Plot
 %  ========================================================================
 % Load data
-trl_info = cell(size(SBJ_vars.block_name));
 for b_ix = 1:numel(SBJ_vars.block_name)
     % Create a block suffix in cases with more than one recording block
     if numel(SBJ_vars.raw_file)==1 || isfield(SBJ_vars.dirs,'nlx')
-        block_suffix = SBJ_vars.block_name{b_ix};   % should just be ''
+        block_suffix = '';
+%         block_suffix = SBJ_vars.block_name{b_ix};   % should just be ''
     else
         block_suffix = strcat('_',SBJ_vars.block_name{b_ix});
     end
     evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
     load(evnt_fname);
+    [evnt, hdr] = fn_format_data_ft2KLA(evnt);
     
     % Plot event channels
-    plot(evnt.time{1}, evnt.trial{1});
+    plot(linspace(0,hdr.length_in_seconds,hdr.n_samples), evnt);
     
     %% ========================================================================
     %   Step 4b- Manually Clean Photodiode Trace: Mark Sections to Correct
     %  ========================================================================
     % Create correction times and values in a separate file in ~/PRJ_Stroop/scripts/SBJ_evnt_clean/
-    SBJ_evnt_clean_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_evnt_clean/' SBJ '_evnt_clean_params',block_suffix,'.m'];
+    SBJ_evnt_clean_cmd = ['run ' root_dir 'PRJ_Stroop/scripts/SBJ_evnt_clean/' SBJ '_evnt_clean_params',block_suffix,'.m'];
     eval(SBJ_evnt_clean_cmd);
     
     %% ========================================================================
     %   Step 4c- Manually Clean Photodiode Trace: Apply Corrections
     %  ========================================================================
+    photod_ix = strmatch(SBJ_vars.ch_lab.photod,hdr.channel_labels);
+    mic_ix    = strmatch(SBJ_vars.ch_lab.mic,hdr.channel_labels);
     % Correct baseline shift
     for shift_ix = 1:length(bsln_shift_times)
         epoch_idx = floor(bsln_shift_times{shift_ix}(1)*hdr.sample_rate):floor(bsln_shift_times{shift_ix}(2)*hdr.sample_rate);
         epoch_idx(epoch_idx<1) = [];
-        evnt.trial{1}(epoch_idx) = evnt.trial{1}(epoch_idx) - bsln_shift_val(shift_ix);
+        evnt(photod_ix,epoch_idx) = evnt(photod_ix,epoch_idx) - bsln_shift_val(shift_ix);
     end
     % zero out drifts
     for zero_ix = 1:length(bsln_times)
         epoch_idx = floor(bsln_times{zero_ix}(1)*hdr.sample_rate):floor(bsln_times{zero_ix}(2)*hdr.sample_rate);
         epoch_idx(epoch_idx<1) = [];
-        evnt.trial{1}(epoch_idx) = bsln_val;
+        evnt(photod_ix,epoch_idx) = bsln_val;
     end
     
     % level out stimulus periods
     for stim_ix = 1:length(stim_times)
         epoch_idx = floor(stim_times{stim_ix}(1)*hdr.sample_rate):floor(stim_times{stim_ix}(2)*hdr.sample_rate);
         epoch_idx(epoch_idx<1) = [];
-        evnt.trial{1}(epoch_idx) = stim_yval(stim_ix);
+        evnt(photod_ix,epoch_idx) = stim_yval(stim_ix);
     end
     
     % Save corrected data
-    out_fname = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];
-    save(out_fname, 'evnt', 'ignore_trials');
+    out_filename = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];
+    save(out_filename, 'evnt', 'hdr', 'ignore_trials', 'photod_ix', 'mic_ix');
     
     %% ========================================================================
     %   Step 5- Parse Event Traces into Behavioral Data
     %  ========================================================================
-    trl_info{b_ix} = SBJ03_behav_parse(SBJ,b_ix,proc_id,1,1);
+    SBJ02_behav_parse(SBJ,b_ix,pipeline_id,1,1)
 end
+
+%% ========================================================================
+%   Step 5- Parse Event Traces into Behavioral Data
+%  ========================================================================
+if proc_vars.resample_freq~=1000
+    error('ERROR!!! SBJ03_behav_parse assumes 1 kHz neural sampling rate!!!\n');
+end
+trl_info = SBJ03_behav_parse(SBJ,pipeline_id,1,1);
+% Be sure to save the figures coming from this function!
+%   i.e., SBJ_photodiode_segmentation.fig, etc.
 
 %% ========================================================================
 %   Step 6- Reject Bad Trials Based on Behavior and Bob
 %  ========================================================================
-trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id);
-
-%% ========================================================================
-%   Step 7- Create elec files from recon
-%  ========================================================================
-% fn_compile_elec_struct(SBJ,'main_ft','pat','',1);
-% fn_compile_elec_struct(SBJ,'main_ft','mni','v',1);
-% fn_save_elec_atlas(SBJ,'main_ft','pat','','DK',1);
-% fn_save_elec_atlas(SBJ,'main_ft','pat','','Dx',1);
-% tissue compartments...
+trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,pipeline_id);
 
 % %% ========================================================================
 % %   Step 9a- Prepare Variance Estimates for Variance-Based Trial Rejection
@@ -295,5 +302,5 @@ trl_info = trl_info_cln;
 % % Make sure no response times are in weird float format
 % trl_info.rsp_onset = round(trl_info.rsp_onset);
 
-save(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
+save(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_good.mat'),'trl_info');
 

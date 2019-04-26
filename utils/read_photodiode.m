@@ -105,6 +105,7 @@ end
 
 % Plot data, histogram of photo amplitudes, detected peaks, cutoff values, etc
 if plot_it
+    figure;
     subplot(3,1,1);
     plot(data_photo_orig,'k'); hold on;
     for shade_n = 2:n_shades

@@ -1,4 +1,4 @@
-function SBJ07b_ERP_plot_stats(SBJ,conditions,pipeline_id,an_id,plt_id,save_fig,fig_vis)
+function SBJ07b_ERP_plot_stats(SBJ,conditions,proc_id,an_id,plt_id,save_fig,fig_vis)
 % Plots ERPs computed in SBJ07a_ERP_stats
 % clear all; %close all;
 
@@ -26,7 +26,7 @@ stats_filename = strcat(SBJ_vars.dirs.SBJ,'04_proc/',SBJ,'_ROI_',conditions,'_',
 load(stats_filename);
 
 % Load ROI and GM/WM info
-einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' pipeline_id '.mat'];
+einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
 load(einfo_filename);
 % Electrode Info Table:
 %   label- name of electrode

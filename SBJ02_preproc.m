@@ -1,8 +1,8 @@
-function SBJ02_preproc(SBJ,pipeline_id)
+function SBJ02_preproc(SBJ,proc_id)
 %% Preprocess data using fieldtrip
 % Inputs:
 %   SBJ [str]- name of the subject
-%   pipeline_id [str] - name of the pipeline containing proc_vars struct
+%   proc_id [str] - name of the pipeline containing proc_vars struct
 
 % Parameters
 psd_bp       = 'yes';          % plot psds after filtering?
@@ -20,7 +20,7 @@ ft_defaults
 %% Load data
 fprintf('============== Loading Data %s ==============\n',SBJ);
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 
 data_all = {};
 for b_ix = 1:numel(SBJ_vars.block_name)
@@ -178,13 +178,13 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     end
     
     if strcmp(psd_line,'yes')
-        psd_dir = strcat(SBJ_vars.dirs.preproc,'PSDs/',pipeline_id,'/');
+        psd_dir = strcat(SBJ_vars.dirs.preproc,'PSDs/',proc_id,'/');
         if ~exist(psd_dir,'dir')
             mkdir(psd_dir);
         end
         fn_plot_PSD_1by1_compare_save(data_reref.trial{1},data.trial{1},data_reref.label,data.label,...
-            data_reref.fsample,strcat(psd_dir,SBJ,'_PSD_',pipeline_id,block_suffix),...
-            'bp.reref',pipeline_id,psd_fig_type);
+            data_reref.fsample,strcat(psd_dir,SBJ,'_PSD_',proc_id,block_suffix),...
+            'bp.reref',proc_id,psd_fig_type);
     end
     
     data_all{b_ix} = data;
@@ -195,7 +195,7 @@ end
 data = fn_concat_blocks(data_all);
 
 %% Save data
-output_filename = strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat');
+output_filename = strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat');
 fprintf('============== Saving %s ==============\n',output_filename);
 save(output_filename, '-v7.3', 'data');
 

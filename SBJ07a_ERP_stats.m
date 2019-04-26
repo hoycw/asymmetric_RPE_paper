@@ -1,4 +1,4 @@
-function SBJ07a_ERP_stats(SBJ,conditions,pipeline_id,an_id)
+function SBJ07a_ERP_stats(SBJ,conditions,proc_id,an_id)
 % Calculates ERPs, computes cluster-based statistics, and plots the results
 % clear all; %close all;
 
@@ -15,7 +15,7 @@ an_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/an_vars/' an_id '_vars.
 eval(an_vars_cmd);
 
 % Load Data
-load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat'));
+load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
 
 % Select Conditions of Interest

@@ -1,4 +1,4 @@
-function SBJ10c_HFA_GRP_summary_bar_perc_actv_RT_ANOVA_ROI(SBJs,stat_id,pipeline_id,an_id,actv_win,roi_id,...
+function SBJ10c_HFA_GRP_summary_bar_perc_actv_RT_ANOVA_ROI(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
                                                             plt_id,save_fig,fig_vis,fig_filetype)
 % Load HFA analysis results for active, RT correlation, and ANOVA epochs
 %   Active- must be significant, and for S-locked, before mean(RT)
@@ -74,7 +74,7 @@ for sbj_ix = 1:numel(SBJs)
     tmp = load(actv_filename,'hfa'); hfa_actv = tmp.hfa;
     
     %% Load ROI and GM/WM info
-    einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' pipeline_id '.mat'];
+    einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
     load(einfo_filename);
     % Electrode Info Table:
     %   label- name of electrode

@@ -1,4 +1,4 @@
-function trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,pipeline_id)
+function trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id)
 % Select data of interest and reject all bad trials based on behavior
 % Criteria:
 %   1. Bob bad epoch
@@ -9,7 +9,7 @@ function trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,pipeline_id)
 %   SBJ [str]- the dataset to process (e.g., 'IR54')
 %   trl_info [struct]- structure with trial information
 %       should be SBJ_trl_info_manual.mat from events_dir as saved by SBJ03_RT_manual_adjustments.m
-%   pipeline_id [str] - name of processing pipeline (proc_vars)
+%   proc_id [str] - name of processing pipeline (proc_vars)
 %       should contain RT_std_thresh [int]- # standard deviation from mean for RT to be tossed as outlier
 % Outputs:
 %   trl_info_clean [struct]- saves out final version after tossing all bad trials
@@ -21,8 +21,8 @@ SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.
 eval(SBJ_vars_cmd);
 
 %% Load data
-eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m']);
-load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat'));
+eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_visual_bad_epochs_preclean.mat'));
 
 % Parameters

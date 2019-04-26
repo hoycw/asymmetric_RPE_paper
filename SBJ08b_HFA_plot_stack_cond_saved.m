@@ -1,4 +1,4 @@
-function SBJ08b_HFA_plot_stack_cond_saved(SBJ,conditions,pipeline_id, an_id,actv_win,...
+function SBJ08b_HFA_plot_stack_cond_saved(SBJ,conditions,proc_id, an_id,actv_win,...
                                         plt_id,save_fig,fig_vis,fig_filetype)
 % Plots single trial stack for both stimulus- and response-locked HFA computed in SBJ08a_HFA_actv
 %   sorts by condition, then by RT; scatter for RTs in stim-locked
@@ -28,7 +28,7 @@ hfa_filename = strcat(SBJ_vars.dirs.proc,SBJ,'_HFA_ROI_',an_id,'.mat');
 load(hfa_filename,'hfa');
 
 % Load ROI and GM/WM info
-einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' pipeline_id '.mat'];
+einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
 load(einfo_filename);
 % Electrode Info Table:
 %   label- name of electrode

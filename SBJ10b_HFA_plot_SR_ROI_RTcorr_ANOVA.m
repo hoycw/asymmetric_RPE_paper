@@ -1,4 +1,4 @@
-function SBJ10b_HFA_plot_SR_ROI_RTcorr_ANOVA(SBJs,stat_id,pipeline_id,an_id_s,an_id_r,...
+function SBJ10b_HFA_plot_SR_ROI_RTcorr_ANOVA(SBJs,stat_id,proc_id,an_id_s,an_id_r,...
                                                 roi_id,plt_id,save_fig,fig_vis,fig_filetype)
 % Plot time series for all significant effects by ROI
 % clear all; %close all;
@@ -93,7 +93,7 @@ for sbj_ix = 1:numel(SBJs)
     stat{2} = ft_selectdata(cfg_trim,stat{2});
         
     %% Load ROI and GM/WM info
-    einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' pipeline_id '.mat'];
+    einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
     load(einfo_filename);
     % Electrode Info Table:
     %   label- name of electrode

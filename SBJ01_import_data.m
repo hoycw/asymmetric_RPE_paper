@@ -1,6 +1,6 @@
 %% SBJ01_import_data.m
 % Extract data with fieldtrip and save out by data type
-function SBJ01_import_data(SBJ,pipeline_id)
+function SBJ01_import_data(SBJ,proc_id)
 
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
@@ -11,7 +11,7 @@ ft_defaults
 %% Load and preprocess the data
 SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
-proc_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m'];
+proc_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m'];
 eval(proc_vars_cmd);
 
 %% Process channel labels
@@ -171,6 +171,9 @@ for b_ix = 1:numel(SBJ_vars.block_name)
         cfg.resamplefs = proc_vars.resample_freq;
         cfg.detrend = 'no';
         data = ft_resampledata(cfg, data);
+        if ~isfield(SBJ_vars.dirs,'nlx')
+            evnt = ft_resampledata(cfg, evnt);
+        end
         if ~isempty(SBJ_vars.ch_lab.eeg)
             eeg = ft_resampledata(cfg, eeg);
         end
@@ -274,7 +277,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     end
     
     if ~isfield(SBJ_vars.dirs,'nlx')
-        evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
+        evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt.fsample),'hz',block_suffix,'.mat');
         save(evnt_out_fname, '-v7.3', 'evnt');
     end
     

@@ -1,4 +1,4 @@
-function SBJ10b_HFA_plot_corrRT_ANOVA(SBJ,pipeline_id,stat_id,an_id,plt_id,save_fig,fig_vis,fig_filetype)
+function SBJ10b_HFA_plot_corrRT_ANOVA(SBJ,proc_id,stat_id,an_id,plt_id,save_fig,fig_vis,fig_filetype)
 % Plots ANOVA results
 % clear all; %close all;
 % fig_filetype = 'png';
@@ -29,7 +29,7 @@ tmp = load(f_name,'stat'); stat = tmp.stat;
 clear tmp
 
 % Load ROI and GM/WM info
-einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' pipeline_id '.mat'];
+einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
 load(einfo_filename);
 % Electrode Info Table:
 %   label- name of electrode

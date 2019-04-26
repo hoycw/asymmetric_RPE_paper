@@ -1,4 +1,4 @@
-function SBJ08a_HFA_actv(SBJ,pipeline_id,an_id,actv_win)
+function SBJ08a_HFA_actv(SBJ,proc_id,an_id,actv_win)
 % Calculates high frequency activity, computes cluster-based statistics, and plots the results
 % clear all; %close all;
 % Set up paths
@@ -13,10 +13,10 @@ SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.
 eval(SBJ_vars_cmd);
 an_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/an_vars/' an_id '_vars.m'];
 eval(an_vars_cmd);
-% eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m']);
+% eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 
 % Load Data
-load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat'));
+load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
 
 %% Select Channel(s)
