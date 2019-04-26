@@ -16,7 +16,7 @@ probe = labels{1}(regexp(labels{1},'\D'));
 lab_num = zeros(size(labels));
 for lab_ix = 1:length(labels)
     if ~strcmp(probe,labels{lab_ix}(regexp(labels{lab_ix},'\D')))
-        error('ERROR!!! Mixed probe names in labels!');
+        error(['ERROR!!! Mixed probe names in labels: ' probe ',' labels{lab_ix}]);
     end
     lab_num(lab_ix) = str2num(labels{lab_ix}(regexp(labels{lab_ix},'\d')));
 end
@@ -27,7 +27,7 @@ new_labels = {};
 weight_row = 0;
 for lab_ix = 2:numel(labels)
     if lab_num(lab_ix)-lab_num(lab_ix-1)==1
-        new_labels = {new_labels{:} strcat(labels{lab_ix-1},'-',num2str(lab_num(lab_ix)))};
+        new_labels = [new_labels; {strcat(labels{lab_ix-1},'-',num2str(lab_num(lab_ix)))}];
         weight_row = weight_row+1;
         weights(weight_row,lab_ix-1) = 1;
         weights(weight_row,lab_ix)   = -1;

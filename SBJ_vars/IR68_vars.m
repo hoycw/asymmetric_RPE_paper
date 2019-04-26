@@ -14,7 +14,7 @@ SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
 SBJ_vars.log_fname  = {'IR68_response_log_20180124140950.txt'};
 
-SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
+SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
@@ -64,16 +64,16 @@ SBJ_vars.ch_lab.eeg_ROI    = {'CZ'};
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
-    'LHH8','LHH9','LHH10','LTH8','LTH9','LTH10','LAM7','LAM9','LAM10',...% epileptic
-    'AIN5','LPC6','LPC7',...% noisy
+    'LHH8','LHH9','LHH10','LTH8','LTH9','LTH10','LAM7','LAM8','LAM9','LAM10',...% epileptic
+    'AIN5',...%noisy, originally added for stroop: 'LPC6','LPC7',...% noisy
     'LAC10',...% added for HF noise, LAC9-10 is flat and terrible
     'AIN8','AIN9','AIN10',...% out of brainm also 'LTH9','LTH10','LHH10','LAM10' but listed above too
-    'GRND','XREF','EKG','DC03','DC04'...% not real data
+    'GRND','XREF','EKG','DC02','DC03','DC04'...% not real data
     };
 %   LAC8-10 have HF noise that reflects FZ, need to check if low pass and variance rejection help
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 2 2 2 2 3 3 3 0 0 0 0 0];
+SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 2 2 3 3 3 0 0 0 0 0 0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
@@ -89,7 +89,8 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % Time Parameters
 %--------------------------------------
-SBJ_vars.analysis_time = {};
+% first trial @206s, last @ 1440s
+SBJ_vars.analysis_time = {{[196.0 1451.0]}};
 SBJ_vars.ignore_trials = [];
 
 %--------------------------------------

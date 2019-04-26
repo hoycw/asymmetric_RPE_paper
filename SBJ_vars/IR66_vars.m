@@ -1,4 +1,4 @@
-%% ${SBJ} Processing Variables
+%% IR66 Processing Variables
 addpath('/home/knight/hoycw/Apps/fieldtrip/');
 ft_defaults
 
@@ -11,7 +11,7 @@ SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
 SBJ_vars.log_fname  = {'ir66_response_log_20171219124409.txt'};
 
-SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
+SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
@@ -46,7 +46,7 @@ SBJ_vars.orig_srate = hdr.Fs;
 clear hdr;
 
 SBJ_vars.ch_lab.probes = {};
-SBJ_vars.ref_types     = {};
+SBJ_vars.ch_lab.ref_type     = {};
 SBJ_vars.ch_lab.ROI    = {};
 SBJ_vars.ch_lab.eeg_ROI = {};
 

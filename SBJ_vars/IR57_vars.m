@@ -1,4 +1,4 @@
-%% ${SBJ} Processing Variables
+%% IR57 Processing Variables
 addpath('/home/knight/hoycw/Apps/fieldtrip/');
 ft_defaults
 
@@ -11,7 +11,7 @@ SBJ_vars.block_name = {''};
 SBJ_vars.low_srate  = [0];
 SBJ_vars.log_fname  = {'857_response_log_20170322112243_CWHedit.txt'};
 
-SBJ_vars.dirs.SBJ     = ['/home/knight/hoycw/PRJ_Error/data/' SBJ_vars.SBJ '/'];
+SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
@@ -47,7 +47,7 @@ clear hdr;
 
 SBJ_vars.ch_lab.probes = {'RSM','RAC','ROF','RIN','RTI','RAM','RHH','RTH',...
                          'LSMA','LAC','LOF','LIN','LTI','LAM','LTH'};%'LHH' doesn't count because all elecs are bad
-SBJ_vars.ref_types     = {'BP','BP','BP','BP','BP','BP','BP','BP',...
+SBJ_vars.ch_lab.ref_type = {'BP','BP','BP','BP','BP','BP','BP','BP',...
                           'BP','BP','BP','BP','BP','BP','BP'};
 SBJ_vars.ch_lab.ROI    = {'RSM*','RAC*','ROF*','RIN*','RTI*',...
                               'LAM4-5','LAM5-6','LAC*','LOF*'};%LAM4,5 are inferior anterior insula

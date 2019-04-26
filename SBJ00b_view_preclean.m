@@ -118,7 +118,7 @@ load([SBJ_vars.dirs.preproc SBJ '_preclean' block_suffix '.mat']);
 junk_ch_neg = fn_ch_lab_negate(SBJ_vars.ch_lab.bad(SBJ_vars.ch_lab.bad_code==0));
 
 cfg = [];
-cfg.channel = [{'all','-EDF Annotations'},junk_ch_neg,photod_ch_neg,mic_ch_neg];
+cfg.channel = [{'all','-EDF Annotations'},junk_ch_neg,photod_ch_neg];
 data = ft_selectdata(cfg,data);
 
 % Name EEG/EOG to stick together, move to bottom of sort, add # if necessary for sorting
@@ -145,7 +145,7 @@ end
 load([root_dir 'PRJ_Error/scripts/utils/cfg_plot.mat']);
 if exist('bad_epochs','var')
     if ischar(bad_epochs) && strcmp(bad_epochs,'load')
-        load([SBJ_vars.dirs.events SBJ '_bob_bad_epochs_preclean' block_suffix '.mat']);
+        load([SBJ_vars.dirs.events SBJ '_bad_epochs_preclean' block_suffix '.mat']);
     end
     cfg_plot.artfctdef.visual.artifact = bad_epochs;
 end
@@ -184,6 +184,6 @@ else
 end
 
 %% Save
-% save([SBJ_vars.dirs.events SBJ '_bob_bad_epochs_preclean.mat'],'-v7.3','bad_epochs');
+% save([SBJ_vars.dirs.events SBJ '_bad_epochs_preclean.mat'],'-v7.3','bad_epochs');
 
 end
