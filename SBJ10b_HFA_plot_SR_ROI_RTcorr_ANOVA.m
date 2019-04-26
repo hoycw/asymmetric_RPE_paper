@@ -7,15 +7,15 @@ if ischar(save_fig); save_fig = str2num(save_fig); end
 
 %% Data Preparation
 % Set up paths
-addpath('/home/knight/hoycw/PRJ_Stroop/scripts/');
-addpath('/home/knight/hoycw/PRJ_Stroop/scripts/utils/');
+addpath('/home/knight/hoycw/PRJ_Error/scripts/');
+addpath('/home/knight/hoycw/PRJ_Error/scripts/utils/');
 addpath('/home/knight/hoycw/Apps/fieldtrip/');
 ft_defaults
 
 %% Prep variables
-stat_vars_cmd = ['run /home/knight/hoycw/PRJ_Stroop/scripts/stat_vars/' stat_id '_vars.m'];
+stat_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/stat_vars/' stat_id '_vars.m'];
 eval(stat_vars_cmd);
-plt_vars_cmd = ['run /home/knight/hoycw/PRJ_Stroop/scripts/plt_vars/' plt_id '_vars.m'];
+plt_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
 eval(plt_vars_cmd);
 if ~strcmp(plt_vars.sig_type,'bold')
     error('Only bold sig_type allowed');
@@ -44,7 +44,7 @@ elec_roi_cnt  = zeros([2 numel(SBJs) numel(roi_list)]);
 for sbj_ix = 1:numel(SBJs)
     SBJ = SBJs{sbj_ix};
     % Load variables
-    SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Stroop/scripts/SBJ_vars/' SBJ '_vars.m'];
+    SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
     eval(SBJ_vars_cmd);
     
     % Load data
@@ -283,7 +283,7 @@ for sbj_ix = 1:numel(SBJs)
         
         % Save figure
         if save_fig
-            fig_dir = ['/home/knight/hoycw/PRJ_Stroop/results/HFA/' SBJ '/' stat_id '/SR/' an_id_s '-' an_id_r '/'];
+            fig_dir = ['/home/knight/hoycw/PRJ_Error/results/HFA/' SBJ '/' stat_id '/SR/' an_id_s '-' an_id_r '/'];
             if ~exist(fig_dir,'dir')
                 mkdir(fig_dir);
             end

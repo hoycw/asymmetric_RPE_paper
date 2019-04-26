@@ -4,14 +4,14 @@ function SBJ01_import_data(SBJ,pipeline_id)
 
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
-addpath([root_dir 'PRJ_Stroop/scripts/utils/']);
+addpath([root_dir 'PRJ_Error/scripts/utils/']);
 addpath(ft_dir);
 ft_defaults
 
 %% Load and preprocess the data
-SBJ_vars_cmd = ['run ' root_dir 'PRJ_Stroop/scripts/SBJ_vars/' SBJ '_vars.m'];
+SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
-proc_vars_cmd = ['run ' root_dir 'PRJ_Stroop/scripts/proc_vars/' pipeline_id '_proc_vars.m'];
+proc_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m'];
 eval(proc_vars_cmd);
 
 %% Process channel labels
@@ -212,11 +212,9 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     if ~isfield(SBJ_vars.dirs,'nlx')
         if isfield(SBJ_vars.ch_lab,'prefix')
             evnt.label{1} = strrep(evnt.label{1},SBJ_vars.ch_lab.prefix,'');
-            evnt.label{2} = strrep(evnt.label{2},SBJ_vars.ch_lab.prefix,'');
         end
         if isfield(SBJ_vars.ch_lab,'suffix')
             evnt.label{1} = strrep(evnt.label{1},SBJ_vars.ch_lab.suffix,'');
-            evnt.label{2} = strrep(evnt.label{2},SBJ_vars.ch_lab.suffix,'');
         end
     end
     
