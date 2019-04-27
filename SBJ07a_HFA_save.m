@@ -1,4 +1,4 @@
-function SBJ08a_HFA_save(SBJ,proc_id,an_id)
+function SBJ07a_HFA_save(SBJ,proc_id,an_id)
 % Calculates high frequency activity, computes cluster-based statistics, and plots the results
 % clear all; %close all;
 % Set up paths
@@ -19,7 +19,7 @@ eval(an_vars_cmd);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
 
-%% Select Channel(s) and Non-Training Trials
+%% Select Channel(s)
 cfgs = [];
 cfgs.channel = SBJ_vars.ch_lab.ROI;
 roi = ft_selectdata(cfgs,data);
@@ -43,21 +43,24 @@ end
 %   Add extra 10 ms just because trimming back down to trial_lim_s exactly leave
 %   one NaN on the end (smoothing that will NaN out everything)
 trial_lim_s_pad = [min(bsln_lim)-pad_len trial_lim_s(2)+pad_len+0.01];
-trial_lim_s_pad = [trial_lim_s(1)-max(cfg_hfa.t_ftimwin)/2 trial_lim_s(2)+max(cfg_hfa.t_ftimwin)/2+0.01];
 
 % Always normalize to pre-stimulus baseline for HFA
 bsln_events = trl_info.trl_onset;
 if strcmp(event_type,'stim')
+    % Check that baseline will be included in data cut to trial_lim_s
+    if trial_lim_s(1) < bsln_lim(1)
+        error(['ERROR: trial_lim_s does not include bsln_lim for an_id = ' an_id]);
+    end
     % Cut to desired trial_lim_s
     roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,trl_info.cond_n,...
         round(trial_lim_s_pad*roi.fsample));
 elseif strcmp(event_type,'resp')
-    % Check that baseline will be included in trial_lim_s
-    if trial_lim_s(1)>bsln_lim(1)
+    % Check that baseline will be included in data cut to trial_lim_s
+    if trial_lim_s(1)+min(trial_info.response_time) < bsln_lim(1)
         error(['ERROR: trial_lim_s does not include bsln_lim for an_id = ' an_id]);
     end
-    % Cut out to max_RT+trial_lim_s(2)+max(cfg_hfa.t_ftimwin)
-    max_RT  = max(trl_info.rt);
+    % Cut to max_RT+trial_lim_s(2) to include S baseline + full R-locked trial_lim_s
+    max_RT  = max(trl_info.RT);
     roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,trl_info.cond_n,...
         round([trial_lim_s_pad(1) max_RT+trial_lim_s_pad(2)]*roi.fsample));
 else
@@ -71,32 +74,43 @@ fprintf('===================================================\n');
 if strcmp(HFA_type,'multiband')
     cfg_hfa.trials = 'all';
     hfa = ft_freqanalysis(cfg_hfa, roi_trl);
+elseif strcmp(HFA_type,'hilbert')
+    % Create fake ft_freqanalysis struct
+    hfa.label = roi_trl.label;
+    hfa.freq  = fois;
+    hfa.time  = roi_trl.time{1};
+    hfa.powspctrm = zeros([numel(roi_trl.trial) numel(roi_trl.label) numel(fois) numel(roi_trl.time{1})]);
+    hfa.dimord = 'rpt_chan_freq_time';
+    hfa.trialinfo = roi_trl.trialinfo;
+    for f_ix = 1:numel(fois)
+        cfg_hfa.bpfreq = bp_lim(f_ix,:);
+        cfg_hfa.hilbert = 'abs';
+        fprintf('\n------> %s filtering: %.03f - %.03f\n', HFA_type, bp_lim(f_ix,1), bp_lim(f_ix,2));
+        hfa_tmp = ft_preprocessing(cfg_hfa,roi_trl);
+        for t_ix = 1:numel(roi_trl.trial)
+            hfa.powspctrm(t_ix,:,f_ix,:) = hfa_tmp.trial{t_ix};
+        end
+    end
+    clear hfa_tmp;
 elseif strcmp(HFA_type,'broadband')
-    error('Stop using broadband and use multitapers you dummy!');
-    %         % Filter to HFA band
-    %         cfgpp = [];
-    %         cfgpp.hpfilter  = 'yes';
-    %         cfgpp.hpfreq    = 70;
-    %         cfgpp.lpfilter  = 'yes';
-    %         cfgpp.lpfreq    = 150;
+    error('Stop using broadband and account for 1/f you dummy!');
+    %         % Filter to single HFA band
+    %         cfgpp=[];.hpfilter='yes';.hpfreq=70;.lpfilter='yes';lpfreq=150;
     %         roi = ft_preprocessing(cfgpp,roi);
-    %         % Hilbert method to extract power
 else
     error('Unknown HFA_type provided');
 end
 
 % Trim back down to original trial_lim_s to exclude NaNs
+cfg_trim = [];
 if strcmp(event_type,'stim')
-    cfg_trim = [];
     cfg_trim.latency = trial_lim_s;
-    hfa = ft_selectdata(cfg_trim,hfa);
-elseif strcmp(event_type,'resp')
-    cfg_trim = [];
-    cfg_trim.latency = [trial_lim_s(1) max_RT+trial_lim_s(2)];
-    hfa = ft_selectdata(cfg_trim,hfa);
+elseif strcmp(event_type,'resp') && strcmp(bsln_evnt,'stim')
+    cfg_trim.latency = [bsln_lim(1) max_RT+trial_lim_s(2)];
 else
-    error(['Unknown event_type: ' event_type]);
+    error('mismatched R-locked without S-locked baseline!');
 end
+hfa = ft_selectdata(cfg_trim,hfa);
 
 %% Baseline Correction
 fprintf('===================================================\n');
@@ -118,6 +132,14 @@ end
 
 %% Smooth Power Time Series
 if smooth_pow_ts
+    % error catches
+    if ~strcmp(lp_yn,'yes')
+        if strcmp(hp_yn,'yes')
+            error('Why are you only high passing?');
+        else
+            error('Why is smooth_pow_ts yes but no lp or hp?');
+        end
+    end
     fprintf('===================================================\n');
     fprintf('----------------- Filtering Power -----------------\n');
     fprintf('===================================================\n');
@@ -128,36 +150,40 @@ if smooth_pow_ts
                     hfa.powspctrm(:,ch_ix,f_ix,:), roi.fsample, hp_freq, lp_freq);
             elseif strcmp(lp_yn,'yes')
                 hfa.powspctrm(:,ch_ix,f_ix,:) = fn_EEGlab_lowpass(...
-                    squeeze(hfa.powspctrm(:,ch_ix,f_ix,:)), roi.fsample, lp_freq);
-            elseif strcmp(hp_yn,'yes')
-                error('Why are you only high passing?');
+                    hfa.powspctrm(:,ch_ix,f_ix,:), roi.fsample, lp_freq);
             else
-                error('Why did you say yes smooth but no to both low and high pass?');
+                error('weird non-Y/N filtering options!');
             end
         end
     end
 end
 
 %% Merge multiple bands
-if strcmp(HFA_type,'multiband')
-    cfg_avg = [];
-    cfg_avg.freq = 'all';
-    cfg_avg.avgoverfreq = 'yes';
-    hfa = ft_selectdata(cfg_avg,hfa);
-end
+cfg_avg = [];
+cfg_avg.freq = 'all';
+cfg_avg.avgoverfreq = 'yes';
+hfa = ft_selectdata(cfg_avg,hfa);
 
 %% Re-align to event of interest if necessary (e.g., response)
 if strcmp(event_type,'resp')
-    hfa = fn_realign_tfr_s2r(hfa,trl_info.rt,trial_lim_s);
+    hfa = fn_realign_tfr_s2r(hfa,trl_info.RT,trial_lim_s);
 elseif ~strcmp(event_type,'stim')
     error(['ERROR: unknown event_type ' event_type]);
 end
 
+%% Downsample
+if resample_ts && hfa.fsample~=resample_freq
+    cfgrs = [];
+    cfgrs.resamplefs = resample_freq;
+    cfgrs.detrend = 'no';
+    hfa = ft_resampledata(cfgrs, hfa);
+end
+
 %% Save Results
-data_out_filename = strcat(SBJ_vars.dirs.proc,SBJ,'_HFA_ROI_',an_id,'.mat');
+data_out_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat');
 fprintf('===================================================\n');
-fprintf('--- Saving %s ------------------\n',data_out_filename);
+fprintf('--- Saving %s ------------------\n',data_out_fname);
 fprintf('===================================================\n');
-save(data_out_filename,'-v7.3','hfa');
+save(data_out_fname,'-v7.3','hfa');
 
 end

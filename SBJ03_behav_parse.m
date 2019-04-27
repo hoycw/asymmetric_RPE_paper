@@ -135,8 +135,8 @@ trl_info.fb_onset  = fb_onsets;
 
 % Track no response trials
 trl_info.rsp_onset(trl_info.RT<0) = -1;
-trl_info.hit(trl_info.RT<0)       = -1;
-trl_info.score(trl_info.RT<0)     = 0;
+trl_info.Hit(trl_info.RT<0)       = -1;
+trl_info.Score(trl_info.RT<0)     = 0;
 
 % Book keeping
 trl_info.ignore_trials = ignore_trials;

@@ -1,50 +1,43 @@
 event_type  = 'stim';           % event around which to cut trials
 % trial_lim_s will NOT be full of data! the first and last t_ftimwin/2 epochs will be NaNs
 trial_lim_s = [-0.25 1.51];      % window in SEC for cutting trials
-%plt_lim     = [-0.2 1.5];         % window to plot this data
 demean_yn   = 'no';             % z-score for HFA instead
 bsln_evnt   = 'stim';
 bsln_type   = 'zboot';
 bsln_lim    = [-0.25 -0.05];    % window in SEC for baseline correction
 
 % HFA Calculations
-HFA_type = 'multiband';                 % b = broadband = 70-150 Hz
-foi_center  = [70:10:150];
-octave      = 3/4;              % Frequency resolution
-foi_min     = 2^(-octave/2)*foi_center;
-foi_max     = 2^(octave/2)*foi_center;
-foi         = (foi_min+foi_max)/2;
-delta_freq  = foi_max-foi_min;
-delta_time  = 0.1;
-n_taper_all = max(1,round(delta_freq.*delta_time-1));   %number of tapers for each frequency
-foi_center  = round(foi_center*10)/10;          %convert to float?
-delta_freq_true = (n_taper_all+1)./delta_time; % total bandwidth around
+HFA_type   = 'hilbert';
+foi_lim = [70 150]; % min and max of desired frequencies
+n_foi   = 8;
+min_exp = log(foi_lim(1))/log(2); % that returns the exponents
+max_exp = log(foi_lim(2))/log(2);
+fois    = 2.^[linspace(min_exp,max_exp,n_foi)];
+foi_bws = fn_semilog_bws(fois);     % semilog bandwidth spacing to match Erik Edwards & Chang lab
+bp_lim  = zeros([numel(fois) 2]);
+for f = 1:numel(fois)
+    bp_lim(f,:) = fn_freq_lim_from_CFBW(fois(f), foi_bws(f));
+end
 
 cfg_hfa = [];
-cfg_hfa.output       = 'pow';
-cfg_hfa.channel      = 'all';
-cfg_hfa.method       = 'mtmconvol';
-cfg_hfa.taper        = 'dpss';
-cfg_hfa.tapsmofrq    = delta_freq_true./2;                  %ft wants half bandwidth around the foi
-cfg_hfa.keeptapers   = 'no';
-cfg_hfa.pad          = 'maxperlen';                         %add time on either side of window
-cfg_hfa.padtype      = 'zero';
-cfg_hfa.foi          = foi_center;                          % analysis 2 to 30 Hz in steps of 2 Hz 
-cfg_hfa.t_ftimwin    = ones(length(cfg_hfa.foi),1).*delta_time;    % length of time window; 0.5 sec, could be n_cycles./foi for n_cylces per win
-cfg_hfa.toi          = 'all';%-buff_lim(1):0.1:1.5;         % time window centers
-cfg_hfa.keeptrials   = 'yes';                               % must be 'yes' for stats
-% cfg.t_ftimwin    = ones(1,length(cfg.tapsmofrq))*delta_time;
-
+cfg_hfa.hilbert  = 'abs';
+cfg_hfa.bpfilter = 'yes';
+cfg_hfa.bpfreq   = [];      % to be filled by looping through foi_center
+cfg_hfa.channel  = 'all';
 
 % Outlier Rejection
-outlier_std_lim = 6;
+% outlier_std_lim = 6;
 
 % Cleaning up power time series for plotting
-smooth_pow_ts = 1;
-lp_yn       = 'yes';
+smooth_pow_ts = 0;
+lp_yn       = 'no';
 lp_freq     = 10;
 hp_yn       = 'no';
 hp_freq     = 0.5;
+
+% Resampling
+resample_ts   = 0;
+% resample_freq = 250;
 
 % Stats parameters
 stat_lim    = [0 1.5];            % window in SEC for stats

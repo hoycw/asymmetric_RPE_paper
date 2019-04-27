@@ -29,7 +29,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 %   Step 2- Import Data, Resample, and Save Individual Data Types
 %  ========================================================================
 % FILE TOO BIG, RUNNING THIS VIA SGE
-% SBJ01_import_data(SBJ,pipeline_id);
+% SBJ01_import_data(SBJ,proc_id);
 
 %% ========================================================================
 %   Step 3- Preprocess Neural Data
@@ -37,10 +37,37 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 SBJ02_preproc(SBJ,proc_id)
 
 %% ========================================================================
-%   Step 4a- Manually Clean Photodiode Trace: Load & Plot
+%   Step 4- Second visual cleaning
+%  ========================================================================
+load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
+% Load bad_epochs from preclean data and adjust to analysis_time
+preclean_ep_at = fn_compile_epochs_full2at(SBJ,proc_id);
+
+% Plot data with bad_epochs highlighted
+load(strcat(root_dir,'PRJ_Error/scripts/utils/cfg_plot.mat'));
+% If you want to see preclean bad_epochs:
+cfg_plot.artfctdef.visual.artifact = preclean_ep_at;
+if isfield(data,'sampleinfo')
+    data = rmfield(data,'sampleinfo');
+end
+out = ft_databrowser(cfg_plot,data);
+
+% Save out the bad_epochs from the preprocessed data
+bad_epochs = out.artfctdef.visual.artifact;
+tiny_bad = find(diff(bad_epochs,1,2)<10);
+if ~isempty(tiny_bad)
+    warning('Tiny bad epochs detected:\n');
+    disp(bad_epochs(tiny_bad,:));
+    bad_epochs(tiny_bad,:) = [];
+end
+save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'),'-v7.3','bad_epochs');
+
+%% ========================================================================
+%   Step 5a- Manually Clean Photodiode Trace: Load & Plot
 %  ========================================================================
 % Load data
-trl_info = cell(size(SBJ_vars.block_name));
+trl_info     = cell(size(SBJ_vars.block_name));
+trl_info_cln = cell(size(SBJ_vars.block_name));
 for b_ix = 1:numel(SBJ_vars.block_name)
     % Create a block suffix in cases with more than one recording block
     if numel(SBJ_vars.raw_file)==1 || isfield(SBJ_vars.dirs,'nlx')
@@ -51,18 +78,18 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
     load(evnt_fname);
     
-    % Plot event channels
+    % Plot event channelsedit
     plot(evnt.time{1}, evnt.trial{1});
     
     %% ========================================================================
-    %   Step 4b- Manually Clean Photodiode Trace: Mark Sections to Correct
+    %   Step 5b- Manually Clean Photodiode Trace: Mark Sections to Correct
     %  ========================================================================
     % Create correction times and values in a separate file in ~/PRJ_Stroop/scripts/SBJ_evnt_clean/
     SBJ_evnt_clean_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_evnt_clean/' SBJ '_evnt_clean_params',block_suffix,'.m'];
     eval(SBJ_evnt_clean_cmd);
     
     %% ========================================================================
-    %   Step 4c- Manually Clean Photodiode Trace: Apply Corrections
+    %   Step 5c- Manually Clean Photodiode Trace: Apply Corrections
     %  ========================================================================
     % Correct baseline shift
     for shift_ix = 1:length(bsln_shift_times)
@@ -89,18 +116,25 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     save(out_fname, 'evnt', 'ignore_trials');
     
     %% ========================================================================
-    %   Step 5- Parse Event Traces into Behavioral Data
+    %   Step 6- Parse Event Traces into Behavioral Data
     %  ========================================================================
     trl_info{b_ix} = SBJ03_behav_parse(SBJ,b_ix,proc_id,1,1);
+
+    %% ========================================================================
+    %   Step 7- Reject Bad Trials Based on Behavior and Visual Cleaning
+    %  ========================================================================
+    trl_info_cln{b_ix} = SBJ04_reject_behavior(SBJ,trl_info{b_ix},proc_id);
+    
+end
+
+if numel(SBJ_vars.block_name)>1
+    error('write code to concat behavioral trl_info!');
+else
+    trl_info_cln = trl_info_cln{1};
 end
 
 %% ========================================================================
-%   Step 6- Reject Bad Trials Based on Behavior and Bob
-%  ========================================================================
-trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id);
-
-%% ========================================================================
-%   Step 7- Create elec files from recon
+%   Step 8- Create elec files from recon
 %  ========================================================================
 % fn_compile_elec_struct(SBJ,'main_ft','pat','',1);
 % fn_compile_elec_struct(SBJ,'main_ft','mni','v',1);
@@ -108,12 +142,21 @@ trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id);
 % fn_save_elec_atlas(SBJ,'main_ft','pat','','Dx',1);
 % tissue compartments...
 
-% %% ========================================================================
+%% PRJ_Error starts here again
+clear trl_info
+trl_info = trl_info_cln;
+% 
+% % Make sure no response times are in weird float format
+% trl_info.rsp_onset = round(trl_info.rsp_onset);
+
+save(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
+
+%% %% ========================================================================
 % %   Step 9a- Prepare Variance Estimates for Variance-Based Trial Rejection
 % %  ========================================================================
 % % Load data for visualization
 % clear data
-% load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat'));
+% load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 % 
 % % Select channels of interest
 % cfg = [];
@@ -213,7 +256,7 @@ trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id);
 % 
 % % Reload data and re-select channels of interest after excluding bad ones
 % clear data
-% load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',pipeline_id,'.mat'));
+% load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 % cfg = [];
 % cfg.channel = SBJ_vars.ch_lab.ROI;
 % data = ft_selectdata(cfg,data);
@@ -288,12 +331,4 @@ trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id);
 % trl_info.condition_n(trial_reject_ix) = [];
 % trl_info.error(trial_reject_ix) = [];
 
-%% PRJ_Error starts here again
-clear trl_info
-trl_info = trl_info_cln;
-% 
-% % Make sure no response times are in weird float format
-% trl_info.rsp_onset = round(trl_info.rsp_onset);
-
-save(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
 

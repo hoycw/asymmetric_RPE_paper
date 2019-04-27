@@ -1,4 +1,4 @@
-function SBJ07a_ERP_stats(SBJ,conditions,proc_id,an_id)
+function SBJ06a_ERP_stats(SBJ,conditions,proc_id,an_id)
 % Calculates ERPs, computes cluster-based statistics, and plots the results
 % clear all; %close all;
 

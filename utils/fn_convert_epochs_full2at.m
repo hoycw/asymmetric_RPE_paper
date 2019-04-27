@@ -10,7 +10,8 @@ function cut_epochs = fn_convert_epochs_full2at(epochs,analysis_time,full_filena
 %       1: trim epoch edges to include only valid points
 %       NOTE: completely non-overlapping epochs will be removed in both cases!
 
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
+[root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
+addpath(ft_dir);
 ft_defaults
 
 %% Load full file

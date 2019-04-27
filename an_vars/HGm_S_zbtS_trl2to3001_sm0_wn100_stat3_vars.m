@@ -46,6 +46,10 @@ lp_freq     = 10;
 hp_yn       = 'no';
 hp_freq     = 0.5;
 
+% Resampling
+resample_ts   = 0;
+% resample_freq = 250;
+
 % Stats parameters
 stat_lim    = [0 3.0];            % window in SEC for stats
 n_boots     = 1000;             % Repetitions for non-parametric stats

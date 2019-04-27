@@ -30,6 +30,10 @@ tfr_r.powspctrm = NaN([orig_size(1) orig_size(2) orig_size(3) numel(tfr_r.time)]
 for t = 1:size(tfr_s.powspctrm,1)
     [~, beg_ix] = min(abs(tfr_s.time-(rt(t)+trial_lim_sec(1))));
     [~, end_ix] = min(abs(tfr_s.time-(rt(t)+trial_lim_sec(2))));
+    if numel(beg_ix:end_ix)~=numel(tfr_r.time)
+        warning('sampling rate causes slight misalignments in time!');
+        end_ix = end_ix-1;
+    end
     tfr_r.powspctrm(t,:,:,:) = tfr_s.powspctrm(t,:,:,beg_ix:end_ix);
 end
 

@@ -1,4 +1,4 @@
-function overlap_trials = fn_find_trials_overlap_epochs(epochs,sample_idx,events,trial_lim)
+function overlap_trial_ix = fn_find_trials_overlap_epochs(epochs,sample_idx,events,trial_lim)
 %% Find trials that overlap with epochs by comparing sample indices
 %   Mainly used to find trials that overlap with visually identified artifacts
 % INPUTS:
@@ -9,9 +9,9 @@ function overlap_trials = fn_find_trials_overlap_epochs(epochs,sample_idx,events
 %   events [int array] - sample indices indicating the segmentation point for trials
 %   trial_lim [Nx2 int array] - # data points to include [before, after] the event
 % OUTPUTS:
-%   overlap_trials [Nx1 int array] - column vector of trials that overlap with any epochs
-
-addpath('/home/knight/hoycw/PRJ_Error/scripts/utils/');
+%   overlap_trials [Nx1 int array] - column vector of trial indices that overlap with any epochs
+[root_dir,~] = fn_get_root_dir();
+addpath([root_dir 'PRJ_Error/scripts/utils/']);
 
 % Compile list of samples covered by epochs
 epoch_samples = [];
@@ -23,10 +23,10 @@ end
 trials_sample_idx = fn_epoch_cuts_datapad(sample_idx,events,events,trial_lim);
 
 % Find trials that overlap with any epoch indices
-overlap_trials = [];
+overlap_trial_ix = [];
 for trial_ix = 1:size(trials_sample_idx,1)
     if ~isempty(intersect(trials_sample_idx(trial_ix,:),epoch_samples))
-        overlap_trials = [overlap_trials; trial_ix];
+        overlap_trial_ix = [overlap_trial_ix; trial_ix];
     end
 end
 

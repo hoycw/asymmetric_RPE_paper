@@ -12,8 +12,8 @@ function [trials] = fn_ft_cut_trials_equal_len(data,events,event_types,lim)
 %           lim(2) = post-event length, e.g. 1000 would be 1000 samples after events
 % Outputs:
 %   trials [ft data struct]- a segmented fieldtrip data structure
-
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
+[root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
+addpath(ft_dir);
 ft_defaults
 
 % Check size of inputs
