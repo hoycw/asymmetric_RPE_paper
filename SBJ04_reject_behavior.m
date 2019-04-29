@@ -47,8 +47,8 @@ end
 trial_lim = proc_vars.trial_lim_s*data.fsample;
 
 %% Reject known artifacts
-skip_rt  = find(trl_info.RT<0);     % no response (-1)
-skip_bad = find(trl_info.Hit<0);    % bad trial
+skip_rt  = find(trl_info.rt<0);     % no response (-1)
+skip_bad = find(trl_info.hit<0);    % bad trial
 
 % Convert visually bad epochs from full time to analysis_time
 % Not necessary anymore since preproc epochs now include any kept from preclean
@@ -61,21 +61,21 @@ skip_bad = find(trl_info.Hit<0);    % bad trial
 skip_vis = fn_find_trials_overlap_epochs(bad_epochs,1:size(data.trial{1},2),events,trial_lim);
 
 % Find RT outliers
-RT_mean = nanmean(trl_info.RT);
-RT_std  = nanstd(trl_info.RT);
-skip_rt_outlier = find(abs(trl_info.RT-RT_mean)>proc_vars.RT_std_thresh*RT_std);
+RT_mean = nanmean(trl_info.rt);
+RT_std  = nanstd(trl_info.rt);
+skip_rt_outlier = find(abs(trl_info.rt-RT_mean)>proc_vars.RT_std_thresh*RT_std);
 
 % Check against RT bounds, toss late but only warn for early
-RT_late = find(trl_info.RT>proc_vars.rt_bounds(2));
-RT_early = find(trl_info.RT(trl_info.RT>0)<proc_vars.rt_bounds(1));
+RT_late = find(trl_info.rt>proc_vars.rt_bounds(2));
+RT_early = find(trl_info.rt(trl_info.rt>0)<proc_vars.rt_bounds(1));
 skip_rt_outlier = [skip_rt_outlier; RT_late; RT_early];
 
 % Toss training trials
-skip_training = find(trl_info.Block==0);
+skip_training = find(trl_info.blk==0);
 
 % Compile all a priori bad trials
 skip_trial_ix = unique([skip_bad; skip_rt; skip_vis; skip_rt_outlier; skip_training]);
-ok_trial_ix = setdiff(1:numel(trl_info.Total_Trial),skip_trial_ix);
+ok_trial_ix = setdiff(1:numel(trl_info.trl_n),skip_trial_ix);
 
 %% Compile Bad Trials
 trl_info_cln = trl_info;
@@ -85,15 +85,15 @@ trl_info_cln.trial_lim_s   = proc_vars.trial_lim_s;
 trl_info_cln.RT_std_thresh = proc_vars.RT_std_thresh;
 
 % Document bad trials
-trl_info_cln.bad_trials.RT_bad = trl_info.Total_Trial(skip_rt);
-trl_info_cln.bad_trials.RT_out = trl_info.Total_Trial(skip_rt_outlier);
-trl_info_cln.bad_trials.visual = trl_info.Total_Trial(skip_vis);
-trl_info_cln.bad_trials.bad    = trl_info.Total_Trial(skip_bad);
-trl_info_cln.bad_trials.train  = trl_info.Total_Trial(skip_training);
-trl_info_cln.bad_trials.all    = trl_info.Total_Trial(skip_trial_ix);
+trl_info_cln.bad_trials.RT_bad = trl_info.trl_n(skip_rt);
+trl_info_cln.bad_trials.RT_out = trl_info.trl_n(skip_rt_outlier);
+trl_info_cln.bad_trials.visual = trl_info.trl_n(skip_vis);
+trl_info_cln.bad_trials.bad    = trl_info.trl_n(skip_bad);
+trl_info_cln.bad_trials.train  = trl_info.trl_n(skip_training);
+trl_info_cln.bad_trials.all    = trl_info.trl_n(skip_trial_ix);
 
 % Remove bad trials
-n_trials = numel(trl_info.Total_Trial);
+n_trials = numel(trl_info.trl_n);
 fields = fieldnames(trl_info_cln);
 for f_ix = 1:numel(fields)
     if numel(trl_info_cln.(fields{f_ix}))==n_trials
@@ -118,7 +118,7 @@ fprintf('Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
 fprintf('Num trials excluded by visual rej : %i\n',length(skip_vis));
 fprintf('Num trials excluded for other     : %i\n',length(skip_bad));
 fprintf('TOTAL TRIALS EXCLUDED A PRIORI    : %i\n',length(skip_trial_ix));
-fprintf('TRIALS REMAINING: %i/%i\n',length(trl_info_cln.Total_Trial),length(trl_info.Total_Trial));
+fprintf('TRIALS REMAINING: %i/%i\n',length(trl_info_cln.trl_n),length(trl_info.trl_n));
 fprintf('==============================================================================================\n');
 
 % Save results
@@ -137,7 +137,7 @@ fprintf(r_file,'Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier
 fprintf(r_file,'Num trials excluded by visual rej : %i\n',length(skip_vis));
 fprintf(r_file,'Num trials excluded for other     : %i\n',length(skip_bad));
 fprintf(r_file,'TOTAL TRIALS EXCLUDED A PRIORI    : %i\n',length(skip_trial_ix));
-fprintf(r_file,'TRIALS REMAINING: %i/%i\n',length(trl_info_cln.Total_Trial),length(trl_info.Total_Trial));
+fprintf(r_file,'TRIALS REMAINING: %i/%i\n',length(trl_info_cln.trl_n),length(trl_info.trl_n));
 fclose(r_file);
 
 end

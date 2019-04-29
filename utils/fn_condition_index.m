@@ -20,9 +20,9 @@ for cond_ix = 1:numel(cond_lab)
         case 'Ls'
             condition_num(trl_info.hit==0) = cond_ix;
         case 'Er'
-            condition_num(trl_info.rt<trl_info.timing.target) = cond_ix;
+            condition_num(trl_info.rt<trl_info.prdm.target) = cond_ix;
         case 'Lt'
-            condition_num(trl_info.rt>trl_info.timing.target) = cond_ix;
+            condition_num(trl_info.rt>trl_info.prdm.target) = cond_ix;
         case 'EzWn'
             matches = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==1);
             condition_num(matches) = cond_ix;

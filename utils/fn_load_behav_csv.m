@@ -27,11 +27,20 @@ fprintf('\tReading behavioral csv file: %s\n',csv_fname);
 bhv_file = fopen(csv_fname);
 
 % Read field names
-%   Fields: Total_Trial, Block, Condition, Hit, RT, Timestamp,...
-%           Tolerance, Trial, Score, ITI, ITI type
-% fields = {'trl_n','blk','cond','hit','rt','time',...
-%             'tol','blk_trl','score','ITI','ITI_type'};
+py_fields  = {'Total_Trial', 'Block', 'Condition', 'Hit', 'RT', 'Timestamp',...
+              'Tolerance', 'Trial', 'Score', 'ITI', 'ITI type'};
+new_fields = {'trl_n','blk','cond','hit','rt','time',...
+              'tol','blk_trl_n','score','ITI','ITI_type'};
 bhv_fields = textscan(bhv_file, '%s %s %s %s %s %s %s %s %s %s %s', 1, 'Delimiter', ',');
+% Check that loaded fields match expected py_fields
+if numel(py_fields)~=numel(bhv_fields)
+    error('Mismatched fields in behav csv than expected!');
+end
+for f = 1:numel(py_fields)
+    if ~strcmp(py_fields{f},bhv_fields{f})
+        error(['Mismatched field in behav csv and expected: ' py_fields{f} ' vs. ' bhv_fields{f}]);
+    end
+end
 
 % Read data
 %   orig version: formatspec = '%d%d%s%d%f%f%f%d%d%f%s';
@@ -51,17 +60,17 @@ end
 
 % Add data to struct, convert field names with spaces to underscore
 for f_ix = 1:numel(bhv_fields)
-    bhv_fields{f_ix} = strrep(bhv_fields{f_ix}{1},' ','_');
+%     bhv_fields{f_ix} = strrep(bhv_fields{f_ix}{1},' ','_');
     if numel(bhv_data{f_ix})==n_trials
-        bhv.(bhv_fields{f_ix}) = bhv_data{f_ix}(good_trials);
+        bhv.(new_fields{f_ix}) = bhv_data{f_ix}(good_trials);
     else
-        bhv.(bhv_fields{f_ix}) = bhv_data{f_ix};
+        bhv.(new_fields{f_ix}) = bhv_data{f_ix};
     end
 end
 
 % Convert from python to MATLAB indexing
-bhv.Total_Trial = bhv.Total_Trial+1;
-bhv.Block       = bhv.Block+1;
-bhv.Trial       = bhv.Trial+1;
+bhv.trl_n     = bhv.trl_n+1;
+bhv.blk       = bhv.blk+1;
+bhv.blk_trl_n = bhv.blk_trl_n+1;
 
 end

@@ -52,7 +52,7 @@ if strcmp(event_type,'stim')
         error(['ERROR: trial_lim_s does not include bsln_lim for an_id = ' an_id]);
     end
     % Cut to desired trial_lim_s
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,trl_info.cond_n,...
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
         round(trial_lim_s_pad*roi.fsample));
 elseif strcmp(event_type,'resp')
     % Check that baseline will be included in data cut to trial_lim_s
@@ -60,8 +60,8 @@ elseif strcmp(event_type,'resp')
         error(['ERROR: trial_lim_s does not include bsln_lim for an_id = ' an_id]);
     end
     % Cut to max_RT+trial_lim_s(2) to include S baseline + full R-locked trial_lim_s
-    max_RT  = max(trl_info.RT);
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,trl_info.cond_n,...
+    max_RT  = max(trl_info.rt);
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
         round([trial_lim_s_pad(1) max_RT+trial_lim_s_pad(2)]*roi.fsample));
 else
     error(['Unknown event_type: ' event_type]);
@@ -166,7 +166,7 @@ hfa = ft_selectdata(cfg_avg,hfa);
 
 %% Re-align to event of interest if necessary (e.g., response)
 if strcmp(event_type,'resp')
-    hfa = fn_realign_tfr_s2r(hfa,trl_info.RT,trial_lim_s);
+    hfa = fn_realign_tfr_s2r(hfa,trl_info.rt,trial_lim_s);
 elseif ~strcmp(event_type,'stim')
     error(['ERROR: unknown event_type ' event_type]);
 end

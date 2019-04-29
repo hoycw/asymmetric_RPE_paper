@@ -109,10 +109,10 @@ end
 
 %% Read in log file
 trl_info = fn_load_behav_csv(bhv_fname,ignore_trials);
-fprintf('\t\tKeeping %d trials from log file\n', numel(trl_info.Total_Trial));
+fprintf('\t\tKeeping %d trials from log file\n', numel(trl_info.trl_n));
 
 %% Check if log and photodiode have different n_trials, plot and error out
-if(length(trl_info.Total_Trial) ~= length(trl_onsets))
+if(length(trl_info.trl_n) ~= length(trl_onsets))
     figure;
     % Plot photodiode data
     plot_photo = data_photo_orig - min(data_photo_orig);
@@ -128,32 +128,21 @@ if(length(trl_info.Total_Trial) ~= length(trl_onsets))
 end
 
 %% Put all the information into correct structures
-fprintf('\t\tMean response time: %1.2f seconds from word onset\n', nanmean(trl_info.RT)); % Ignore NaNs
+fprintf('\t\tMean response time: %1.2f seconds from word onset\n', nanmean(trl_info.rt)); % Ignore NaNs
 trl_info.trl_onset = trl_onsets;
-trl_info.rsp_onset = trl_onsets + floor(trl_info.RT*evnt_srate);
+trl_info.rsp_onset = trl_onsets + floor(trl_info.rt*evnt_srate);
 trl_info.fb_onset  = fb_onsets;
 
 % Track no response trials
-trl_info.rsp_onset(trl_info.RT<0) = -1;
-trl_info.Hit(trl_info.RT<0)       = -1;
-trl_info.Score(trl_info.RT<0)     = 0;
+trl_info.rsp_onset(trl_info.rt<0) = -1;
+trl_info.hit(trl_info.rt<0)       = -1;
+trl_info.score(trl_info.rt<0)     = 0;
 
 % Book keeping
 trl_info.ignore_trials = ignore_trials;
-trl_info.SBJ = SBJ;
-trl_info.RT_type = 'auto_log';
-
-prdm_fields = fieldnames(prdm_vars);
-for f_ix = 1:numel(prdm_fields)
-    trl_info.(prdm_fields{f_ix}) = prdm_vars.(prdm_fields{f_ix});
-end
-
-%% Convert condition codes from string to numbers
-trl_info.cond_types = {'easy', 'hard'};
-trl_info.cond_n = zeros(size(trl_info.Total_Trial));
-for t_ix = 1:numel(trl_info.Total_Trial)
-    trl_info.cond_n(t_ix) = find(strcmp(trl_info.cond_types,trl_info.Condition{t_ix}));
-end
+trl_info.SBJ     = SBJ;
+trl_info.rt_type = 'auto_log';
+trl_info.prdm    = prdm_vars;
 
 %% Convert samples from event channel sample rate to iEEG channel sample rate
 s_rate_ratio = nrl_srate / evnt.fsample;

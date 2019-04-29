@@ -1,5 +1,5 @@
-function SBJ08b_HFA_plot_stack_cond_saved(SBJ,conditions,proc_id, an_id,actv_win,...
-                                        plt_id,save_fig,fig_vis,fig_filetype)
+function SBJ07b_HFA_plot_stack_cond_saved(SBJ, conditions, an_id, actv_win,...
+                                        plt_id, save_fig, fig_vis, fig_ftype)
 % Plots single trial stack for both stimulus- and response-locked HFA computed in SBJ08a_HFA_actv
 %   sorts by condition, then by RT; scatter for RTs in stim-locked
 % clear all; %close all;
@@ -9,35 +9,30 @@ if isnumeric(actv_win); actv_win = num2str(actv_win); end
 
 %% Data Preparation
 % Set up paths
-addpath('/home/knight/hoycw/PRJ_Error/scripts/');
-addpath('/home/knight/hoycw/PRJ_Error/scripts/utils/');
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
+if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
+else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
+addpath([root_dir 'PRJ_Error/scripts/']);
+addpath([root_dir 'PRJ_Error/scripts/utils/']);
+addpath(ft_dir);
 ft_defaults
 
-%% Load Results
-SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
+%% Data Preparation
+SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
-plt_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
+plt_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
 eval(plt_vars_cmd);
 
+%% Load Results
 % Load RTs
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
 
 % Load data
-hfa_filename = strcat(SBJ_vars.dirs.proc,SBJ,'_HFA_ROI_',an_id,'.mat');
-load(hfa_filename,'hfa');
+hfa_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat');
+load(hfa_fname,'hfa');
 
 % Load ROI and GM/WM info
-einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
-load(einfo_filename);
-% Electrode Info Table:
-%   label- name of electrode
-%   ROI- specific region
-%   gROI- general region (LPFC, MPFC, OFC, FWM=frontal white matter)
-%   ROI2- specific region of second electrode
-%   tissue- primary tissue type
-%   GM weight- percentage of electrode pair in GM
-%   Out- 0/1 flag for whether this is partially out of the brain
+% einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
+% load(einfo_filename);
 
 %!!! is this the best way to do this??? Maybe not...
 sample_rate = (numel(hfa.time)-1)/(hfa.time(end)-hfa.time(1));
@@ -59,9 +54,9 @@ RT_mean = mean(round(1000*trl_info.rt)); % converts sec to ms
 RT_mean = RT_mean-plt_vars.plt_lim(1)*1000;
 
 %% Plot Results
-fig_dir = ['/home/knight/hoycw/PRJ_Error/results/HFA/' SBJ '/stack_' conditions '/' an_id '/'];
+fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/stack_' conditions '/' an_id '/'];
 if ~exist(fig_dir,'dir')
-    mkdir(fig_dir);
+    [~] = mkdir(fig_dir);
 end
 
 % Create a figure for each channel
@@ -100,9 +95,9 @@ for ch_ix = 1:numel(hfa.label)
     event_lab    = {'stim','target','fb on','fb off'};
     event_styles = {'-', '--', '-', '-'};
     event_times = [-plt_vars.plt_lim(1)*sample_rate...
-        (trl_info.timing.target-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.timing.target+trl_info.timing.fb_delay-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.timing.trl_len-plt_vars.plt_lim(1))*sample_rate];
+        (trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate...
+        (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate...
+        (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate];
     event_lines = [];
     for event_ix = 1:numel(event_times)
         event_lines(event_ix) = line([event_times(event_ix) event_times(event_ix)],ylim,...
@@ -118,7 +113,7 @@ for ch_ix = 1:numel(hfa.label)
     % Plotting parameters
     ax = gca;
 %     ax.legend        = plt_vars.legend;
-    ax.Title.String  = strcat(hfa.label{ch_ix}, ' (', einfo(ch_ix,2), '): stim trials');
+    ax.Title.String  = strcat(hfa.label{ch_ix});%, ' (', einfo(ch_ix,2), '): stim trials');
     ax.XLim          = [0,numel(hfa.time)];
     ax.XTick         = 0:plt_vars.x_step_sz*sample_rate:numel(hfa.time);
     ax.XTickLabel    = x_tick_lab;
@@ -133,9 +128,9 @@ for ch_ix = 1:numel(hfa.label)
     
     % Save figure
     if save_fig
-        fig_filename = [fig_dir fig_name '.' fig_filetype];
-        fprintf('Saving %s\n',fig_filename);
-        saveas(gcf,fig_filename);
+        fig_fname = [fig_dir fig_name '.' fig_ftype];
+        fprintf('Saving %s\n',fig_fname);
+        saveas(gcf,fig_fname);
         %eval(['export_fig ' fig_filename]);
     end
 end

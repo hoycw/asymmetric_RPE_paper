@@ -20,7 +20,7 @@ stat_cmd = ['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m'];
 eval(stat_cmd);
 
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
-load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'_test.mat'));
+load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat'));
 
 % Select data in stat window
 cfg_trim = [];
@@ -140,11 +140,11 @@ for ch_ix = 1:length(hfa.label)
 end
 
 %% Save Results
-out_fname = [SBJ_vars.dirs.proc SBJ '_ROI_' stat_id '_' an_id '.mat'];
+f_name = [SBJ_vars.dirs.proc SBJ '_ROI_' stat_id '_' an_id '.mat'];
 if rt_correlation
-    save(out_fname,'-v7.3','hfa','w2','stat');
+    save(f_name,'-v7.3','hfa','w2','stat');
 else
-    save(out_fname,'-v7.3','hfa','w2');
+    save(f_name,'-v7.3','hfa','w2');
 end
 
 end
