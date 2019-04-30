@@ -1,4 +1,4 @@
-function SBJ10a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id)
+function SBJ08a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id)
 %% Run ANOVA with potential RT regression before
 % Set up paths
 % Set up paths

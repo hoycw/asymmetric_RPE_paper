@@ -1,4 +1,4 @@
-function SBJ10b_HFA_plot_corrRT_ANOVA(SBJ,proc_id,stat_id,an_id,plt_id,save_fig,fig_vis,fig_filetype)
+function SBJ08b_HFA_plot_corrRT_ANOVA(SBJ,proc_id,stat_id,an_id,plt_id,save_fig,fig_vis,fig_filetype)
 % Plots ANOVA results
 % clear all; %close all;
 % fig_filetype = 'png';

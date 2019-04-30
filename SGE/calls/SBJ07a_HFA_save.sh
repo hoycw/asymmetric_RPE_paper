@@ -12,15 +12,15 @@ cd /home/knight/hoycw/PRJ_Error/scripts/
 SBJ="${SGE_TASK}"
 
 # define function
-FUNCTION='SBJ10a_corrRT_regressRT_ANOVA_terms'
+FUNCTION='SBJ07a_HFA_save'
 
 # set up matlab function call
-func_call="${FUNCTION}('${SBJ}', '${an_id}', '${stat_id}')"
+func_call="${FUNCTION}('${SBJ}', '${pipeline_id}', '${an_id}')"
 
 # define commands to execute via SGE
 echo ${SBJ}
 echo ${func_call}
 echo $$
-echo ${func_call} > NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}_${stat_id}.m
-time matlab -nodesktop -nosplash -nodisplay < NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}_${stat_id}.m
-rm NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}_${stat_id}.m
+echo ${func_call} > NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
+time matlab -nodesktop -nosplash -nodisplay < NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
+rm NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
