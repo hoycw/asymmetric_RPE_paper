@@ -75,7 +75,12 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     else
         block_suffix = strcat('_',SBJ_vars.block_name{b_ix});
     end
-    evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
+    if SBJ_vars.low_srate(b_ix)~=0
+        evnt_srate = SBJ_vars.low_srate(b_ix);
+    else
+        evnt_srate = proc_vars.resample_freq;
+    end
+    evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt_srate),'hz',block_suffix,'.mat');
     load(evnt_fname);
     
     % Plot event channels

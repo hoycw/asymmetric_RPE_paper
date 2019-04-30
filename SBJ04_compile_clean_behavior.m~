@@ -26,10 +26,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'));
 load([SBJ_vars.dirs.events SBJ '_trl_info_auto.mat']);
-if numel(SBJ_vars.block_name)>1
-    error('SBJ04 cant handle multiple runs yet!');
-end
-
+if numel(SBJ_vars.
 % Parameters
 if ~isfield(proc_vars,'RT_std_thresh')
     proc_vars.RT_std_thresh = 3;
