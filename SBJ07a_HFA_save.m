@@ -19,6 +19,11 @@ eval(an_vars_cmd);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
 
+% Toss sampleinfo which can mess up trial cutting
+if isfield(data,'sampleinfo')
+    data = rmfield(data,'sampleinfo');
+end
+
 %% Select Channel(s)
 cfgs = [];
 cfgs.channel = SBJ_vars.ch_lab.ROI;
