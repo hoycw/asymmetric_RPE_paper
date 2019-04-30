@@ -1,7 +1,4 @@
 %% IR66 Processing Variables
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
-ft_defaults
-
 %--------------------------------------
 % Basics
 %--------------------------------------
@@ -63,7 +60,7 @@ SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
     'LHH1','LHH2','LHH3','LTH1','LTH2','LTH3','LTH4',...% epileptic
     'RHH1','RHH2','RHH3','RHH4','RTH1','RTH2','RTH3',...% epileptic, originally tried then stopped saving RAM1, RAM2
-    'RAM1','RAM2','LAM1','LAM2',...% rejected after preproc cleaning
+    'LHH4','RAM1','RAM2','RAM3','LAM1','LAM2','LAM3',...% rejected after preproc cleaning
     'LAC8','LAC9','LAC10',...% out of brain
     'DC01','DC03','DC04',...% empty analogs
     'GND','REF','EKG'...% not real data
