@@ -78,7 +78,7 @@ skip_trial_ix = unique([skip_bad; skip_rt; skip_vis; skip_rt_outlier; skip_train
 ok_trial_ix = setdiff(1:numel(trl_info.trl_n),skip_trial_ix);
 
 %% Compile Bad Trials
-error('adjust trl_n for the training trials!');
+% error('adjust trl_n for the training trials!');
 trl_info_cln = trl_info;
 trl_info_cln.event_type    = proc_vars.event_type;
 trl_info_cln.trial_lim     = trial_lim;
@@ -145,7 +145,7 @@ if save_it
     
     % Save the clean trl_info
     trl_info  = trl_info_cln;
-    output_fname = [SBJ_vars.dirs.events SBJ '_trl_info_clean',block_suffix,'.mat'];
+    output_fname = [SBJ_vars.dirs.events SBJ '_trl_info_final.mat'];%',block_suffix,'.mat'];
     save(output_fname, '-v7.3', 'trl_info');
 end
 

@@ -10,6 +10,7 @@ ft_defaults
 
 %%
 SBJ        = 'IR68';
+proc_id    = 'main_ft';
 conditions = 'DifOut';
 an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';
 actv_win   = 100;
@@ -21,5 +22,10 @@ fig_ftype  = 'png';
 SBJ07b_HFA_plot_stack_cond_saved(SBJ, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
 
 %%
-stat_id = 'corrRT_DifOutTimDOOT_WL200_WS50';
+stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
 SBJ10a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id);
+
+%%
+plt_id = 'ts_S0to3_evnts_sigline';
+fig_vis = 'off';
+SBJ08b_HFA_plot_corrRT_ANOVA(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);

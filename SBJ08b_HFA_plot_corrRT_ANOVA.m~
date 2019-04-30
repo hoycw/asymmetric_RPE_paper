@@ -1,4 +1,4 @@
-function SBJ08b_HFA_plot_corrRT_ANOVA(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype)
+function SBJ08b_HFA_plot_corrRT_ANOVA(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_filetype)
 % Plots ANOVA results
 % clear all; %close all;
 % fig_filetype = 'png';
@@ -99,7 +99,7 @@ sig_ch = zeros([numel(stat.label),1+numel(grp_lab)]);
 for ch_ix = 1:numel(stat.label)
     fig_name = [SBJ '_' stat_id '_' stat.label{ch_ix}];
     figure('Name',fig_name,'units','normalized',...
-        'outerposition',[0 0 1 0.8],'Visible',fig_vis);
+        'outerposition',[0 0 1 0.8],'Visible',fig_vis); %twice as wide for the double plot
     
     hold on;
     main_lines = [];
@@ -113,15 +113,15 @@ for ch_ix = 1:numel(stat.label)
     end
     set(rt_line,'Color',rt_color{1},'LineStyle',rt_style{1});
     main_lines = [main_lines grp_lines' rt_line];
-    lgd_lab = [grp_lab {'corr(RT)'}];
+    lgd_lab = {grp_lab{:} 'corr(RT)'};
     
     % Plot events: stim, target, feedback onset, feedback offset
     x_tick_lab       = plt_vars.plt_lim(1):plt_vars.x_step_sz:plt_vars.plt_lim(2);
 %     event_lab    = {'stim','target','fb on','fb off'};
     event_styles = {'--', '-', '-'};
-    event_times = [(trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate];
+    event_times = [(trl_info.timing.target-plt_vars.plt_lim(1))*sample_rate...
+        (trl_info.timing.target+trl_info.timing.fb_delay-plt_vars.plt_lim(1))*sample_rate...
+        (trl_info.timing.trl_len-plt_vars.plt_lim(1))*sample_rate];
     event_lines = [];
     for event_ix = 1:numel(event_times)
         event_lines(event_ix) = line([event_times(event_ix) event_times(event_ix)],ylims1,...
@@ -209,7 +209,7 @@ for ch_ix = 1:numel(stat.label)
     end
     
     % Plotting parameters
-    axs(1).Title.String  = strcat(stat.label{ch_ix});%, ' (', einfo(ch_ix,2), ')');
+    axs(1).Title.String  = strcat(stat.label{ch_ix}, ' (', einfo(ch_ix,2), ')');
     axs(1).Box           = 'off';
     axs(1).YLim          = ylims1;
     axs(1).YTick         = yticks1;
@@ -226,16 +226,16 @@ for ch_ix = 1:numel(stat.label)
     
     % Save figure
     if save_fig
-        fig_fname = [fig_dir fig_name '.' fig_ftype];
-        fprintf('Saving %s\n',fig_fname);
-        saveas(gcf,fig_fname);
+        fig_filename = [fig_dir fig_name '.' fig_filetype];
+        fprintf('Saving %s\n',fig_filename);
+        saveas(gcf,fig_filename);
         %eval(['export_fig ' fig_filename]);
     end
 end
 
 %% Save out list of channels with significant differences
-sig_report_fname = [fig_dir 'ch_sig_list.csv'];
-sig_report = fopen(sig_report_fname,'w');
+sig_report_filename = [fig_dir 'ch_sig_list.csv'];
+sig_report = fopen(sig_report_filename,'w');
 fprintf(sig_report,'%s: %s for %s \n',SBJ,stat_id,an_id);
 fprintf(sig_report,'label,%s,RT\n',strjoin(grp_lab,','));
 for ch_ix = 1:numel(stat.label)
