@@ -111,7 +111,8 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 % see cut scripts for timing info
-SBJ_vars.analysis_time = {{[1 1289]},{[1 1429]}};
+% miscut first run (not redoing it), so first event is ~158s in R1
+SBJ_vars.analysis_time = {{[1 1429]},{[1 1289]}};
 
 %--------------------------------------
 % Artifact Rejection Parameters

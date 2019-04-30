@@ -62,7 +62,7 @@ else
     combined = blocks{1};
     combined.trial = {data_concat};
     combined.time = {time_concat};
-    combined.sampleinfo = [1 numel(data_concat)];
+    combined.sampleinfo = [1 size(data_concat,2)];
 end
 
 end

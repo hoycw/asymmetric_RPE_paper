@@ -78,7 +78,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
     load(evnt_fname);
     
-    % Plot event channelsedit
+    % Plot event channels
     plot(evnt.time{1}, evnt.trial{1});
     
     %% ========================================================================
@@ -93,45 +93,39 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     %  ========================================================================
     % Correct baseline shift
     for shift_ix = 1:length(bsln_shift_times)
-        epoch_idx = floor(bsln_shift_times{shift_ix}(1)*hdr.sample_rate):floor(bsln_shift_times{shift_ix}(2)*hdr.sample_rate);
+        epoch_idx = floor(bsln_shift_times{shift_ix}(1)*evnt.fsample):floor(bsln_shift_times{shift_ix}(2)*evnt.fsample);
         epoch_idx(epoch_idx<1) = [];
         evnt.trial{1}(epoch_idx) = evnt.trial{1}(epoch_idx) - bsln_shift_val(shift_ix);
     end
     % zero out drifts
     for zero_ix = 1:length(bsln_times)
-        epoch_idx = floor(bsln_times{zero_ix}(1)*hdr.sample_rate):floor(bsln_times{zero_ix}(2)*hdr.sample_rate);
+        epoch_idx = floor(bsln_times{zero_ix}(1)*evnt.fsample):floor(bsln_times{zero_ix}(2)*evnt.fsample);
         epoch_idx(epoch_idx<1) = [];
         evnt.trial{1}(epoch_idx) = bsln_val;
     end
     
     % level out stimulus periods
     for stim_ix = 1:length(stim_times)
-        epoch_idx = floor(stim_times{stim_ix}(1)*hdr.sample_rate):floor(stim_times{stim_ix}(2)*hdr.sample_rate);
+        epoch_idx = floor(stim_times{stim_ix}(1)*evnt.fsample):floor(stim_times{stim_ix}(2)*evnt.fsample);
         epoch_idx(epoch_idx<1) = [];
         evnt.trial{1}(epoch_idx) = stim_yval(stim_ix);
     end
     
-    % Save corrected data
+    %% Save corrected data
     out_fname = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];
     save(out_fname, 'evnt', 'ignore_trials');
     
     %% ========================================================================
     %   Step 6- Parse Event Traces into Behavioral Data
     %  ========================================================================
-    trl_info{b_ix} = SBJ03_behav_parse(SBJ,b_ix,proc_id,1,1);
-
-    %% ========================================================================
-    %   Step 7- Reject Bad Trials Based on Behavior and Visual Cleaning
-    %  ========================================================================
-    trl_info_cln{b_ix} = SBJ04_reject_behavior(SBJ,trl_info{b_ix},proc_id);
-    
+    [~] = SBJ03_behav_parse(SBJ,b_ix,proc_id,1,1);
 end
 
-if numel(SBJ_vars.block_name)>1
-    error('write code to concat behavioral trl_info!');
-else
-    trl_info_cln = trl_info_cln{1};
-end
+%% ========================================================================
+%   Step 7- Reject Bad Trials (Behavior, Visual Cleaning) and Compile Runs
+%  ========================================================================
+clear trl_info
+trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 
 %% ========================================================================
 %   Step 8- Create elec files from recon
@@ -141,15 +135,6 @@ end
 % fn_save_elec_atlas(SBJ,'main_ft','pat','','DK',1);
 % fn_save_elec_atlas(SBJ,'main_ft','pat','','Dx',1);
 % tissue compartments...
-
-%% PRJ_Error starts here again
-clear trl_info
-trl_info = trl_info_cln;
-% 
-% % Make sure no response times are in weird float format
-% trl_info.rsp_onset = round(trl_info.rsp_onset);
-
-save(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
 
 %% %% ========================================================================
 % %   Step 9a- Prepare Variance Estimates for Variance-Based Trial Rejection

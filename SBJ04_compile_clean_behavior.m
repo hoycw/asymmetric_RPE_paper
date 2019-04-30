@@ -1,5 +1,6 @@
-function trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id)
-% Select data of interest and reject all bad trials based on behavior
+function trl_info_cln = SBJ04_compile_clean_behavior(SBJ, proc_id, save_it)
+% Reject all bad trials based on behavior and visual cleaning, then combine
+%   data from multiple runs
 % Criteria:
 %   1. Bob bad epoch
 %   2. Bad trial (interruption, corrupt data, etc.)
@@ -7,10 +8,9 @@ function trl_info_cln = SBJ04_reject_behavior(SBJ,trl_info,proc_id)
 %   4. Training trials
 % Inputs:
 %   SBJ [str]- the dataset to process (e.g., 'IR54')
-%   trl_info [struct]- structure with trial information
-%       should be SBJ_trl_info_manual.mat from events_dir as saved by SBJ03_RT_manual_adjustments.m
 %   proc_id [str] - name of processing pipeline (proc_vars)
 %       should contain RT_std_thresh [int]- # standard deviation from mean for RT to be tossed as outlier
+%   save_it [0/1] - save the cleaned up trl_info
 % Outputs:
 %   trl_info_clean [struct]- saves out final version after tossing all bad trials
 
@@ -78,6 +78,7 @@ skip_trial_ix = unique([skip_bad; skip_rt; skip_vis; skip_rt_outlier; skip_train
 ok_trial_ix = setdiff(1:numel(trl_info.trl_n),skip_trial_ix);
 
 %% Compile Bad Trials
+error('adjust trl_n for the training trials!');
 trl_info_cln = trl_info;
 trl_info_cln.event_type    = proc_vars.event_type;
 trl_info_cln.trial_lim     = trial_lim;
@@ -104,7 +105,7 @@ end
 % Prevent formatting errors
 trl_info_cln.rsp_onset = round(trl_info_cln.rsp_onset);
 
-% Print results
+%% Print results
 fprintf('==============================================================================================\n');
 if ~isempty(RT_late)
     fprintf('WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc_vars.rt_bounds(2));
@@ -121,23 +122,31 @@ fprintf('TOTAL TRIALS EXCLUDED A PRIORI    : %i\n',length(skip_trial_ix));
 fprintf('TRIALS REMAINING: %i/%i\n',length(trl_info_cln.trl_n),length(trl_info.trl_n));
 fprintf('==============================================================================================\n');
 
-% Save results
-results_fname = [SBJ_vars.dirs.events SBJ '_behavior_rejection_results.txt'];
-r_file = fopen(results_fname,'a');
-fprintf(r_file,'%s\n',datestr(datetime));
-if ~isempty(RT_late)
-    fprintf(r_file,'WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc_vars.rt_bounds(2));
+%% Save results
+if save_it
+    % Print results to logging file
+    results_fname = [SBJ_vars.dirs.events SBJ '_behavior_rejection_results.txt'];
+    r_file = fopen(results_fname,'a');
+    fprintf(r_file,'%s\n',datestr(datetime));
+    if ~isempty(RT_late)
+        fprintf(r_file,'WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc_vars.rt_bounds(2));
+    end
+    if ~isempty(RT_early)
+        fprintf(r_file,'WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
+    end
+    fprintf(r_file,'Num trials excluded for training  : %i\n',length(skip_training));
+    fprintf(r_file,'Num trials excluded for bad RT    : %i\n',length(skip_rt));
+    fprintf(r_file,'Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
+    fprintf(r_file,'Num trials excluded by visual rej : %i\n',length(skip_vis));
+    fprintf(r_file,'Num trials excluded for other     : %i\n',length(skip_bad));
+    fprintf(r_file,'TOTAL TRIALS EXCLUDED A PRIORI    : %i\n',length(skip_trial_ix));
+    fprintf(r_file,'TRIALS REMAINING: %i/%i\n',length(trl_info_cln.trl_n),length(trl_info.trl_n));
+    fclose(r_file);
+    
+    % Save the clean trl_info
+    trl_info  = trl_info_cln;
+    output_fname = [SBJ_vars.dirs.events SBJ '_trl_info_clean',block_suffix,'.mat'];
+    save(output_fname, '-v7.3', 'trl_info');
 end
-if ~isempty(RT_early)
-    fprintf(r_file,'WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
-end
-fprintf(r_file,'Num trials excluded for training  : %i\n',length(skip_training));
-fprintf(r_file,'Num trials excluded for bad RT    : %i\n',length(skip_rt));
-fprintf(r_file,'Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
-fprintf(r_file,'Num trials excluded by visual rej : %i\n',length(skip_vis));
-fprintf(r_file,'Num trials excluded for other     : %i\n',length(skip_bad));
-fprintf(r_file,'TOTAL TRIALS EXCLUDED A PRIORI    : %i\n',length(skip_trial_ix));
-fprintf(r_file,'TRIALS REMAINING: %i/%i\n',length(trl_info_cln.trl_n),length(trl_info.trl_n));
-fclose(r_file);
 
 end
