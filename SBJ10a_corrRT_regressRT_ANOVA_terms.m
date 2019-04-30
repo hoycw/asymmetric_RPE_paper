@@ -20,7 +20,7 @@ stat_cmd = ['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m'];
 eval(stat_cmd);
 
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
-load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'_test.mat'));
+load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat'));
 
 % Select data in stat window
 cfg_trim = [];
