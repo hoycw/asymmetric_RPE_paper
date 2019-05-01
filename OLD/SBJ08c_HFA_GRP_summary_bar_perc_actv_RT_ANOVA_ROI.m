@@ -1,5 +1,5 @@
-function SBJ08c_HFA_GRP_summary_bar_perc_actv_RT_ANOVA_ROI(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
-                                                            plt_id,save_fig,fig_vis,fig_filetype)
+function SBJ08c_HFA_GRP_summary_bar_perc_actv_RT_ANOVA_ROI(SBJs, proc_id, an_id, stat_id, actv_win, roi_id,...
+                                                            plt_id, save_fig, fig_vis, fig_ftype)
 % Load HFA analysis results for active, RT correlation, and ANOVA epochs
 %   Active- must be significant, and for S-locked, before mean(RT)
 %   RT correlation: any significance in stat_lim
@@ -15,17 +15,19 @@ if isnumeric(actv_win); actv_win = num2str(actv_win); end
 
 %% Data Preparation
 % Set up paths
-addpath('/home/knight/hoycw/PRJ_Error/scripts/');
-addpath('/home/knight/hoycw/PRJ_Error/scripts/utils/');
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
+if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
+else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
+addpath(genpath([root_dir 'PRJ_Error/scripts/']));
+addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
+addpath(ft_dir);
 ft_defaults
 
 %% Prep variables
-an_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/an_vars/' an_id '_vars.m'];
+an_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m'];
 eval(an_vars_cmd);
-plt_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
+plt_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
 eval(plt_vars_cmd);
-stat_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/stat_vars/' stat_id '_vars.m'];
+stat_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m'];
 eval(stat_vars_cmd);
 
 % Get condition info
@@ -279,7 +281,7 @@ if save_fig
         mkdir(fig_dir);
     end
     
-    fig_filename = [fig_dir fig_name '.' fig_filetype];
+    fig_filename = [fig_dir fig_name '.' fig_ftype];
     fprintf('Saving %s\n',fig_filename);
     saveas(gcf,fig_filename);
     %eval(['export_fig ' fig_filename]);

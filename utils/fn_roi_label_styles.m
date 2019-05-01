@@ -1,4 +1,4 @@
-function [labels, colors, einfo_col] = fn_roi_label_styles(roi_id)
+function [labels, colors] = fn_roi_label_styles(roi_id)
 %% Converts the name of a set of ROIs into labels, plotting colors
 % condition_name: [str] 'ROI', 'gROI', 'INS', 'LPFC', 'MPFC', 'OFC'
 % colors from http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=3
@@ -12,31 +12,44 @@ switch roi_id
         labels = all_rois;
         % Exclude FWM, '', OUT
         labels(strmatch('FWM',labels,'exact')) = [];
+        labels(strmatch('TWM',labels,'exact')) = [];
         labels(strmatch('OUT',labels,'exact')) = [];
         labels(strmatch('',labels,'exact')) = [];
-        einfo_col = 2;
-    case 'gROI'
+    case 'Yeo7'
+        labels = {'Vis','SM','DAttn','VAttn','Limb','FP','Def'};
+    case 'Main3'
+        labels = {'LPFC','MPFC','INS'};
+    case 'mgROI'
         labels = {'LPFC','MPFC','INS','OFC'};
-        einfo_col = 3;
+    case 'gROI'
+        labels = {'LPFC','MPFC','INS','OFC','PAR','TMP','AMG','HPC'};%,'OCC'};
+    case 'lat'
+        labels = {'LPFC','PAR','TMP','OCC'};
+    case 'deep'
+        labels = {'INS','HPC','AMG'};
+    case 'mnLPFC'
+        labels = {'DLPFC','VLPFC','PM','aMCC','preSMA','SMA'};
     case 'thryROI'
         labels = {'DLPFC','VLPFC','PM','aMCC','preSMA','SMA','daINS','vaINS','FO'};
-        einfo_col = 2;
+    case 'PAR'
+        labels = {'S1','SPL','IPL','Precuneus'};
+    case 'TMP'
+        labels = {'STS'};
     case 'LPFC'
-        labels = {'FPC','DLPFC','VLPFC','PM','M1','S1'};
-        einfo_col = 2;
+        labels = {'FPC','DLPFC','VLPFC','PM','M1'};
     case 'MPFC'
-        labels = {'ACC','preSMA','aMCC','SMA','pMCC','Precuneus'};
-        einfo_col = 2;
+        labels = {'ACC','preSMA','aMCC','SMA','pMCC'};
     case 'INS'
         labels = {'vaINS','daINS','FO','mINS','pINS'};
-        einfo_col = 2;
     case 'OFC'
         labels = {'mOFC','lOFC'};
-        einfo_col = 2;
-    case 'ALL'
+    case 'MTL'
+        labels = {'AMG','HPC'};
+    case {'tissue', 'tissueC'}
+        labels = {'GM','WM','CSF','OUT'};
+    case 'all'
         load('~/PRJ_Error/data/full_roi_lists.mat');
         labels = all_rois;
-        einfo_col = 2;
     otherwise
         error(strcat('Unknown roi_id: ',roi_id));
 end

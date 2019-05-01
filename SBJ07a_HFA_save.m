@@ -183,7 +183,7 @@ elseif strcmp(event_type,'fb')
     hfa = fn_realign_tfr_s2r(hfa,...
         ones(size(trl_info.rt))*trl_info.prdm.target+trl_info.prdm.fb_delay,...
         trial_lim_s);
-else
+elseif ~strcmp(event_type,'stim')
     error(['ERROR: unknown event_type ' event_type]);
 end
 

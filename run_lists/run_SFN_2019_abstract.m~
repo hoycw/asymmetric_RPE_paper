@@ -9,7 +9,7 @@ addpath(ft_dir);
 ft_defaults
 
 %%
-SBJs = {'CP24','IR57','IR66','IR68'};%
+SBJs = {'CP24','IR66','IR68'};%'IR57',
 proc_id    = 'main_ft';
 an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';
 actv_win   = 100;
@@ -18,11 +18,6 @@ fig_vis    = 'on';
 fig_ftype  = 'png';
 
 %%
-conditions = 'DifOut';
-an_id = 'ERP_F_trl2to1_stat1';
-for s = 1:numel(SBJs)
-    SBJ06a_ERP_stats(SBJs{s},conditions,proc_id,an_id);
-end
 
 %%
 conditions = 'DifOut';
