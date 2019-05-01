@@ -7,18 +7,20 @@ if ischar(save_fig); save_fig = str2num(save_fig); end
 
 %% Data Preparation
 % Set up paths
-addpath('/home/knight/hoycw/PRJ_Error/scripts/');
-addpath('/home/knight/hoycw/PRJ_Error/scripts/utils/');
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
+if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
+else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
+addpath([root_dir 'PRJ_Error/scripts/']);
+addpath([root_dir 'PRJ_Error/scripts/utils/']);
+addpath(ft_dir);
 ft_defaults
 
 %% Load Results
-SBJ_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
+SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
-an_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/an_vars/' an_id '_vars.m'];
-eval(an_vars_cmd);
-plt_vars_cmd = ['run /home/knight/hoycw/PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
+plt_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m'];
 eval(plt_vars_cmd);
+an_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m'];
+eval(an_vars_cmd);
 
 [cond_lab, cond_colors, cond_style, ~] = fn_condition_label_styles(conditions);
 
@@ -26,30 +28,23 @@ stats_filename = strcat(SBJ_vars.dirs.SBJ,'04_proc/',SBJ,'_ROI_',conditions,'_',
 load(stats_filename);
 
 % Load ROI and GM/WM info
-einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
-load(einfo_filename);
-% Electrode Info Table:
-%   label- name of electrode
-%   ROI- specific region
-%   gROI- general region (LPFC, MPFC, OFC, FWM=frontal white matter)
-%   ROI2- specific region of second electrode
-%   tissue- primary tissue type
-%   GM weight- percentage of electrode pair in GM
-%   Out- 0/1 flag for whether this is partially out of the brain
+%einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
+%load(einfo_filename);
 
 %!!! is this the best way to do this??? Maybe not...
 sample_rate = (numel(roi_erp{1}.time)-1)/(roi_erp{1}.time(end)-roi_erp{1}.time(1));
 
 % Get rid of .trial field to avoid following bug that tosses .avg, .var, and .dof:
 %   "Warning: timelock structure contains field with and without repetitions"
-roi_erp{1} = rmfield(roi_erp{1},'trial');
-roi_erp{2} = rmfield(roi_erp{2},'trial');
+% roi_erp{1} = rmfield(roi_erp{1},'trial');
+% roi_erp{2} = rmfield(roi_erp{2},'trial');
 
 % Trim data to plotting epoch
 cfg_trim = [];
 cfg_trim.latency = plt_vars.plt_lim;
-roi_erp{1} = ft_selectdata(cfg_trim,roi_erp{1});
-roi_erp{2} = ft_selectdata(cfg_trim,roi_erp{2});
+for cond_ix = 1:numel(cond_lab)
+    roi_erp{cond_ix} = ft_selectdata(cfg_trim,roi_erp{cond_ix});
+end
 
 %% Plot Results
 % NO! I will plot whatever channels I ran the stats on (why else did I run them?)
@@ -61,7 +56,7 @@ roi_erp{2} = ft_selectdata(cfg_trim,roi_erp{2});
 %     roi_erp{an_ix} = ft_selectdata(cfgs,roi_erp{an_ix});
 % end
 
-fig_dir = ['/home/knight/hoycw/PRJ_Error/results/ERP/' SBJ '/' conditions '/' an_id '/'];
+fig_dir = [root_dir 'PRJ_Error/results/ERP/' SBJ '/' conditions '/' an_id '/'];
 if ~exist(fig_dir,'dir')
     mkdir(fig_dir);
 end
@@ -99,15 +94,15 @@ for ch_ix = 1:numel(stat.label)
     
 %     subplot(plot_rc(1),plot_rc(2),ch_ix);
     plot_info.ax     = gca;
-    plot_info.title  = strcat(stat.label{ch_ix}, ' (', einfo(ch_ix,2), ')');
+    plot_info.title  = strcat(stat.label{ch_ix});%, ' (', einfo(ch_ix,2), ')');
     plot_info.legend = plt_vars.legend;
     
     % Compute means and variance
-    means = NaN([numel(cond_lab) size(roi_erp{1}.avg,2)]);
-    sem = NaN([numel(cond_lab) size(roi_erp{1}.avg,2)]);
-    for an_ix = 1:numel(cond_lab)
-        means(an_ix,:) = roi_erp{an_ix}.avg(ch_ix,:);
-        sem(an_ix,:) = squeeze(sqrt(roi_erp{an_ix}.var(ch_ix,:))./sqrt(numel(roi_erp{an_ix}.trialinfo)))';
+    means = NaN([numel(cond_lab) size(roi_erp{1}.time,2)]);
+    sem   = NaN([numel(cond_lab) size(roi_erp{1}.time,2)]);
+    for cond_ix = 1:numel(cond_lab)
+        means(cond_ix,:) = squeeze(mean(roi_erp{cond_ix}.trial(:,ch_ix,:),1))';
+        sem(cond_ix,:) = squeeze(std(roi_erp{cond_ix}.trial(:,ch_ix,:),[],1)./sqrt(size(roi_erp{cond_ix}.trial,1)))';
     end
     % Find significant time periods
     if sum(stat.mask(ch_ix,:))>0

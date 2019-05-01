@@ -117,15 +117,32 @@ for ch_ix = 1:numel(stat.label)
     
     % Plot events: stim, target, feedback onset, feedback offset
     x_tick_lab       = plt_vars.plt_lim(1):plt_vars.x_step_sz:plt_vars.plt_lim(2);
-%     event_lab    = {'stim','target','fb on','fb off'};
-    event_styles = {'--', '-', '-'};
-    event_times = [(trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate];
-    event_lines = [];
-    for event_ix = 1:numel(event_times)
-        event_lines(event_ix) = line([event_times(event_ix) event_times(event_ix)],ylims1,...
-            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',event_styles{event_ix});
+    % Plot events: stim, target, feedback onset, feedback offset
+%     plt_vars.evnt_lab    = {'stim','target','fb on','fb off'};
+%     plt_vars.evnt_styles = {'-', '--', '-', '-'};
+    if numel(plt_vars.evnt_lab)==1
+        evnt_times = -plt_vars.plt_lim(1)*sample_rate;
+    else
+        evnt_times = zeros(size(plt_vars.evnt_lab));
+        for e = 1:numel(plt_vars.evnt_lab)
+            switch plt_vars.evnt_lab{e}
+                case 'S'
+                    evnt_times(e) = -plt_vars.plt_lim(1)*sample_rate;
+                case 'R'
+                    evnt_times(e) = (trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate;
+                case {'Fon','F'}
+                    evnt_times(e) = (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate;
+                case 'Foff'
+                    evnt_times(e) = (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate;
+                otherwise
+                    error('unknown evnt_lab');
+            end
+        end
+    end
+    evnt_lines = [];
+    for evnt_ix = 1:numel(evnt_times)
+        evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylims1,...
+            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
     end
 %         % Plot Response Marker
 %         event_line = line([find(stat.time==0) find(stat.time==0)],ylims1,...

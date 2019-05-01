@@ -79,10 +79,31 @@ for sbj_ix = 1:numel(SBJs)
     end
     load(elec_fname);
     
+    % HACK!!!
+    if strcmp(SBJ,'CP24')
+        cfgs = [];
+        cfgs.channel = {'all','-RTO4'};
+        stat = ft_selectdata(cfgs,stat);
+        hfa = ft_selectdata(cfgs,hfa);
+    elseif strcmp(SBJ,'IR57')
+        cfgs = [];
+        cfgs.channel = {'all','-LAM4-5','-LAM5-6','-RIN8-9','-RIN9-10',...
+                        '-RSM1-2','-RSM2-3','-RSM3-4','-RTI9-10'};
+        stat = ft_selectdata(cfgs,stat);
+        hfa = ft_selectdata(cfgs,hfa);
+    elseif strcmp(SBJ,'IR68')
+        cfgs = [];
+        cfgs.channel = {'all','-LPC5-6','-LPC6-7','-LPC7-8'};
+        stat = ft_selectdata(cfgs,stat);
+        hfa = ft_selectdata(cfgs,hfa);
+    end
+
     % Sort elecs by stat labels
-    cfgs = []; cfgs.channel = stat.label;
-    elec = fn_select_elec(cfgs,elec);
-    elec.roi = fn_atlas2roi_labels(elec.atlas_lab,atlas_id,roi_id);
+    if ~strcmp(SBJ,'IR66')  % HACK!!!
+        cfgs = []; cfgs.channel = stat.label;
+        elec = fn_select_elec(cfgs,elec);
+        elec.roi = fn_atlas2roi_labels(elec.atlas_lab,atlas_id,roi_id);
+    end
     
     % Exclude elecs not in atlas ROIs
     if ~plot_out
@@ -281,7 +302,7 @@ ax.XTickLabel = [{'Activation','Deactivation','Corr(RT)'},grp_lab];
 
 ax.YLabel.String   = 'Proportion of Electrodes';
 ax.YLabel.FontSize = 14;
-ax.YLim            = [0 0.6];%[0 ymaxs(plot_ix)];%
+ax.YLim            = [0 ax.YLim(2)];%[0 0.6];%
 ax.YTick           = ax.YLim(1):0.1:ax.YLim(2);
 % ax.YTickLabel      = roi_list;
 % ax.YTickLabelRotation = 45;

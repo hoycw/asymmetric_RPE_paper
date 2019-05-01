@@ -49,9 +49,9 @@ trl_info.cond_n = fn_condition_index(conditions,trl_info);
 cond_mat = horzcat(trl_info.cond_n,round(1000*trl_info.rt),[1:numel(trl_info.trl_n)]');
 cond_mat = sortrows(cond_mat,[1 2]);
 cond_edges = find(diff(cond_mat(:,1)));
-RT_mean = mean(round(1000*trl_info.rt)); % converts sec to ms
-% Add in the baseline offset to plot correctly
-RT_mean = RT_mean-plt_vars.plt_lim(1)*1000;
+% RT_mean = mean(round(1000*trl_info.rt)); % converts sec to ms
+% % Add in the baseline offset to plot correctly
+% RT_mean = RT_mean-plt_vars.plt_lim(1)*1000;
 
 %% Plot Results
 fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/stack_' conditions '/' an_id '/'];
@@ -83,25 +83,42 @@ for ch_ix = 1:numel(hfa.label)
     set(gca,'YDir','normal');
     x_tick_lab = plt_vars.plt_lim(1):plt_vars.x_step_sz:plt_vars.plt_lim(2);
     scat = [];
-    for cond_ix = 1:numel(cond_lab)
-        idx = cond_mat(:,1)==cond_ix;
-        scat(cond_ix) = scatter(cond_mat(idx,2)-plt_vars.plt_lim(1)*sample_rate,find(idx),...
-            'MarkerFaceColor',[cond_colors{cond_ix}],'MarkerEdgeColor','k',...
-            'Marker',cond_mrkrs{cond_ix});
+    if any(strcmp(plt_vars.evnt_lab,'R'))
+        for cond_ix = 1:numel(cond_lab)
+            idx = cond_mat(:,1)==cond_ix;
+            scat(cond_ix) = scatter(cond_mat(idx,2)-plt_vars.plt_lim(1)*sample_rate,find(idx),...
+                'MarkerFaceColor',[cond_colors{cond_ix}],'MarkerEdgeColor','k',...
+                'Marker',cond_mrkrs{cond_ix});
+        end
     end
     ylim([1 size(cond_mat,1)]);
     
     % Plot events: stim, target, feedback onset, feedback offset
-    event_lab    = {'stim','target','fb on','fb off'};
-    event_styles = {'-', '--', '-', '-'};
-    event_times = [-plt_vars.plt_lim(1)*sample_rate...
-        (trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate...
-        (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate];
-    event_lines = [];
-    for event_ix = 1:numel(event_times)
-        event_lines(event_ix) = line([event_times(event_ix) event_times(event_ix)],ylim,...
-            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',event_styles{event_ix});
+%     plt_vars.evnt_lab    = {'stim','target','fb on','fb off'};
+%     plt_vars.evnt_styles = {'-', '--', '-', '-'};
+    if numel(plt_vars.evnt_lab)==1
+        evnt_times = -plt_vars.plt_lim(1)*sample_rate;
+    else
+        evnt_times = zeros(size(plt_vars.evnt_lab));
+        for e = 1:numel(plt_vars.evnt_lab)
+            switch plt_vars.evnt_lab{e}
+                case 'S'
+                    evnt_times(e) = -plt_vars.plt_lim(1)*sample_rate;
+                case 'R'
+                    evnt_times(e) = (trl_info.prdm.target-plt_vars.plt_lim(1))*sample_rate;
+                case {'Fon','F'}
+                    evnt_times(e) = (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1))*sample_rate;
+                case 'Foff'
+                    evnt_times(e) = (trl_info.prdm.trl_len-plt_vars.plt_lim(1))*sample_rate;
+                otherwise
+                    error('unknown evnt_lab');
+            end
+        end
+    end
+    evnt_lines = [];
+    for evnt_ix = 1:numel(evnt_times)
+        evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylim,...
+            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
     end
     
     % Plot condition dividers
@@ -122,7 +139,11 @@ for ch_ix = 1:numel(hfa.label)
     cbar = colorbar;
     caxis(clims);
     if plt_vars.legend
-        legend(scat,cond_lab{:}, 'Location',plt_vars.legend_loc);
+        if scat
+            legend(scat,cond_lab{:}, 'Location',plt_vars.legend_loc);
+        else
+            legend(evnt_lines, plt_vars.evnt_lab, 'Location',plt_vars.legend_loc);
+        end
 %         legend(event_lines,event_lab,'Location',plt_vars.legend_loc);
     end
     

@@ -7,9 +7,9 @@ function roi_labels = fn_atlas2roi_labels(labels, atlas_id, roi_id)
 [root_dir, ~] = fn_get_root_dir();
 
 %% Read in Atlas to ROI mappings
-tsv_filename = [root_dir 'PRJ_Error/data/atlases/atlas_mappings/atlas_ROI_mappings_' atlas_id '.tsv'];
-fprintf('\tReading roi csv file: %s\n', tsv_filename);
-roi_file = fopen(tsv_filename, 'r');
+tsv_fname = [root_dir 'PRJ_Error/data/atlases/atlas_mappings/atlas_ROI_mappings_' atlas_id '.tsv'];
+fprintf('\tReading roi csv file: %s\n', tsv_fname);
+roi_file = fopen(tsv_fname, 'r');
 % roi.csv contents:
 %   atlas_label, gROI_label, ROI_label, Notes (not read in)
 roi_map = textscan(roi_file, '%s %s %s %s', 'HeaderLines', 1,...

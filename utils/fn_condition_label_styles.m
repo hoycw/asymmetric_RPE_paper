@@ -22,7 +22,7 @@ switch factor_name
     case 'DifOut'
         labels = {'EzWn', 'EzLs', 'HdWn', 'HdLs'};
         colors = {[55,126,184]./256, [228,26,28]./256, [55,126,184]./256, [228,26,28]./256};
-        line_styles = {'-', '-', '-', '-'};
+        line_styles = {'-', '-', '--', '--'};
         markers = {'o', 'o', 'd', 'd'};
     case 'Tim'
         labels = {'Er', 'Lt'};
