@@ -1,7 +1,4 @@
 %% IR57 Processing Variables
-addpath('/home/knight/hoycw/Apps/fieldtrip/');
-ft_defaults
-
 %--------------------------------------
 % Basics
 %--------------------------------------
@@ -39,12 +36,6 @@ SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);
 %--------------------------------------
 % Channel Selection
 %--------------------------------------
-hdr = ft_read_header(SBJ_vars.dirs.raw_filename);
-SBJ_vars.orig_n_ch = length(hdr.label);
-SBJ_vars.orig_n_samples = hdr.nSamples;
-SBJ_vars.orig_srate = hdr.Fs;
-clear hdr;
-
 SBJ_vars.ch_lab.probes = {'RSM','RAC','ROF','RIN','RTI','RAM','RHH','RTH',...
                          'LSMA','LAC','LOF','LIN','LTI','LAM','LTH'};%'LHH' doesn't count because all elecs are bad
 SBJ_vars.ch_lab.ref_type = {'BP','BP','BP','BP','BP','BP','BP','BP',...
@@ -86,7 +77,7 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 % data starts ~62s, goes to ~1410
-SBJ_vars.analysis_time = {[52 1420]};
+SBJ_vars.analysis_time = {{[52 1420]}};
 SBJ_vars.ignore_trials = [];
 
 %--------------------------------------
