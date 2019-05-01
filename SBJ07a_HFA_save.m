@@ -68,6 +68,11 @@ elseif strcmp(event_type,'resp')
     max_RT  = max(trl_info.rt);
     roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
         round([trial_lim_s_pad(1) max_RT+trial_lim_s_pad(2)]*roi.fsample));
+elseif strcmp(event_type,'fb')
+    % Cut from S baseline to full fb_locked:
+    %   [trl_onset+trial_lim_s(1) to fb+trial_lim_s(2)]
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
+        round([trial_lim_s_pad(1) trl_info.prdm.trl_len+trial_lim_s_pad(2)]*roi.fsample));
 else
     error(['Unknown event_type: ' event_type]);
 end
@@ -112,8 +117,10 @@ if strcmp(event_type,'stim')
     cfg_trim.latency = trial_lim_s;
 elseif strcmp(event_type,'resp') && strcmp(bsln_evnt,'stim')
     cfg_trim.latency = [bsln_lim(1) max_RT+trial_lim_s(2)];
+elseif strcmp(event_type,'fb') && strcmp(bsln_evnt,'stim')
+    cfg_trim.latency = [bsln_lim(1) trl_info.prdm.trl_len+trial_lim_s(2)];
 else
-    error('mismatched R-locked without S-locked baseline!');
+    error('mismatched event without S-locked baseline!');
 end
 hfa = ft_selectdata(cfg_trim,hfa);
 
@@ -172,7 +179,11 @@ hfa = ft_selectdata(cfg_avg,hfa);
 %% Re-align to event of interest if necessary (e.g., response)
 if strcmp(event_type,'resp')
     hfa = fn_realign_tfr_s2r(hfa,trl_info.rt,trial_lim_s);
-elseif ~strcmp(event_type,'stim')
+elseif strcmp(event_type,'fb')
+    hfa = fn_realign_tfr_s2r(hfa,...
+        ones(size(trl_info.rt))*trl_info.prdm.target+trl_info.prdm.fb_delay,...
+        trial_lim_s);
+else
     error(['ERROR: unknown event_type ' event_type]);
 end
 
