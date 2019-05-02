@@ -44,13 +44,14 @@ end
 %%
 fig_vis = 'off';
 conditions = 'DifOut';
+an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
 stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
 for s = 1:numel(SBJs)
-    plt_id     = 'stack_F2to12_evnt_c5';
-    SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
-    close all;
+%     plt_id     = 'stack_S2to3_evnt_c5';%'stack_F2to12_evnt_c5';
+%     SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
+%     close all;
     
-    plt_id = 'ts_F0to1_evnts_sigline';
+    plt_id = 'ts_S0to3_evnts_sigline';%'ts_F0to1_evnts_sigline';
     SBJ08b_HFA_plot_corrRT_ANOVA(SBJs{s}, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
     close all;
 end
@@ -90,3 +91,18 @@ for s = 1:numel(SBJs)
     mpfc_ix = find(strcmp(elec.roi,'MPFC'));
     disp(elec.label(mpfc_ix));
 end
+
+%% Recon viewing
+an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
+s = 4;
+fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'r', 0);
+fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'l', 0);
+
+%%
+SBJs = {'CP24','IR57','IR68'};%'IR66' - doesn't have mni_v_Dx yet
+roi_id = 'gROI';
+atlas_id = 'Dx';
+plot_out = 0;
+show_lab = 0;
+fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'r', atlas_id, roi_id, plot_out);
+fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'l', atlas_id, roi_id, plot_out);

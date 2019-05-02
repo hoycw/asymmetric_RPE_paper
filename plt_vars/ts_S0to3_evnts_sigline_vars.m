@@ -1,3 +1,6 @@
+plt_vars.evnt_lab    = {,'S','R','Fon','Foff'};
+plt_vars.evnt_styles = {'-','--','-','--'};
+
 plt_vars.plt_lim  = [0 3];
 plt_vars.x_step_sz  = 0.2;
 plt_vars.legend     = 1;
