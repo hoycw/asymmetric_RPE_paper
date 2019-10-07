@@ -1,4 +1,4 @@
-function SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
+function SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI_DO(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
                                                             atlas_id,gm_thresh,plt_id,plot_out,plot_scat,save_fig,fig_vis,fig_ftype)
 % Load HFA analysis results for active, RT correlation, and ANOVA epochs
 %   RT correlation: any significance in stat_lim
@@ -146,7 +146,7 @@ for sbj_ix = 1:numel(SBJs)
     if ~same_start || ~same_end || ~same_numel
         error('time axes are not the same across hfa analyses!');
     end
-    if ~isempty(setdiff(stat.label,hfa.label));
+    if ~isempty(setdiff(stat.label,hfa.label))
         error('Different electrodes across hfa analyses!');
     end
     
@@ -229,7 +229,7 @@ else
     scat_suffix = '';
 end
 % Create and format the plot
-fig_name = ['GRP_HFA_errbar_perc_GMlim' num2str(gm_thresh*100) '_actv_' stat_id '_' roi_id '_' event_type scat_suffix];
+fig_name = ['GRP_HFA_errbar_perc_GMlim' num2str(gm_thresh*100) '_DO_' stat_id '_' roi_id '_' event_type scat_suffix];
 figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 0.5 0.6],'Visible',fig_vis);
 hold on;
@@ -241,21 +241,21 @@ hold on;
 % delete(h2);
 
 % Compile Data in Plotting Format
-scat_vars = {actv_cnt, dact_cnt, rt_cnt};
-bar_data  = zeros([3+numel(grp_lab) numel(roi_list)]);
-var_data  = zeros([3+numel(grp_lab) numel(roi_list)]);
+scat_vars = {};%{actv_cnt, dact_cnt, rt_cnt};
+bar_data  = zeros([numel(grp_lab) numel(roi_list)]);
+var_data  = zeros([numel(grp_lab) numel(roi_list)]);
 for roi_ix = 1:numel(roi_list)
 %     bar_vars(1,roi_ix) = sum(cI_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
-    bar_data(1,roi_ix) = sum(actv_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
-    var_data(1,roi_ix) = nanstd(actv_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
-    bar_data(2,roi_ix) = sum(dact_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
-    var_data(2,roi_ix) = nanstd(dact_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
-    bar_data(3,roi_ix) = sum(rt_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
-    var_data(3,roi_ix) = nanstd(rt_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
+%     bar_data(1,roi_ix) = sum(actv_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
+%     var_data(1,roi_ix) = nanstd(actv_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
+%     bar_data(2,roi_ix) = sum(dact_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
+%     var_data(2,roi_ix) = nanstd(dact_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
+%     bar_data(3,roi_ix) = sum(rt_cnt(:,roi_ix))/sum(elec_cnt(:,roi_ix));
+%     var_data(3,roi_ix) = nanstd(rt_cnt(:,roi_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
     for grp_ix = 1:numel(grp_lab)
-        bar_data(3+grp_ix,roi_ix) = sum(grp_cnt(:,roi_ix,grp_ix))/sum(elec_cnt(:,roi_ix));
-        var_data(3+grp_ix,roi_ix) = nanstd(grp_cnt(:,roi_ix,grp_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
-        scat_vars{3+grp_ix} = squeeze(grp_cnt(:,:,grp_ix));
+        bar_data(grp_ix,roi_ix) = sum(grp_cnt(:,roi_ix,grp_ix))/sum(elec_cnt(:,roi_ix));
+        var_data(grp_ix,roi_ix) = nanstd(grp_cnt(:,roi_ix,grp_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
+        scat_vars{grp_ix} = squeeze(grp_cnt(:,:,grp_ix));
     end
 end
 
@@ -263,7 +263,7 @@ end
 b = {};
 scat_offsets = linspace(-0.015,0.015,numel(SBJs));
 bar_offsets  = linspace(-0.25,0.25,numel(roi_list));   %bar for activation, deactivation, condition
-for cond_ix = 1:3+numel(grp_lab)
+for cond_ix = 1:numel(grp_lab)
     % Use "stacked" bars that have empty elements to trick MATLAB into
     % thinking there are multiple elements, which lets me change properties of individual bars
     b{cond_ix} = bar(bar_offsets+cond_ix,diag(bar_data(cond_ix,:)),0.9,'stacked');
@@ -297,13 +297,13 @@ end
 ax = gca;
 % ax.XLabel.String   = 'Time (s)';
 % ax.XLabel.FontSize = 14;
-ax.XLim    = [0.5 3.5+numel(grp_lab)];
-ax.XTick   = 1:3+numel(grp_lab);
+ax.XLim    = [0.5 0.5+numel(grp_lab)];
+ax.XTick   = 1:numel(grp_lab);
 ax.XColor  = 'k';
-ax.XTickLabel = [{'Activation','Deactivation','Corr(RT)'},grp_lab];
+ax.XTickLabel = grp_lab;
 
 ax.YLabel.String   = 'Proportion of Electrodes';
-ax.YLabel.FontSize = 14;
+ax.YLabel.FontSize = 16;
 ax.YLim            = [0 ax.YLim(2)];%[0 0.6];%
 ax.YTick           = ax.YLim(1):0.1:ax.YLim(2);
 % ax.YTickLabel      = roi_list;
@@ -317,7 +317,7 @@ ax.Title.FontSize = 16;
 
 %% Save figure
 if save_fig
-    fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP_summary_errbar_ROI/actv_'...
+    fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP_summary_errbar_ROI/'...
         stat_id '_' roi_id '/' an_id '_mn' actv_win '/'];
     if ~exist(fig_dir,'dir')
         [~,~] = mkdir(fig_dir);

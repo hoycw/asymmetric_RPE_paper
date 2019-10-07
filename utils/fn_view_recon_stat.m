@@ -1,4 +1,4 @@
-function fn_view_recon_stat(SBJ, pipeline_id, stat_id, an_id, view_space, reg_type, show_labels, hemi, plot_out, varargin)
+function fn_view_recon_stat(SBJ, pipeline_id, stat_id, an_id, view_space, reg_type, show_labels, hemi, mirror, plot_out, varargin)
 %% Plot a reconstruction with electrodes colored according to statistics
 %   FUTURE 1: this is a static brain, need to adapt to a movie!
 %   FUTURE 2: add option for stat_var to be a cell with 2nd stat for edge
@@ -29,6 +29,10 @@ if ~isempty(varargin)
             view_angle = varargin{v+1};
         elseif strcmp(varargin{v},'mesh_alpha') && varargin{v+1}>0 && varargin{v+1}<=1
             mesh_alpha = varargin{v+1};
+        elseif strcmp(varargin{v},'save_fig')
+            save_fig = varargin{v+1};
+        elseif strcmp(varargin{v},'fig_ftype')
+            fig_ftype = varargin{v+1};
         else
             error(['Unknown varargin ' num2str(v) ': ' varargin{v}]);
         end
@@ -53,6 +57,15 @@ if ~exist('mesh_alpha','var')
         mesh_alpha = 0.8;
     end
 end
+if mirror && strcmp(hemi,'b')
+    error('why mirror if hemi b?');
+end
+if ~exist('save_fig','var')
+    save_fig = 0;
+end
+if ~exist('fig_ftype','var')
+    fig_ftype = 'fig';
+end
 if show_labels
     lab_arg = 'label';
 else
@@ -68,10 +81,23 @@ end
 load([SBJ_vars.dirs.recon,SBJ,'_elec_',pipeline_id,'_',view_space,reg_suffix,'.mat']);
 
 %% Remove electrodes that aren't in hemisphere
+cfgs = [];
 if ~plot_out
-    cfgs = [];
-    cfgs.channel = fn_select_elec_lab_match(elec, hemi, [], []);
-    elec = fn_select_elec(cfgs, elec);
+    if mirror
+        cfgs.channel = fn_select_elec_lab_match(elec, 'b', [], []);
+    else
+        cfgs.channel = fn_select_elec_lab_match(elec, hemi, [], []);
+    end
+end
+elec = fn_select_elec(cfgs, elec);
+
+% Mirror hemispheres
+if mirror
+    elec.chanpos(~strcmp(elec.hemi,hemi),1) = ...
+        -elec.chanpos(~strcmp(elec.hemi,hemi),1);
+    hemi_str = [hemi 'b'];
+else
+    hemi_str = hemi;
 end
 
 %% Load brain recon
@@ -159,15 +185,21 @@ else    % ANOVA
 end
 
 %% 3D Surface + Grids (3d, pat/mni, vol/srf, 0/1)
+if save_fig
+    out_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' stat_id '_recon/' an_id '/'];
+    if ~exist(out_dir,'dir')
+        [~] = mkdir(out_dir);
+    end
+end
 f = {};
 for grp_ix = 1:numel(grp_lab)+1
     if any(strcmp(stat_id,{'actv'}))
-        plot_name = [SBJ '_' stat_id '_' an_id];
+        plot_name = [SBJ '_' stat_id '_' an_id '_' hemi_str];
     else
         if grp_ix<=numel(grp_lab)
-            plot_name = [SBJ '_' grp_lab{grp_ix} '_' stat_id '_' an_id];
+            plot_name = [SBJ '_' grp_lab{grp_ix} '_' stat_id '_' an_id '_' hemi_str];
         else
-            plot_name = [SBJ '_' rt_lab{1} '_' stat_id '_' an_id];
+            plot_name = [SBJ '_' rt_lab{1} '_' stat_id '_' an_id '_' hemi_str];
         end
     end
     f{grp_ix} = figure('Name',plot_name);
@@ -189,5 +221,11 @@ for grp_ix = 1:numel(grp_lab)+1
         'make sure none of the figure adjustment tools (e.g., zoom, rotate) are active\n' ...
         '(i.e., uncheck them within the figure), and then hit ''l'' on the keyboard\n'])
     set(f{grp_ix}, 'windowkeypressfcn',   @cb_keyboard);
+    
+    if save_fig
+        fig_fname = [out_dir plot_name fig_ftype];
+        fig_fname = strrep(fig_fname,'*','x');
+        saveas(gcf,fig_fname);
+    end
 end
 
