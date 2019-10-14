@@ -22,6 +22,8 @@ switch model_id
         grp_labels = {'Dif','Out','Tim','Dif*Out'};
     case 'DifOut'
         grp_labels = {'Dif','Out'};
+    case 'DifOutDO'
+        grp_labels = {'Dif','Out', 'Dif*Out'};
     case 'corrRT_DifOut'
         grp_labels = {'Dif','Out'};
     case 'RT'
