@@ -136,7 +136,7 @@ ylims  = [min_w2-ylim_fudge max_w2+ylim_fudge];
 yticks = 0:1:ylims(2);
 
 % Create a figure for each condition (all gROIs in one subplot)
-fig_name = [SBJ '_ANOVA_ts_' grp_lab{grp_ix} '_' atlas_id '_' roi_id];
+fig_name = [SBJ '_ANOVA_ts_' model_lab '_' atlas_id '_' roi_id];
 f = figure('Name',fig_name,'units','normalized',...
     'outerposition',[0 0 1 1],'Visible',fig_vis); %twice as wide for the double plot
 for grp_ix = 1:numel(grp_lab)
@@ -221,7 +221,7 @@ for grp_ix = 1:numel(grp_lab)
     end
     legend(roi_lines,roi_legend,'Location',plt_vars.legend_loc);
     
-    
+    set(gca,'FontSize',16);
 end
 
 %% Save figure
