@@ -1,26 +1,28 @@
-% Model Factors and Levels
-model_lab   = 'DifOutDO';
-
-% ANOVA Parameters
-regress_rt  = 0;    % regrees reaction time off before running ANOVA
-groups      = {'Dif', 'Out'};
-levels      = {{'Ez','Hd'},{'Wn','Ls'}};
-anova_terms = 'interaction';%[1 0; 0 1; 1 1];
-
-% Stats parameters
-n_boots = 1000;
+% Time Parameters
+st.evnt_lab = 'F';
+st.stat_lim = [0 1.0];
 
 % Sliding Window Parameters
-win_len = 100;
-win_step = 25;
+st.win_len  = 0.1;
+st.win_step = 0.025;
+
+% Model Factors and Levels
+st.model_lab = 'DifOutDO';
+st.groups    = {'Dif', 'Out'};
+st.anova_term = 'interaction';
+st.alpha     = 0.05;
+st.n_boots   = 1000;
+
+% ANOVA Parameters
+st.regress_rt = 0;    % regrees reaction time off before running ANOVA
 
 % RT Correlation Parameters
-rt_correlation = 0;
+st.rt_corr = 0;
 cfg_rt = [];
 cfg_rt.parameter        = 'powspctrm';
 cfg_rt.statistic        = 'ft_statfun_correlationT';
 cfg_rt.method           = 'montecarlo';
-cfg_rt.numrandomization = n_boots;
+cfg_rt.numrandomization = st.n_boots;
 cfg_rt.correctm         = 'cluster';
 cfg_rt.clusteralpha     = 0.05;   %threshold for a single comparison (time point) to be included in the clust
 cfg_rt.clusterstatistic = 'maxsum';
