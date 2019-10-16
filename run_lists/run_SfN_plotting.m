@@ -54,13 +54,16 @@ for roi_ix = 1:numel(roi_opts)
     fn_view_recon_atlas_grp_stat_ROI(SBJs, proc_id, stat_id, an_id, ...
         reg_type, show_labels, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
         roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
+    fn_view_recon_atlas_grp_stat_venn_ROI(SBJs, proc_id, stat_id, an_id,...
+        reg_type, show_labels, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+        roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
 end
 
 %%
 an_id   = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
 stat_id = 'DifOutDO_F0t1_WL1_WS25';
 for s = 1:numel(SBJs)
-    SBJ08a_crRT_nANOVA(SBJs{s},an_id,stat_id);
+%     SBJ08a_crRT_nANOVA(SBJs{s},an_id,stat_id);
 end
 
 %%
@@ -68,6 +71,7 @@ end
 proc_id   = 'main_ft';
 an_id     = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
 stat_id   = 'corrRT_DifOutTimDO_WL200_WS50';
+plt_id    = 'ts_S0to3_evnts_sigline';%'ts_F0to1_evnts_sigline';
 atlas_id  = 'Dx';
 roi_id    = 'mgROI';
 gm_thresh = 0;
@@ -80,7 +84,6 @@ for s = 1:numel(SBJs)
 %     SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
 %     close all;
     
-    plt_id = 'ts_S0to3_evnts_sigline';%'ts_F0to1_evnts_sigline';
 %     SBJ08b_HFA_plot_corrRT_ANOVA(SBJs{s}, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
 %     close all;
     SBJ10b_ANOVA_plot_ts_gROIcomb(SBJs{s},proc_id,stat_id,an_id,...
