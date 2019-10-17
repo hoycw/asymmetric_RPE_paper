@@ -9,10 +9,10 @@ addpath(ft_dir);
 ft_defaults
 
 %%
-behav_SBJ = {'CP22','CP23','CP24','CP25','IR57','IR60','IR62','IR63','IR65','IR66','IR67','IR68',...
-                'IR69','IR71','IRR72','IR74','IR75','IR76','IR77','IR78','IR79','IR82','IR84'};
-eeg_behav_SBJ = {'EP06','EP07','EP08','EP10','EP11','EP14','EP15','EP16','EP17','EP18','EP19',...
-           'EEG01','EEG02','EEG03','EEG04','EEG06','EEG07','EEG08','EEG09','EEG10','EEG12'};
+% behav_SBJ = {'CP22','CP23','CP24','CP25','IR57','IR60','IR62','IR63','IR65','IR66','IR67','IR68',...
+%                 'IR69','IR71','IRR72','IR74','IR75','IR76','IR77','IR78','IR79','IR82','IR84'};
+% eeg_behav_SBJ = {'EP06','EP07','EP08','EP10','EP11','EP14','EP15','EP16','EP17','EP18','EP19',...
+%            'EEG01','EEG02','EEG03','EEG04','EEG06','EEG07','EEG08','EEG09','EEG10','EEG12'};
 SBJs = {'CP24','IR57','IR68'};%
 
 %% Print Group Accuracy
@@ -46,12 +46,31 @@ for roi_ix = 2:numel(roi_opts)
                                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
 end
 
-%%
+%% Run Model (SGE...)
 an_id   = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
 stat_id = 'DifOutDO_F0t1_WL1_WS25';
 for s = 1:numel(SBJs)
 %     SBJ08a_crRT_nANOVA(SBJs{s},an_id,stat_id);
 end
+
+%% Plot Example HFA stack and ANOVA ts
+SBJ        = 'IR57';
+elec_lab   = {'RAC1-2'};
+an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';
+conditions = 'DifOut';
+actv_win   = 100;
+plt_id     = 'stack_S2to3_evnt_c5';
+save_fig   = 1;
+fig_vis    = 'on';
+fig_ftype  = 'svg';
+SBJ07b_HFA_plot_stack_cond_saved_single(SBJ, elec_lab, conditions, an_id, actv_win,...
+    plt_id, save_fig, fig_vis, fig_ftype);
+
+an_id      = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
+stat_id    = 'DifOutDO_F0t1_WL1_WS25';
+plt_id    = 'ts_F0to1_evnts_sigline';
+SBJ08b_HFA_plot_crRT_nANOVA_single(SBJs{s}, elec_lab, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
+close all;
 
 %% Plot Group Stat ROI Recon
 proc_id   = 'main_ft';
@@ -83,23 +102,9 @@ stat_id   = 'DifOutDO_F0t1_WL1_WS25';%'corrRT_DifOutTimDO_WL200_WS50';
 plt_id    = 'ts_F0to1_evnts_sigline';
 atlas_id  = 'Dx';
 roi_id    = 'mgROI';
-gm_thresh = 0;
-z_thresh  = 0;
-plot_nsig = 0;
 save_fig  = 1;
 fig_vis   = 'on';
-fig_ftype  = 'png';
-for s = 1:numel(SBJs)
-%     plt_id     = 'stack_S2to3_evnt_c5';%'stack_F2to12_evnt_c5';
-%     SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
-%     close all;
-    
-%     SBJ08b_HFA_plot_corrRT_ANOVA(SBJs{s}, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
-%     close all;
-%     SBJ10b_ANOVA_plot_ts_gROIcomb(SBJs{s},proc_id,stat_id,an_id,...
-%                                     atlas_id,roi_id,gm_thresh,z_thresh,plot_nsig,...
-%                                     plt_id,save_fig,fig_vis,fig_ftype)
-end
+fig_ftype  = 'svg';
 SBJ10c_grp_ANOVA_plot_ts_gROIcomb(SBJs,proc_id,stat_id,an_id,...
                                     atlas_id,roi_id,plt_id,save_fig,fig_vis,fig_ftype);
 

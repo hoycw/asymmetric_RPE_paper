@@ -148,14 +148,14 @@ for grp_ix = 1:numel(grp_lab)
             end
         end
     end
-    evnt_lines = gobjects(size(evnt_times));
-    for evnt_ix = 1:numel(evnt_times)
-        evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylim,...
-            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
-    end
+%     evnt_lines = gobjects(size(evnt_times));
+%     for evnt_ix = 1:numel(evnt_times)
+%         evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylim,...
+%             'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
+%     end
     
     % Plotting parameters
-    ax.Title.String  = [grp_lab{grp_ix} ' (n total = ' num2str(roi_cnt(roi_ix)) ')'];
+    ax.Title.String  = grp_lab{grp_ix};
     ax.Box           = 'off';
     ax.YLim          = ylims;
 %     ax.YTick         = yticks;
@@ -166,11 +166,11 @@ for grp_ix = 1:numel(grp_lab)
     ax.XLabel.String = 'Time (s)';
     
     % Legend
-%     roi_legend = cell(size(grp_roi_list));
-%     for roi_ix = 1:numel(grp_roi_list)
-%         roi_legend{roi_ix} = [roi_list{roi_ix} ' (n sig=' num2str(roi_sig_count(roi_ix)) ')'];
-%     end
-    legend(roi_lines,roi_list,'Location',plt_vars.legend_loc);
+    roi_legend = cell(size(roi_list));
+    for roi_ix = 1:numel(roi_list)
+        roi_legend{roi_ix} = [roi_list{roi_ix} ' (n = ' num2str(roi_cnt(roi_ix)) ')'];
+    end
+    legend(roi_lines,roi_legend,'Location',plt_vars.legend_loc);
     
     set(gca,'FontSize',16);
 end

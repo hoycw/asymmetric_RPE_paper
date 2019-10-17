@@ -41,7 +41,7 @@ if exist('cond_id','var')
     end
 else
     % Define Colors
-    if strcmp('color_id','hard')
+    if strcmp(color_id,'hard')
         r = {[1 0 0]./255};
         g = {[0 1 0]./255};
         b = {[0 0 1]./255};
@@ -55,7 +55,7 @@ else
 %         y = {[255 250 146]./255};
 %         p = {[250 146 255]./255};
 %         c = {[146 255 250]./255};
-    elseif strcmp('color_id','def')
+    elseif strcmp(color_id,'def')
         r = {[255 158 163]./255};
         g = {[163 255 158]./255};
         b = {[158 163 255]./255};

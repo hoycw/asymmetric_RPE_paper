@@ -324,7 +324,7 @@ fprintf(['To reset the position of the camera light after rotating the figure,\n
 set(f, 'windowkeypressfcn',   @cb_keyboard);
 
 if save_fig
-    fig_fname = [out_dir plot_name fig_ftype];
+    fig_fname = [out_dir plot_name '.' fig_ftype];
     fig_fname = strrep(fig_fname,'*','x');
     saveas(f,fig_fname);
 end
