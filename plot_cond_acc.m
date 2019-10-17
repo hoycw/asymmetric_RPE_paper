@@ -1,4 +1,4 @@
-sbj_list = eeg_behav_SBJ;
+sbj_list = SBJs;
 SBJ_colors = distinguishable_colors(numel(sbj_list));
 cond_lab = {'easy','hard'};
 acc_cond = zeros([numel(sbj_list) 2]);
@@ -6,7 +6,7 @@ for sbj_ix = 1:numel(sbj_list)
     SBJ = sbj_list{sbj_ix};
     fprintf('================= Processing: %s =================\n',SBJ);
     % Load variables
-    SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error_eeg/scripts/SBJ_vars/' SBJ '_vars.m'];
+    SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
     eval(SBJ_vars_cmd);
     
     % Compute mean RT
