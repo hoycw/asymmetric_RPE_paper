@@ -37,7 +37,6 @@ end
 % Select data in stat window
 cfg_trim = [];
 cfg_trim.latency = [st.stat_lim(1) st.stat_lim(2)+0.001];
-cfg_trim.channel = hfa.label(2:3);
 hfa = ft_selectdata(cfg_trim,hfa);
 
 %% Build Design Matrix
