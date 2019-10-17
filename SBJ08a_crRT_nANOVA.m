@@ -37,6 +37,7 @@ end
 % Select data in stat window
 cfg_trim = [];
 cfg_trim.latency = [st.stat_lim(1) st.stat_lim(2)+0.001];
+cfg_trim.channel = hfa.label(2:3);
 hfa = ft_selectdata(cfg_trim,hfa);
 
 %% Build Design Matrix
@@ -184,14 +185,14 @@ for ch_ix = 1:numel(w2.label)
         rand_design = design;
         fprintf('boot #: ');
         for boot_ix = 1:st.n_boots
-            fprintf('%i..',boot_ix);
+            if mod(boot_ix,25)==0; fprintf('%i..',boot_ix); end
             % Randomize rows in design matrix
             rand_idx = randperm(size(design{grp_ix},1));
             for grp_ix = 1:numel(st.groups)
                 rand_design{grp_ix} = design{grp_ix}(rand_idx);
             end
             % Compute ANOVA
-            [~, table] = anovan(squeeze(hfa_win(:,ch_ix,t_ix)), w2.design, ...
+            [~, table] = anovan(squeeze(hfa_win(:,ch_ix,t_ix)), rand_design, ...
                 'model', st.anova_term,...% 'sstype', 2, ...% 'continuous', strmatch('RT',w2.cond),
                 'varnames', st.groups, 'display', 'off');
             % Compute w2
@@ -201,19 +202,17 @@ for ch_ix = 1:numel(w2.label)
                 w2.boot(factor_ix,ch_ix,t_ix,boot_ix) = (table{factor_row,sumsq_ix} - (table{factor_row,dof_ix} * mse))/...
                     (table{end,sumsq_ix} + mse);
             end
-            if mod(boot_ix,100)==0
-                fprintf('\n');
-            end
+            if mod(boot_ix,500)==0; fprintf('\n'); end
             clear p table
         end
         
         % Compute Significance accross bootstraps
         for factor_ix = 1:numel(w2.cond)
-            w2_false_pos = find(w2.boot(factor_ix,ch_ix,t_ix,:) > w2.trial(factor_ix,ch_ix,t_ix));
+            w2_false_pos = find(w2.boot(factor_ix,ch_ix,t_ix,:) >= w2.trial(factor_ix,ch_ix,t_ix));
             w2.pval(factor_ix,ch_ix,t_ix) = numel(w2_false_pos)/n_boots;
         end
     end
-    fprintf('\n');
+    fprintf('\n\n');
 end
 
 % Compute statistics

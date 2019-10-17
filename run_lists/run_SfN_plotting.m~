@@ -37,13 +37,6 @@ for roi_ix = 2:numel(roi_opts)
                                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
 end
 
-%%
-an_id   = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
-stat_id = 'DifOutDO_F0t1_WL1_WS25';
-for s = 1:numel(SBJs)
-    SBJ08a_crRT_nANOVA(SBJs{s},an_id,stat_id);
-end
-
 %% Plot Group Stat ROI Recon
 proc_id   = 'main_ft';
 an_id   = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';

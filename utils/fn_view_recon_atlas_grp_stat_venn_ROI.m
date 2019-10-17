@@ -44,7 +44,6 @@ if ~isempty(varargin)
 end
 
 %% Implement the default options
-ns_color = [0 0 0];
 % Add default view_angle if not defined
 if ~exist('view_angle','var')
     view_angle = fn_get_view_angle(hemi,plot_roi);
@@ -97,7 +96,7 @@ end
 
 %% Load data
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
-[grp_lab, ~, ~] = fn_group_label_styles(model_lab);
+[grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
 if numel(grp_lab) < 2 || numel(grp_lab) > 3; error('why venn?'); end
 venn_colors = fn_venn_colors(numel(grp_lab));
 all_color   = [1 1 1];
@@ -156,7 +155,18 @@ for sbj_ix = 1:numel(SBJs)
                 -elec_sbj{sbj_ix}.chanpos(~strcmp(elec_sbj{sbj_ix}.hemi,hemi),1);
         end
         
-        load([SBJ_vars.dirs.proc SBJ '_ROI_' stat_id '_' an_id '.mat'],'w2');
+        load([SBJ_vars.dirs.proc SBJ '_nANOVA_ROI_' stat_id '_' an_id '.mat'],'w2');
+        % HACK!!! remove some to match with PRJ_Stroop elec files
+        cfgs = [];
+        if strcmp(SBJ,'CP24')
+            cfgs.channel = {'all','-RTO4'};
+        elseif strcmp(SBJ,'IR57')
+            cfgs.channel = {'all','-LAM4-5','-LAM5-6','-RIN8-9','-RIN9-10',...
+                '-RSM1-2','-RSM2-3','-RSM3-4','-RTI9-10'};
+        elseif strcmp(SBJ,'IR68')
+            cfgs.channel = {'all','-LPC5-6','-LPC6-7','-LPC7-8'};
+        end
+        w2 = ft_selectdata(cfgs,w2);
         if numel(elec_sbj{sbj_ix}.label)~=numel(w2.label) || ~all(strcmp(orig_labels,w2.label))
             error('mismatched labels in elec and w2!');
         end
@@ -175,7 +185,7 @@ for sbj_ix = 1:numel(SBJs)
         if any(any(sig_mat(roi_mat{sbj_ix}~=0,:),2))
             % Print # and % sig
             print_nums = zeros([2 numel(grp_lab)]);
-            for st_ix = 1:numel(stat_conds)
+            for st_ix = 1:numel(grp_lab)
                 print_nums(1,st_ix) = sum(sig_mat(:,st_ix));
                 print_nums(2,st_ix) = sum(sig_mat(:,st_ix))/size(sig_mat,1);
             end
@@ -193,7 +203,7 @@ for sbj_ix = 1:numel(SBJs)
             all_roi_colors{sbj_ix} = zeros([numel(elec_sig{sbj_ix}.label) 3]);
             for sig_ix = 1:numel(elec_sig{sbj_ix}.label)
                 grp_ix = find(sig_roi_mat{sbj_ix}(sig_ix,:));
-                if numel(grp_ix)==numel(stat_conds) && numel(stat_conds) == 3
+                if numel(grp_ix)==numel(grp_lab) && numel(grp_lab) == 3
                     all_roi_colors{sbj_ix}(sig_ix,:) = all_color;
                 elseif numel(grp_ix)==2
                     all_roi_colors{sbj_ix}(sig_ix,:) = venn_colors{grp_ix(1),grp_ix(2)};
