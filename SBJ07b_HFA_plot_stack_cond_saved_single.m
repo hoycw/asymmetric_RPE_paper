@@ -84,7 +84,7 @@ for ch_ix = 1:numel(hfa.label)
     if any(strcmp(plt_vars.evnt_lab,'R'))
         for cond_ix = 1:numel(cond_lab)
             idx = cond_mat(:,1)==cond_ix;
-            scat(cond_ix) = scatter(cond_mat(idx,2)-plt_vars.plt_lim(1),find(idx),...
+            scat(cond_ix) = scatter(cond_mat(idx,2),find(idx),...
                 plt_vars.evnt_mrkr_sz,'MarkerFaceColor',cond_colors{cond_ix},'MarkerEdgeColor','k',...
                 'Marker',cond_mrkrs{cond_ix});
         end
@@ -101,13 +101,13 @@ for ch_ix = 1:numel(hfa.label)
         for e = 1:numel(plt_vars.evnt_lab)
             switch plt_vars.evnt_lab{e}
                 case 'S'
-                    evnt_times(e) = -plt_vars.plt_lim(1);
+                    evnt_times(e) = 0;
                 case 'R'
-                    evnt_times(e) = (trl_info.prdm.target-plt_vars.plt_lim(1));
+                    evnt_times(e) = trl_info.prdm.target;
                 case {'Fon','F'}
-                    evnt_times(e) = (trl_info.prdm.target+trl_info.prdm.fb_delay-plt_vars.plt_lim(1));
+                    evnt_times(e) = trl_info.prdm.target+trl_info.prdm.fb_delay;
                 case 'Foff'
-                    evnt_times(e) = (trl_info.prdm.trl_len-plt_vars.plt_lim(1));
+                    evnt_times(e) = trl_info.prdm.trl_len;
                 otherwise
                     error('unknown evnt_lab');
             end

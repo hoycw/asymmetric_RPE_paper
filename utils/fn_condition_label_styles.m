@@ -5,10 +5,6 @@ function [labels, colors, line_styles, markers] = fn_condition_label_styles(fact
 
 % if length(cond_lab) == 1
 switch factor_name
-%    case 'CNI'
-%        labels = {'con', 'neu', 'inc'};
-%        colors = {[55,126,184]./256, [0 0 0], [228,26,28]./256};
-%        line_styles = {'-', '-', '-'};    % colors for cond_lab plotting
     case 'Dif'
         labels = {'Ez', 'Hd'};
         colors = {[228,26,28]./256, [55,126,184]./256};
@@ -24,6 +20,11 @@ switch factor_name
         colors = {[55,126,184]./256, [228,26,28]./256, [55,126,184]./256, [228,26,28]./256};
         line_styles = {'-', '-', '--', '--'};
         markers = {'o', 'o', 'd', 'd'};
+    case 'Dif*Out'
+        labels = {'Ex', 'Ue'};
+        colors = {[1,0,1]./256, [0,1,1]./256};  % magenta and cyan for now
+        line_styles = {'-', '-'};    % colors for cond_lab plotting
+        markers = {'o', 'o'};
     case 'Tim'
         labels = {'Er', 'Lt'};
         colors = {[1 1 1], [0 0 0]};

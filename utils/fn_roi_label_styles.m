@@ -17,7 +17,7 @@ switch roi_id
         labels(strmatch('',labels,'exact')) = [];
     case 'Yeo7'
         labels = {'Vis','SM','DAttn','VAttn','Limb','FP','Def'};
-    case 'Main3'
+    case 'main3'
         labels = {'LPFC','MPFC','INS'};
     case 'mgROI'
         labels = {'LPFC','MPFC','INS','OFC'};
