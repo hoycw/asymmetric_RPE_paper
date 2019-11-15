@@ -1,4 +1,4 @@
-function [pred,col_names,col_vals] = fn_build_design_predictors(SBJ,stat_id)
+function [design,col_names] = fn_build_design_predictors(SBJ,stat_id)
 %% Build design matrix of predictors for regression analysis
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 
@@ -12,41 +12,28 @@ prdm_vars = load([SBJ_vars.dirs.events SBJ '_prdm_vars.mat']);
 
 %% Build Design Matrix
 [grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
-design = cell([1 numel(grp_lab)]);
+groups = cell([1 numel(grp_lab)]);
 levels = cell([1 numel(grp_lab)]);
 for grp_ix = 1:numel(grp_lab)
     [levels{grp_ix}, ~, ~] = fn_condition_label_styles(grp_lab{grp_ix});
-    design{grp_ix} = fn_condition_index(grp_lab{grp_ix}, trl_info);
+    cond_idx = fn_condition_index(grp_lab{grp_ix}, trl_info);
+    groups{grp_ix} = cell(size(cond_idx));
+    for level_ix = 1:numel(levels{grp_ix})
+        groups{grp_ix}(cond_idx==level_ix) = levels{grp_ix}(level_ix);
+    end
 end
+
+% Add hit/miss
+hit_str = cell(size(trl_info.hit));
+hit_str(logical(trl_info.hit))  = {'hit'};
+hit_str(~logical(trl_info.hit)) = {'miss'};
 
 %% Create matrix with trl_info fields
-col_names = {'trl_n','blk','hit','rt','tol'};
-col_vals  = cell(size(col_names));
-pred = zeros([numel(trl_info.trl_n) numel(col_names)]);
+col_names = {'trl_n','blk','rt','tol'};%'hit' being handled as categorical string
+design = zeros([numel(trl_info.trl_n) numel(col_names)]);
 for c_ix = 1:numel(col_names)
-    if strcmp(col_names{c_ix},'cond')
-        pred(:,c_ix) = cond_idx;
-    else
-        pred(:,c_ix) = trl_info.(col_names{c_ix});
-    end
-    switch col_names{c_ix}
-        case {'trl_n','blk'}
-            col_vals{c_ix} = 'category';
-        case {'rt','tol'}
-            col_vals{c_ix} = 'continuous';
-        case 'cond'
-            col_vals{c_ix} = cond_lab;
-        case 'hit'
-            col_vals{c_ix} = {'Ls','Wn'};
-        otherwise
-            error(['unknown column: ' col_names{c_ix}]);
-    end
+    design(:,c_ix) = trl_info.(col_names{c_ix});
 end
-
-%% Add in design
-col_names = [grp_lab col_names];
-col_vals = [levels col_vals];
-pred = horzcat(design{:},pred);
 
 %% Add signed quantitative surprise (inverse distance from tolerance)
 [tim_lab,~,~,~] = fn_condition_label_styles('Tim');
@@ -65,17 +52,31 @@ end
 
 % Invert to get prediction error
 signed_pe = signed_pe.^-1;
-col_names{end+1} = 'sPE';
-col_vals{end+1}  = 'continuous';
-pred = horzcat(pred,signed_pe);
+col_names{end+1} = 'signPE';
+design = horzcat(design,signed_pe);
 
 % Convert to pure prediction error
-col_names{end+1} = 'uPE';
-col_vals{end+1}  = 'continuous';
-pred = horzcat(pred,abs(signed_pe));
-
+col_names{end+1} = 'absPE';
+design = horzcat(design,abs(signed_pe));
 
 %% Add previous trial fields
+% Previous trial outcome + surprise
+out_ix   = find(strcmp(grp_lab,'Out'));
+sur_ix   = find(strcmp(grp_lab,'Dif*Out'));
+prev_out = cell(size(groups{out_ix}));
+prev_sur = cell(size(groups{sur_ix}));
+prev_out{1} = 'NA';
+prev_sur{1} = 'NA';
+for t_ix = 2:numel(prev_out)
+    if trl_info.blk(t_ix)==trl_info.blk(t_ix-1) && trl_info.trl_n(t_ix)==trl_info.trl_n(t_ix-1)+1
+        prev_out(t_ix) = groups{out_ix}(t_ix-1);
+        prev_sur(t_ix) = groups{sur_ix}(t_ix-1);
+    else
+        prev_out{t_ix} = 'NA';
+        prev_sur{t_ix} = 'NA';
+    end
+end
+
 % Previous RT
 prev_rt = nan(size(trl_info.rt));
 for t_ix = 2:numel(prev_rt)
@@ -84,28 +85,13 @@ for t_ix = 2:numel(prev_rt)
     end
 end
 
-col_names{end+1} = 'rtn-1';
-col_vals{end+1} = 'continuous';
-pred = horzcat(pred,prev_rt);
-
-% Previous trial outcome + surprise
-out_ix   = find(strcmp(grp_lab,'Out'));
-sur_ix   = find(strcmp(grp_lab,'Dif*Out'));
-prev_out = nan(size(design{out_ix}));
-prev_sur = nan(size(design{sur_ix}));
-for t_ix = 2:numel(prev_out)
+% Previous Tolerance
+prev_tol = nan(size(trl_info.tol));
+for t_ix = 2:numel(prev_tol)
     if trl_info.blk(t_ix)==trl_info.blk(t_ix-1) && trl_info.trl_n(t_ix)==trl_info.trl_n(t_ix-1)+1
-        prev_out(t_ix) = design{out_ix}(t_ix-1);
-        prev_sur(t_ix) = design{sur_ix}(t_ix-1);
+        prev_tol(t_ix) = trl_info.tol(t_ix-1);
     end
 end
-
-col_names{end+1} = 'Outn-1';
-col_vals{end+1} = levels{out_ix};
-pred = horzcat(pred,prev_out);
-col_names{end+1} = 'D*On-1';
-col_vals{end+1} = levels{sur_ix};
-pred = horzcat(pred,prev_sur);
 
 % Previous trial PE
 prev_spe = nan(size(signed_pe));
@@ -115,12 +101,29 @@ for t_ix = 2:numel(prev_spe)
     end
 end
 
-col_names{end+1} = 'sPEn-1';
-col_vals{end+1} = 'continuous';
-pred = horzcat(pred,prev_spe);
-col_names{end+1} = 'uPEn-1';
-col_vals{end+1} = 'continuous';
-pred = horzcat(pred,abs(prev_spe));
+% Add these to predictor matrix
+col_names{end+1} = 'n1_rt';
+design = horzcat(design,prev_rt);
+col_names{end+1} = 'n1_tol';
+design = horzcat(design,prev_tol);
+col_names{end+1} = 'n1_signPE';
+design = horzcat(design,prev_spe);
+col_names{end+1} = 'n1_absPE';
+design = horzcat(design,abs(prev_spe));
 
+%% Combine categorical and continuous variables
+% Convert continuous to cell
+design = num2cell(design);
+
+% Combine column names
+col_names = [grp_lab {'hit', 'n1_Out', 'n1_Dif*Out'} col_names];
+design = horzcat(groups{:},hit_str,prev_out,prev_sur,design);
+
+% Convert NaN to 'NA'
+for r = 1:size(design,1)
+    for c = 1:size(design,2)
+        if any(isnan(design{r,c})); design{r,c} = 'NA'; end
+    end
+end
 
 end

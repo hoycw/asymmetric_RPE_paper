@@ -1,4 +1,4 @@
-function [data,col_names,col_vals] = fn_build_data_features(SBJ,proc_id,an_id,stat_id,atlas_id,roi_id)
+function [model,model_names] = fn_build_full_model(SBJ,design,design_names,proc_id,an_id,stat_id,atlas_id,roi_id)
 %% Build design matrix of predictors for regression analysis
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 
@@ -21,7 +21,7 @@ fprintf('================== ROI Overlap =======================\n');
 load([SBJ_vars.dirs.recon SBJ '_elec_' proc_id '_pat_' atlas_id '_final.mat']);
 
 % Load all ROI info
-[roi_list, roi_colors] = fn_roi_label_styles(roi_id);
+[roi_list, ~] = fn_roi_label_styles(roi_id);
 if any(strcmp(roi_id,{'mgROI','gROI','main3','lat','deep','gPFC'}))
     roi_field = 'gROI';
 else
@@ -44,6 +44,9 @@ hfa = ft_selectdata(cfg_trim,hfa);
 
 if ~all(strcmp(elec.label,hfa.label)), error('mismatch hfa elec label order'); end
 
+%% Log transform HFA
+
+
 %% Average HFA in Sliding Windows
 fprintf('================== Averaging HFA within Windows =======================\n');
 % Sliding window parameters
@@ -61,24 +64,21 @@ for w_ix = 1:size(win_lim,1)
 end
 
 %% Raster out into column format
-col_names = cell([1 numel(hfa.label)*size(win_lim,1)]);
-col_vals  = repmat({'continuous'},size(col_names));
-data      = zeros([numel(trl_info.trl_n) numel(col_names)]);
-col_ix = 0;
-for ch_ix = 1:numel(hfa.label)
-    for w_ix = 1:size(win_lim,1)
-        col_ix = col_ix+1;
-        col_names{col_ix} = [hfa.label{ch_ix} '-' elec.(roi_field){ch_ix}(1:2) '-' win_names{w_ix}];
-        data(:,col_ix) = hfa_win(:,ch_ix,w_ix);
+model_names = [design_names {'channel', 'ROI', 'Time', 'HFA'}];
+trl_n_ix  = find(strcmp(design_names,'trl_n'));
+model     = cell(size(model_names));
+row_ix   = 0;
+for roi_ix = 1:numel(roi_list)
+    ch_idx = find(strcmp(elec.(roi_field),roi_list{roi_ix}));
+    for ch_ix = 1:numel(ch_idx)
+        for time_ix = 1:size(win_lim,1)
+            for trl_ix = 1:numel(trl_info.trl_n)
+                row_ix = row_ix + 1;
+                design_ix = find([design{:,trl_n_ix}]==trl_info.trl_n(trl_ix));
+                model(row_ix,:) = [design(design_ix,:) elec.label(ch_idx(ch_ix)) roi_list(roi_ix) win_names(time_ix) hfa_win(trl_ix,ch_idx(ch_ix),time_ix)];
+            end
+        end
     end
-end
-
-% %% Save Results
-% out_fname = [SBJ_vars.dirs.proc SBJ '_ROI_' stat_id '_' an_id '.mat'];
-% if st.rt_corr
-%     save(out_fname,'-v7.3','w2','rt','st');
-% else
-%     save(out_fname,'-v7.3','w2','st');
-% end
+end        
 
 end
