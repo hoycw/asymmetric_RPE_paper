@@ -9,12 +9,14 @@ addpath(ft_dir);
 ft_defaults
 
 %% Full SBJ list (completed and ready to run)
-SBJs      = {'CP24'};%{'CP24','IR57','IR68'};
+SBJs      = {'CP24','IR57','IR68'};%'CP24'};%{
 proc_id   = 'main_ft';
-an_id     = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
-stat_ids  = {'DifOutDO_F02t05_WL03_WS01'};%,'DifOutDO_F02t05_WL01_WS01','DifOutDO_F01t06_WL01_WS01','DifOutDO_F01t06_WL005_WS005'};
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';
+stat_ids  = {'DifOutDO_F02t05_WL03_WS01','DifOutDO_F01t06_WL005_WS005'};%'DifOutDO_F02t05_WL01_WS01','DifOutDO_F01t06_WL01_WS01',
 atlas_id  = 'Dx';
 roi_id    = 'main3';
+
+log_transform = 1;
 
 %% Prepare for inspections
 for s = 1:numel(SBJs)
@@ -31,7 +33,7 @@ for s = 1:numel(SBJs)
 
         % Build data feature matrix
         [model,model_names] = fn_build_full_model(SBJs{s},design,design_names,...
-                                            proc_id,an_id,stat_ids{st_ix},atlas_id,roi_id);
+                                            proc_id,an_id,stat_ids{st_ix},atlas_id,roi_id,log_transform);
         
         % Save CSV file
         csv_fname = [SBJ_vars.dirs.proc SBJs{s} '_ROI_' stat_ids{st_ix} '_' an_id '_' atlas_id '_' roi_id '_full_model.csv'];

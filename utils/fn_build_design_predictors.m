@@ -29,7 +29,8 @@ hit_str(logical(trl_info.hit))  = {'hit'};
 hit_str(~logical(trl_info.hit)) = {'miss'};
 
 %% Create matrix with trl_info fields
-col_names = {'trl_n','blk','run','rt','tol'};%'hit' being handled as categorical string
+% add 'run',
+col_names = {'trl_n','blk','rt','tol'};%'hit' being handled as categorical string
 design = zeros([numel(trl_info.trl_n) numel(col_names)]);
 for c_ix = 1:numel(col_names)
     design(:,c_ix) = trl_info.(col_names{c_ix});

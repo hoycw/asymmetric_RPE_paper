@@ -35,6 +35,8 @@ cfg_hfa.toi          = 'all';%-buff_lim(1):0.1:1.5;         % time window center
 cfg_hfa.keeptrials   = 'yes';                               % must be 'yes' for stats
 % cfg.t_ftimwin    = ones(1,length(cfg.tapsmofrq))*delta_time;
 
+% Log Tranform
+log_yn = 0;
 
 % Outlier Rejection
 outlier_std_lim = 6;

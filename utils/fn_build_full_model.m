@@ -1,4 +1,4 @@
-function [model,model_names] = fn_build_full_model(SBJ,design,design_names,proc_id,an_id,stat_id,atlas_id,roi_id)
+function [model,model_names] = fn_build_full_model(SBJ,design,design_names,proc_id,an_id,stat_id,atlas_id,roi_id,log_yn)
 %% Build design matrix of predictors for regression analysis
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 
@@ -43,9 +43,6 @@ cfg_trim.latency = [st.stat_lim(1) st.stat_lim(2)+0.001];
 hfa = ft_selectdata(cfg_trim,hfa);
 
 if ~all(strcmp(elec.label,hfa.label)), error('mismatch hfa elec label order'); end
-
-%% Log transform HFA
-
 
 %% Average HFA in Sliding Windows
 fprintf('================== Averaging HFA within Windows =======================\n');
