@@ -26,7 +26,7 @@ end
 
 %% Select Channel(s)
 cfgs = [];
-cfgs.channel = data.label(1:2);%SBJ_vars.ch_lab.ROI;
+cfgs.channel = SBJ_vars.ch_lab.ROI;
 roi = ft_selectdata(cfgs,data);
 clear data;
 
@@ -41,7 +41,7 @@ clear data;
 if strcmp(an.HFA_type,'multiband')
     pad_len = 0.5*max(cfg_hfa.t_ftimwin)*3;
 elseif any(strcmp(an.HFA_type,{'broadband','hilbert'}))
-    % add 250 ms as a rule of thumb, or onger if necessary
+    % add 250 ms as a rule of thumb, or longer if necessary
     pad_len = 0.5*max([1/min(fois)*3 0.25]);
 end
 % Cut data to an.bsln_lim to be consistent across S and R locked (confirmed below)
