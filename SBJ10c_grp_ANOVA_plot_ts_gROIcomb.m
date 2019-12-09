@@ -36,7 +36,7 @@ if ~strcmp(plt_vars.sig_type,'bold')
 end
 
 % Get condition info
-[grp_lab, ~, ~] = fn_group_label_styles(model_lab);
+[grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
 
 % Load all ROI info
 [roi_list, roi_colors] = fn_roi_label_styles(roi_id);
@@ -49,7 +49,7 @@ end
 %% Load Data
 % Load example to get timing info
 load([root_dir 'PRJ_Error/data/' SBJs{1} '/03_events/' SBJs{1} '_trl_info_final.mat'],'trl_info');
-load([root_dir 'PRJ_Error/data/' SBJs{1} '/04_proc/' SBJs{1} '_ROI_' stat_id '_' an_id '.mat']);
+load([root_dir 'PRJ_Error/data/' SBJs{1} '/04_proc/' SBJs{1} '_nANOVA_ROI_' stat_id '_' an_id '.mat']);
 time_vec = w2.time;
 
 sig_ts = zeros([numel(grp_lab) numel(roi_list) numel(time_vec)]);
@@ -61,7 +61,7 @@ for s = 1:numel(SBJs)
     eval(SBJ_vars_cmd);
     
     load([SBJ_vars.dirs.recon SBJs{s} '_elec_' proc_id '_pat_' atlas_id '_final.mat']);
-    load([SBJ_vars.dirs.proc SBJs{s} '_ROI_' stat_id '_' an_id '.mat']);
+    load([SBJ_vars.dirs.proc SBJs{s} '_nANOVA_ROI_' stat_id '_' an_id '.mat']);
     
     for ch_ix = 1:numel(w2.label)
         elec_ix = strcmp(w2.label{ch_ix},elec.label);
@@ -69,12 +69,11 @@ for s = 1:numel(SBJs)
             roi_ix = strcmp(roi_list,elec.(roi_field){elec_ix});
             if any(roi_ix)
                 roi_cnt(roi_ix) = roi_cnt(roi_ix) + 1;
-                % FDR correct pvalues for ANOVA
-                [~, ~, ~, qvals] = fdr_bh(squeeze(w2.pval(:,ch_ix,:)));
                 % Consolidate to binary sig/non-sig
                 for grp_ix = 1:numel(grp_lab)
-                    if any(qvals(grp_ix,:)<=0.05,2)
-                        sig_ts(grp_ix,roi_ix,:) = squeeze(sig_ts(grp_ix,roi_ix,:)) + squeeze(qvals(grp_ix,:)<=0.05)';
+                    if any(w2.qval(grp_ix,ch_ix,:)<=0.05,3)
+                        sig_ts(grp_ix,roi_ix,:) = squeeze(sig_ts(grp_ix,roi_ix,:))...
+                                                + squeeze(w2.qval(grp_ix,ch_ix,:)<=0.05);
                     end
                 end
             end
@@ -114,7 +113,7 @@ if ~exist(fig_dir,'dir')
     [~] = mkdir(fig_dir);
 end
 
-ylims = [-1 max(sig_ts(:))+1];
+ylims = [-0.5 max(sig_ts(:))+1];
 
 % Create a figure for each condition (all gROIs in one subplot)
 fig_name = ['GRP_ANOVA_ts_' stat_id '_' atlas_id '_' roi_id];
@@ -149,14 +148,14 @@ for grp_ix = 1:numel(grp_lab)
             end
         end
     end
-    evnt_lines = gobjects(size(evnt_times));
-    for evnt_ix = 1:numel(evnt_times)
-        evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylim,...
-            'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
-    end
+%     evnt_lines = gobjects(size(evnt_times));
+%     for evnt_ix = 1:numel(evnt_times)
+%         evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylim,...
+%             'LineWidth',plt_vars.evnt_width,'Color','k','LineStyle',plt_vars.evnt_styles{evnt_ix});
+%     end
     
     % Plotting parameters
-    ax.Title.String  = [grp_lab{grp_ix} ' (n total = ' num2str(roi_cnt(roi_ix)) ')'];
+    ax.Title.String  = grp_lab{grp_ix};
     ax.Box           = 'off';
     ax.YLim          = ylims;
 %     ax.YTick         = yticks;
@@ -167,11 +166,11 @@ for grp_ix = 1:numel(grp_lab)
     ax.XLabel.String = 'Time (s)';
     
     % Legend
-%     roi_legend = cell(size(grp_roi_list));
-%     for roi_ix = 1:numel(grp_roi_list)
-%         roi_legend{roi_ix} = [roi_list{roi_ix} ' (n sig=' num2str(roi_sig_count(roi_ix)) ')'];
-%     end
-    legend(roi_lines,roi_list,'Location',plt_vars.legend_loc);
+    roi_legend = cell(size(roi_list));
+    for roi_ix = 1:numel(roi_list)
+        roi_legend{roi_ix} = [roi_list{roi_ix} ' (n = ' num2str(roi_cnt(roi_ix)) ')'];
+    end
+    legend(roi_lines,roi_legend,'Location',plt_vars.legend_loc);
     
     set(gca,'FontSize',16);
 end

@@ -97,8 +97,8 @@ end
 % % Diff to get edges which correspond to onsets and offsets
 % data_shades = [diff(data_shades) 0]; % Add a point because diff removes one
 % trl_onsets = find(data_shades>0)'; % 1 to 2,3,4 is word onset. Transpose to make column vector
-fprintf('\t\tFound %d events in photodiode channel\n', length(all_onsets));
-fprintf('\t\tFound %d trials (%d feedbacks) in photodiode channel\n', sum(trl_onsets~=0), sum(fb_onsets~=0));
+fprintf('\t\tFound %d events in photodiode channel\n', length(all_onsets{2}));
+fprintf('\t\tFound %d trial onsets (%d feedback onsets) in photodiode channel\n', sum(trl_onsets~=0), sum(fb_onsets~=0));
 
 % Plot intervals between trial and feedback onsets
 if plot_it

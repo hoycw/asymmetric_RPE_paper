@@ -99,7 +99,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 [grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
 if numel(grp_lab) < 2 || numel(grp_lab) > 3; error('why venn?'); end
 venn_colors = fn_venn_colors(numel(grp_lab));
-all_color   = [1 1 1];
+all_color   = [0.4 0.4 0.4];
 
 elec_sbj    = cell([numel(SBJs) 1]);
 elec_sig    = cell([numel(SBJs) 1]);
@@ -156,28 +156,31 @@ for sbj_ix = 1:numel(SBJs)
         end
         
         load([SBJ_vars.dirs.proc SBJ '_nANOVA_ROI_' stat_id '_' an_id '.mat'],'w2');
-        % HACK!!! remove some to match with PRJ_Stroop elec files
-        cfgs = [];
-        if strcmp(SBJ,'CP24')
-            cfgs.channel = {'all','-RTO4'};
-        elseif strcmp(SBJ,'IR57')
-            cfgs.channel = {'all','-LAM4-5','-LAM5-6','-RIN8-9','-RIN9-10',...
-                '-RSM1-2','-RSM2-3','-RSM3-4','-RTI9-10'};
-        elseif strcmp(SBJ,'IR68')
-            cfgs.channel = {'all','-LPC5-6','-LPC6-7','-LPC7-8'};
-        end
-        w2 = ft_selectdata(cfgs,w2);
-        if numel(elec_sbj{sbj_ix}.label)~=numel(w2.label) || ~all(strcmp(orig_labels,w2.label))
-            error('mismatched labels in elec and w2!');
-        end
+%         % HACK!!! remove some to match with PRJ_Stroop elec files
+%         cfgs = [];
+%         if strcmp(SBJ,'CP24')
+%             cfgs.channel = {'all','-RTO4'};
+%         elseif strcmp(SBJ,'IR57')
+%             cfgs.channel = {'all','-LAM4-5','-LAM5-6','-RIN8-9','-RIN9-10',...
+%                 '-RSM1-2','-RSM2-3','-RSM3-4','-RTI9-10'};
+%         elseif strcmp(SBJ,'IR68')
+%             cfgs.channel = {'all','-LPC5-6','-LPC6-7','-LPC7-8'};
+%         end
+%         w2 = ft_selectdata(cfgs,w2);
+%         if numel(elec_sbj{sbj_ix}.label)~=numel(w2.label) || ~all(strcmp(orig_labels,w2.label))
+%             error('mismatched labels in elec and w2!');
+%         end
         for ch_ix = 1:numel(w2.label)
-            % FDR correct pvalues for ANOVA
-            [~, ~, ~, qvals] = fdr_bh(squeeze(w2.pval(:,ch_ix,:)));
-            % Consolidate to binary sig/non-sig
-            for grp_ix = 1:numel(grp_lab)
-                if any(qvals(grp_ix,:)<=0.05,2)
-                    sig_mat(ch_ix,grp_ix) = 1;
+            elec_ix = strcmp(w2.label{ch_ix},orig_labels);
+            if any(elec_ix)
+                % Consolidate to binary sig/non-sig
+                for grp_ix = 1:numel(grp_lab)
+                    if any(w2.qval(grp_ix,ch_ix,:)<=0.05,3)
+                        sig_mat(elec_ix,grp_ix) = 1;
+                    end
                 end
+            else
+                fprintf(2,'\t%s: %s in w2 missing from elec!\n',SBJ,w2.label{ch_ix});
             end
         end
         
@@ -307,7 +310,7 @@ elseif exist('mtl_mesh','var')
 end
 
 % Plot electrodes on top
-for e = 1:numel(elec{grp_ix}.label)
+for e = 1:numel(elec.label)
     cfgs = []; cfgs.channel = elec.label(e);
     elec_tmp = fn_select_elec(cfgs,elec);
     ft_plot_sens(elec_tmp, 'elecshape', 'sphere', 'facecolor', elec_tmp.color, 'label', lab_arg);
@@ -318,19 +321,19 @@ l = camlight;
 fprintf(['To reset the position of the camera light after rotating the figure,\n' ...
     'make sure none of the figure adjustment tools (e.g., zoom, rotate) are active\n' ...
     '(i.e., uncheck them within the figure), and then hit ''l'' on the keyboard\n'])
-set(f(grp_ix), 'windowkeypressfcn',   @cb_keyboard);
+set(f, 'windowkeypressfcn',   @cb_keyboard);
 
 if save_fig
-    fig_fname = [out_dir plot_name fig_ftype];
+    fig_fname = [out_dir plot_name '.' fig_ftype];
     fig_fname = strrep(fig_fname,'*','x');
-    saveas(f(grp_ix),fig_fname);
+    saveas(f,fig_fname);
 end
 
 %% Plot legend in separate figure
 venn_name = [plot_name '_leg'];
 v = figure('Name',venn_name); hold on;
 venn_legend = {}; leg_ix = 0;
-for grp_ix1 = 1:numel(grp_ix)
+for grp_ix1 = 1:numel(grp_lab)
     for grp_ix2 = grp_ix1:numel(grp_lab)
         scatter(grp_ix1,grp_ix2,500,'MarkerFaceColor',venn_colors{grp_ix1,grp_ix2},...
                 'MarkerEdgeColor','k');
@@ -344,7 +347,7 @@ for grp_ix1 = 1:numel(grp_ix)
     end
 end
 if numel(grp_lab)>2
-    scatter(numel(grp_lab),1,500,'MarkerFaceColor','w','MarkerEdgeColor','k');
+    scatter(numel(grp_lab),1,500,'MarkerFaceColor',all_color,'MarkerEdgeColor','k');
     venn_legend{leg_ix+1} = strjoin(grp_lab,'+');
 end
 xlim([0 numel(grp_lab)+1]);
@@ -352,6 +355,7 @@ ylim([0 numel(grp_lab)+1]);
 legend(venn_legend);
 
 if save_fig
+    venn_name = strrep(venn_name,'*','x');
     saveas(v, [out_dir venn_name '.' fig_ftype]);
 end
 

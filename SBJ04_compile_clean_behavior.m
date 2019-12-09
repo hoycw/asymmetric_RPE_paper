@@ -25,12 +25,100 @@ eval(SBJ_vars_cmd);
 eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'));
-load([SBJ_vars.dirs.events SBJ '_trl_info_auto.mat']);
-if numel(SBJ_vars.block_name)>1
-    error('SBJ04 cant handle multiple runs yet!');
+
+% Load different trl_infos
+trl_infos = cell(size(SBJ_vars.block_name));
+trl_cnt   = zeros(size(SBJ_vars.block_name));
+blk_cnt   = zeros(size(SBJ_vars.block_name));
+blk_lens  = zeros(size(SBJ_vars.block_name));
+blk_times = zeros(size(SBJ_vars.block_name));
+for b_ix = 1:numel(SBJ_vars.block_name)
+    % Get block timing
+    if numel(SBJ_vars.raw_file)>1
+        block_suffix = strcat('_',SBJ_vars.block_name{b_ix});
+    else
+        block_suffix = SBJ_vars.block_name{b_ix};   % should just be ''
+    end
+    
+    % Load trl_info
+    tmp = load([SBJ_vars.dirs.events SBJ '_trl_info_auto' block_suffix '.mat']);
+    trl_infos{b_ix} = tmp.trl_info;
+    
+    % Get block length
+    tmp = load(strcat(SBJ_vars.dirs.import,SBJ,'_',...
+        num2str(proc_vars.resample_freq),'hz',block_suffix,'.mat'));
+    blk_lens(b_ix) = size(tmp.data.trial{1},2);
+    blk_times(b_ix) = tmp.data.time{1}(end);
+    
+    % Add run stats (trial, block, run counts)
+    trl_cnt(b_ix) = numel(trl_infos{b_ix}.trl_n);
+    blk_cnt(b_ix) = numel(setdiff(unique(trl_infos{b_ix}.blk),0));
+    trl_infos{b_ix}.run = repmat(b_ix,size(trl_infos{b_ix}.trl_n));
+    
+    % Check if same fields
+    if b_ix==1
+        ti_fields = fieldnames(trl_infos{b_ix});
+        prdm_fields = fieldnames(trl_infos{b_ix}.prdm);
+    else
+        if numel(fieldnames(trl_infos{b_ix}))~=numel(ti_fields) || ~all(strcmp(fieldnames(trl_infos{b_ix}),ti_fields))
+            error(['Mismatched trl_info fields between ' SBJ_vars.block_name{b_ix} ' and ' SBJ_vars.block_name{1}]);
+        end
+        if numel(fieldnames(trl_infos{b_ix}.prdm))~=numel(prdm_fields) || ~all(strcmp(fieldnames(trl_infos{b_ix}.prdm),prdm_fields))
+            error(['Mismatched prdm fields between ' SBJ_vars.block_name{b_ix} ' and ' SBJ_vars.block_name{1}]);
+        end
+        for p_ix = 1:numel(prdm_fields)
+            if ischar(trl_infos{b_ix}.prdm.(prdm_fields{p_ix}))
+                if ~strcmp(trl_infos{b_ix}.prdm.(prdm_fields{p_ix}),trl_infos{1}.prdm.(prdm_fields{p_ix}))
+                    error(['Mismatch prdm field: ' prdm_fields{p_ix}]);
+                end
+            elseif ~all(trl_infos{b_ix}.prdm.(prdm_fields{p_ix})==trl_infos{1}.prdm.(prdm_fields{p_ix}))
+                error(['Mismatch prdm field: ' prdm_fields{p_ix}]);
+            end
+        end
+    end
 end
 
-% Parameters
+%% Concatenate all fields
+trl_info = trl_infos{1};
+trl_info.ignore_trials = {trl_info.ignore_trials};
+% Keep the original trl_info structs from each run
+if numel(trl_infos)>1; trl_info.run_trl_info = trl_infos; end  
+
+% Add properties of the individual blocks
+trl_info.run_name = SBJ_vars.block_name;
+trl_info.run_len  = blk_lens;
+trl_info.run_time = blk_times;
+% Combine trl_info structs if necessary
+for b_ix = 2:numel(SBJ_vars.block_name)
+    for f_ix = 1:numel(ti_fields)
+        if numel(trl_infos{b_ix}.(ti_fields{f_ix}))==trl_cnt(b_ix)
+            % Concatenate fields that don't need modification
+            %   NOTE: keeping blk in original numbers (helps toss training)
+            if any(strcmp(ti_fields{f_ix},{'cond','blk','run','hit','rt','tol','blk_trl_n','score','ITI','ITI_type'}))
+                trl_info.(ti_fields{f_ix}) = vertcat(trl_info.(ti_fields{f_ix}),trl_infos{b_ix}.(ti_fields{f_ix}));
+            % Modify then concatenate counts and indices
+            elseif any(strcmp(ti_fields{f_ix},{'trl_onset','rsp_onset','fb_onset'}))
+                trl_info.(ti_fields{f_ix}) = vertcat(trl_info.(ti_fields{f_ix}),trl_infos{b_ix}.(ti_fields{f_ix})+sum(blk_lens(1:b_ix-1)));
+            elseif strcmp(ti_fields{f_ix},'trl_n')
+                trl_info.trl_n = vertcat(trl_info.trl_n,trl_infos{b_ix}.trl_n+sum(trl_cnt(1:b_ix-1)));
+            elseif strcmp(ti_fields{f_ix},'time')
+                trl_info.time = vertcat(trl_info.time,trl_infos{b_ix}.time+sum(blk_times(1:b_ix-1)));
+            else
+                error(['Unknown field: ' ti_fields{f_ix}]);
+            end
+        elseif strcmp(ti_fields{f_ix},'ignore_trials')
+            trl_info.ignore_trials = [trl_info.ignore_trials {trl_infos{b_ix}.ignore_trials}];
+        elseif any(strcmp(ti_fields{f_ix},{'SBJ','rt_type'}))
+            if trl_info.(ti_fields{f_ix})~=trl_infos{b_ix}.(ti_fields{f_ix})
+                error([ti_fields{f_ix} ' mismatch!']);
+            end
+        elseif strcmp(ti_fields{f_ix},'sample_rate')
+            if trl_info.(ti_fields{f_ix})~=trl_infos{b_ix}.(ti_fields{f_ix}); error('sample_rate mismatch!'); end
+        end
+    end
+end
+
+%% Parameters
 if ~isfield(proc_vars,'RT_std_thresh')
     proc_vars.RT_std_thresh = 3;
 end

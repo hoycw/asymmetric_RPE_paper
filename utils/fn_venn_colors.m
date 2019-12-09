@@ -20,11 +20,15 @@ if ~isempty(varargin)
     for v = 1:2:numel(varargin)
         if strcmp(varargin{v},'cond_id')
             cond_id = varargin{v+1};
+        elseif strcmp(varargin{v},'color_id')
+            color_id = varargin{v+1};
         else
             error(['Unknown varargin ' num2str(v) ': ' varargin{v}]);
         end
     end
 end
+
+if ~exist('hard_colors','var'); color_id = 'def'; end
 
 %% Determine Colors
 if exist('cond_id','var')
@@ -37,12 +41,30 @@ if exist('cond_id','var')
     end
 else
     % Define Colors
-    r = {[255 158 163]./255};
-    g = {[163 255 158]./255};
-    b = {[158 163 255]./255};
-    y = {[255 250 146]./255};
-    p = {[250 146 255]./255};
-    c = {[146 255 250]./255};
+    if strcmp(color_id,'hard')
+        r = {[1 0 0]./255};
+        g = {[0 1 0]./255};
+        b = {[0 0 1]./255};
+        y = {[1 1 0]./255};
+        p = {[1 0 1]./255};
+        c = {[0 1 1]./255};
+%     elseif strcmp('color_id','ROI')
+%         r = {[255 158 163]./255};
+%         g = {[163 255 158]./255};
+%         b = {[158 163 255]./255};
+%         y = {[255 250 146]./255};
+%         p = {[250 146 255]./255};
+%         c = {[146 255 250]./255};
+    elseif strcmp(color_id,'def')
+        r = {[255 158 163]./255};
+        g = {[163 255 158]./255};
+        b = {[158 163 255]./255};
+        y = {[255 250 146]./255};
+        p = {[250 146 255]./255};
+        c = {[146 255 250]./255};
+    else
+        error(['unknown color_id: ' color_id]);
+    end
     
     % Select Colors
     if n_categories==2

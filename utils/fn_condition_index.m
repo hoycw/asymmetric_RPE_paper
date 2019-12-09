@@ -35,6 +35,14 @@ for cond_ix = 1:numel(cond_lab)
         case 'HdLs'
             matches = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==0);
             condition_num(matches) = cond_ix;
+        case 'Ex'
+            match1 = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==1);
+            match2 = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==0);
+            condition_num(match1 | match2) = cond_ix;
+        case 'Ue'
+            match1 = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==0);
+            match2 = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==1);
+            condition_num(match1 | match2) = cond_ix;
         otherwise
             error(['Invalid condition label: ' conditions]);
     end
