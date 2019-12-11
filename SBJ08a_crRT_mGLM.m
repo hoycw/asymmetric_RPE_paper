@@ -31,7 +31,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
 load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat'));
 [cond_lab, ~, ~, ~] = fn_condition_label_styles(st.trial_cond{1});
-cond_idx = fn_condition_index(st.trial_cond{cond_ix}, trl_info);
+cond_idx = fn_condition_index(st.trial_cond{1}, trl_info);
 
 % Check if more than one frequency, error for now
 if numel(hfa.freq)>1

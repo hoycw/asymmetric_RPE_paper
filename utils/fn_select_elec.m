@@ -107,4 +107,5 @@ if isfield(elec_og, 'tra')
 end
 
 % Sort output by cfg.channel
-elec = fn_reorder_elec(elec,cfg.channel);
+warning('WARNING: commented reorder_elec_call!');
+%elec = fn_reorder_elec(elec,cfg.channel);
