@@ -4,8 +4,12 @@ function [grp_labels, colors, line_styles] = fn_group_label_styles(model_id)
 % colors from http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=3
 
 %% List of possible labels and their colors
-factors  = {'Dif','Out','Tim','Dif*Out','RT'};
-fact_colors = {[55 126 184]./256, [228 26 28]./256, [77 175 74]./256, [152 78  163]./256, [0.5 0.5 0.5]};
+factors  = {'Dif','pWin','Out','sPE','Tim','Dif*Out','uPE','RT'};
+fact_colors = {[55 126 184]./256, [55 126 184]./256, ...
+    [228 26 28]./256, [228 26 28]./256, ...
+    [77 175 74]./256, ...
+    [152 78  163]./256, [152 78  163]./256, ...
+    [0.5 0.5 0.5]};
 % Taken from: colorbrewer2.org, qualitative, 5-class Set1
 %   currently: green, red, blue, purple, gray
 %   orange for later: [255 127 0]
@@ -22,6 +26,8 @@ switch model_id
         grp_labels = {'Dif','Out','Tim','Dif*Out'};
     case 'DifOut'
         grp_labels = {'Dif','Out'};
+    case 'pWinPEus'
+        grp_labels = {'pWin','sPE', 'uPE'};
     case 'DifOutDO'
         grp_labels = {'Dif','Out', 'Dif*Out'};
     case 'corrRT_DifOut'
