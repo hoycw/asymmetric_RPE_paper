@@ -1,4 +1,4 @@
-function SBJ08b_HFA_plot_crRT_mGLM(SBJ, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype)
+function SBJ08b_HFA_plot_crRT_mGLM(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype)
 % Plots ANOVA results
 % clear all; %close all;
 % fig_filetype = 'png';
@@ -27,8 +27,8 @@ load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'),'trl_info');
 load([SBJ_vars.dirs.proc SBJ '_mGLM_ROI_' stat_id '_' an_id '.mat']);
 
 % Load ROI and GM/WM info
-% einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
-% load(einfo_filename);
+elec_fname = [SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_pat_Dx_final.mat'];
+load(elec_fname);
 
 %% Plot Results
 fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' stat_id '/' an_id '/'];
@@ -138,7 +138,12 @@ for ch_ix = 1:numel(beta.label)
     end
     
     % Plotting parameters
-    ax.Title.String  = strcat(beta.label{ch_ix});%, ' (', einfo(ch_ix,2), ')');
+    elec_ix = find(strcmp(beta.label{ch_ix},elec.label));
+    if ~isempty(elec_ix)
+        ax.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, ')');
+    else
+        ax.Title.String  = strcat(beta.label{ch_ix});
+    end
     ax.Box           = 'off';
     % ax.YLim          = ylims;
     ax.YLabel.String = 'Beat Weight';
