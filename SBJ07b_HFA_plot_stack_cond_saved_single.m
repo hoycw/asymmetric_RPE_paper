@@ -31,8 +31,8 @@ hfa_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat');
 load(hfa_fname,'hfa');
 
 % Load ROI and GM/WM info
-% einfo_filename = [SBJ_vars.dirs.preproc SBJ '_einfo_' proc_id '.mat'];
-% load(einfo_filename);
+elec_fname = [SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_pat_Dx_final.mat'];
+load(elec_fname);
 
 %% Prep Data
 % Trim data to plotting epoch
@@ -128,6 +128,12 @@ for ch_ix = 1:numel(hfa.label)
     % Plotting parameters
     ax = gca;
 %     ax.legend        = plt_vars.legend;
+    elec_ix = find(strcmp(hfa.label{ch_ix},elec.label));
+    if ~isempty(elec_ix)
+        ax.Title.String  = strcat(hfa.label{ch_ix}, ' (', elec.ROI{elec_ix}, '): stim trials');
+    else
+        ax.Title.String  = strcat(hfa.label{ch_ix}, ': stim trials');
+    end
     ax.Title.String  = strcat(hfa.label{ch_ix});%, ' (', einfo(ch_ix,2), '): stim trials');
     ax.XLim          = plt_vars.plt_lim;
     ax.XTick         = plt_vars.plt_lim(1):plt_vars.x_step_sz:plt_vars.plt_lim(2);

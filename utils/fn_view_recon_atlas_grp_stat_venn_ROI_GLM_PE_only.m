@@ -1,6 +1,7 @@
-function fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJs, proc_id, stat_id, an_id, reg_type, show_labels,...
+function fn_view_recon_atlas_grp_stat_venn_ROI_GLM_PE_only(SBJs, proc_id, stat_id, an_id, reg_type, show_labels,...
                             hemi, atlas_id, roi_id, plot_roi, mirror, varargin)
 %% Plot a reconstruction with electrodes colored according to statistics
+%   for Gershman, only plot sPE and uPE
 % INPUTS:
 %   SBJ [str] - subject ID to plot
 %   pipeline_id [str] - name of analysis pipeline, used to pick elec file
@@ -98,8 +99,8 @@ end
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 [grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
 if numel(grp_lab) < 2 || numel(grp_lab) > 3; error('why venn?'); end
-venn_colors = fn_venn_colors(0,'model_id',st.model_lab);
-all_color   = [0.1 0.1 0.1];
+venn_colors = fn_venn_colors(numel(grp_lab));
+all_color   = [0.4 0.4 0.4];
 
 elec_sbj    = cell([numel(SBJs) 1]);
 elec_sig    = cell([numel(SBJs) 1]);
