@@ -52,7 +52,10 @@ load([root_dir 'PRJ_Error/data/' SBJs{1} '/03_events/' SBJs{1} '_trl_info_final.
 load([root_dir 'PRJ_Error/data/' SBJs{1} '/04_proc/' SBJs{1} '_mGLM_ROI_' stat_id '_' an_id '.mat']);
 time_vec = beta.time;
 
-sig_ts = zeros([numel(grp_lab) numel(roi_list) numel(time_vec)]);
+sig_ts  = zeros([numel(grp_lab) numel(roi_list) numel(time_vec)]);
+sig_ch  = cell(size(SBJs));
+roi_ch  = cell(size(SBJs));
+onsets  = cell([numel(grp_lab) numel(roi_list)]);
 roi_cnt = zeros(size(roi_list));
 for s = 1:numel(SBJs)
     SBJ = SBJs{s};
@@ -63,17 +66,22 @@ for s = 1:numel(SBJs)
     load([SBJ_vars.dirs.recon SBJs{s} '_elec_' proc_id '_pat_' atlas_id '_final.mat']);
     load([SBJ_vars.dirs.proc SBJs{s} '_mGLM_ROI_' stat_id '_' an_id '.mat']);
     
+    sig_ch{s} = false([numel(beta.label) numel(grp_lab)]);
+    roi_ch{s} = zeros(size(beta.label));
     for ch_ix = 1:numel(beta.label)
         elec_ix = strcmp(beta.label{ch_ix},elec.label);
         if any(elec_ix)
-            roi_ix = strcmp(roi_list,elec.(roi_field){elec_ix});
-            if any(roi_ix)
+            roi_ix = find(strcmp(roi_list,elec.(roi_field){elec_ix}));
+            if ~isempty(roi_ix)
+                roi_ch{s}(ch_ix) = roi_ix;
                 roi_cnt(roi_ix) = roi_cnt(roi_ix) + 1;
                 % Consolidate to binary sig/non-sig
                 for grp_ix = 1:numel(grp_lab)
                     if any(beta.qval(grp_ix,ch_ix,:)<=0.05,3)
+                        sig_ch{s}(ch_ix,grp_ix) = true;
                         sig_ts(grp_ix,roi_ix,:) = squeeze(sig_ts(grp_ix,roi_ix,:))...
                                                 + squeeze(beta.qval(grp_ix,ch_ix,:)<=0.05);
+                        onsets{grp_ix,roi_ix} = [onsets{grp_ix,roi_ix} min(time_vec(beta.qval(grp_ix,ch_ix,:)<=0.05))];
                     end
                 end
             end
@@ -173,6 +181,20 @@ for grp_ix = 1:numel(grp_lab)
     legend(roi_lines,roi_legend,'Location',plt_vars.legend_loc);
     
     set(gca,'FontSize',16);
+end
+
+%% Print onset latency stats
+for grp_ix = 1:numel(grp_lab)
+    for roi_ix = 1:numel(roi_list)
+        if ~isempty(onsets{grp_ix,roi_ix})
+            fprintf('%s %s: n = %d / %d (%.03f); %.03f +/- %.04f ms (min = %.03f, max = %.03f)\n', grp_lab{grp_ix}, roi_list{roi_ix},...
+                numel(onsets{grp_ix,roi_ix}), roi_cnt(roi_ix), numel(onsets{grp_ix,roi_ix})/roi_cnt(roi_ix), ...
+                mean(onsets{grp_ix,roi_ix}), std(onsets{grp_ix,roi_ix}),...
+                min(onsets{grp_ix,roi_ix}), max(onsets{grp_ix,roi_ix}));
+        else
+            fprintf(2,'%s %s: n = 0\n', grp_lab{grp_ix}, roi_list{roi_ix});
+        end
+    end
 end
 
 %% Save figure
