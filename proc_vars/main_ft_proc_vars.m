@@ -17,7 +17,7 @@ proc_vars.notch_type    = 'bandstop';     % method for nothc filtering out line 
 % bs_yn       = 'no';                % Parameters for this in SBJ_vars
 
 % Behavioral Processing
-proc_vars.rt_bounds = [0.5 1.5];          % bounds on a reasonable RT to be detected with KLA algorithm
+proc_vars.rt_bounds = [0.5 1.5];          % exclude RTs too early/late 
 
 % Trial Cut Parameteres
 proc_vars.event_type    = 'stim';         % 'stim'/'resp': lock trial to these event
