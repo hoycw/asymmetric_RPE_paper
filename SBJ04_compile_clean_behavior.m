@@ -206,7 +206,7 @@ if ~isempty(RT_early)
     fprintf('WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
 end
 fprintf('Num trials excluded for training  : %i\n',length(skip_training));
-fprintf('Num trials excluded for bad RT    : %i\n',length(skip_rt));
+fprintf('Num trials excluded for skip RT    : %i\n',length(skip_rt));
 fprintf('Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
 fprintf('Num trials excluded by visual rej : %i\n',length(skip_vis));
 fprintf('Num trials excluded for other     : %i\n',length(skip_bad));
@@ -227,7 +227,7 @@ if save_it
         fprintf(r_file,'WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
     end
     fprintf(r_file,'Num trials excluded for training  : %i\n',length(skip_training));
-    fprintf(r_file,'Num trials excluded for bad RT    : %i\n',length(skip_rt));
+    fprintf(r_file,'Num trials excluded for skip RT   : %i\n',length(skip_rt));
     fprintf(r_file,'Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
     fprintf(r_file,'Num trials excluded by visual rej : %i\n',length(skip_vis));
     fprintf(r_file,'Num trials excluded for other     : %i\n',length(skip_bad));
