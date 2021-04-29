@@ -6,7 +6,7 @@ if block_ix~=1
 end
 
 %% Load, preprocess, and save out photodiode
-if exist('/home/knight/','dir');root_dir='/home/knight/';app_dir=[root_dir 'hoycw/Apps/'];
+if exist('/home/knight/','dir');root_dir='/home/knight/hoycw/';app_dir=[root_dir 'Apps/'];
 else root_dir='/Volumes/hoycw_clust/';app_dir='/Users/colinhoy/Code/Apps/';end
 
 %% Paths
@@ -19,7 +19,7 @@ ft_defaults
 
 %% SBJ vars
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 
 %% Read photodiode, NLX macro, clinical data
 % First check for invalid samples
@@ -31,9 +31,9 @@ evnt       = ft_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'photo/' ...
 evnt_orig  = evnt;
 
 % Neuralynx mic
-mic       = ft_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'mic/' ...
-                            SBJ_vars.ch_lab.mic{1} SBJ_vars.ch_lab.nlx_suffix '.ncs']});
-mic_orig  = mic;
+% mic       = ft_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'mic/' ...
+%                             SBJ_vars.ch_lab.mic{1} SBJ_vars.ch_lab.nlx_suffix '.ncs']});
+% mic_orig  = mic;
 
 % Neuralynx macro channel
 macro_fnames = SBJ_vars.ch_lab.nlx_nk_align;
@@ -84,10 +84,10 @@ if isfield(SBJ_vars,'nlx_analysis_time')
     cfgs = [];
     cfgs.latency = SBJ_vars.nlx_analysis_time{1}{1};
     evnt  = ft_selectdata(cfgs, evnt);
-    mic   = ft_selectdata(cfgs, mic);
+%     mic   = ft_selectdata(cfgs, mic);
     macro = ft_selectdata(cfgs, macro);
 end
-if any(isnan(evnt.trial{1}(:))) || any(isnan(mic.trial{1}(:))) || any(isnan(macro.trial{1}(:)))
+if any(isnan(evnt.trial{1}(:))) || any(isnan(macro.trial{1}(:))) %|| any(isnan(mic.trial{1}(:))) 
     error('NaNs detected in NLX data, check for discontinuities!');
 end
 
@@ -97,12 +97,12 @@ if SBJ_vars.nlx_macro_inverted
 end
 if SBJ_vars.photo_inverted
     evnt.trial{1} = evnt.trial{1}*-1;
-    mic.trial{1}  = mic.trial{1}*-1;
+%     mic.trial{1}  = mic.trial{1}*-1;
 end
 
 % Set aside full sample rate mic for listening
-mic_data = mic.trial{1};
-mic_full_srate = mic.fsample;
+% mic_data = mic.trial{1};
+% mic_full_srate = mic.fsample;
     
 % Bipolar rereference
 if numel(SBJ_vars.ch_lab.nlx_nk_align)>1
@@ -144,13 +144,13 @@ if evnt.fsample > clin.fsample
     cfgr.resamplefs = clin.fsample;
     evnt = ft_resampledata(cfgr, evnt);
 end
-if mic.fsample > clin.fsample
-    fprintf('downsampling Neuralynx photodiode from %d to %d Hz\n', mic.fsample, clin.fsample)
-    cfgr = [];
-    cfgr.demean     = 'yes';
-    cfgr.resamplefs = clin.fsample;
-    mic = ft_resampledata(cfgr, mic);
-end
+% if mic.fsample > clin.fsample
+%     fprintf('downsampling Neuralynx photodiode from %d to %d Hz\n', mic.fsample, clin.fsample)
+%     cfgr = [];
+%     cfgr.demean     = 'yes';
+%     cfgr.resamplefs = clin.fsample;
+%     mic = ft_resampledata(cfgr, mic);
+% end
 
 % % Remove extreme values
 % clin_thresh  = proc.nlx_nk_align_std_thresh*std(clin.trial{1});
@@ -210,22 +210,22 @@ if save_it
     
     %% Create photodiode channel matched to clinical data
     evnt_nlx   = evnt;
-    mic_nlx    = mic;
+%     mic_nlx    = mic;
     evnt       = clin;
-    evnt.label = {SBJ_vars.ch_lab.photod{1}, SBJ_vars.ch_lab.mic{1}};
+    evnt.label = SBJ_vars.ch_lab.photod;%, SBJ_vars.ch_lab.mic{1}};
     % Create dummy time series of the median of the photodiode
-    evnt.trial{1} = [ones(1,numel(clin.trial{1})).*median(evnt.trial{1});
-                     ones(1,numel(clin.trial{1})).*median(mic.trial{1})];
+    evnt.trial{1} = ones(1,numel(clin.trial{1})).*median(evnt.trial{1});
+%                      ones(1,numel(clin.trial{1})).*median(mic.trial{1})];
     % Add in photodiode data for segments when NLX overlaps
     evnt.trial{1}(1,t3(t3>0 & t3<numel(evnt.trial{1}))) = evnt_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
-    evnt.trial{1}(2,t3(t3>0 & t3<numel(evnt.trial{1}))) = mic_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
+%     evnt.trial{1}(2,t3(t3>0 & t3<numel(evnt.trial{1}))) = mic_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
     
     %% Save out mic.wav for listening
-    % Rescale to prevent clipping, add 0.05 fudge factor
-    mic_data_rescale = mic_data./(max(abs(mic_data))+0.05);
-    mic_data_fname = strcat(SBJ_vars.dirs.import,SBJ,'_mic_recording',block_suffix,'.wav');
-    fprintf('Saving %s\n',mic_data_fname);
-    audiowrite(mic_data_fname,mic_data_rescale,mic_full_srate);
+%     % Rescale to prevent clipping, add 0.05 fudge factor
+%     mic_data_rescale = mic_data./(max(abs(mic_data))+0.05);
+%     mic_data_fname = strcat(SBJ_vars.dirs.import,SBJ,'_mic_recording',block_suffix,'.wav');
+%     fprintf('Saving %s\n',mic_data_fname);
+%     audiowrite(mic_data_fname,mic_data_rescale,mic_full_srate);
     
     %% Save data out
     evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');

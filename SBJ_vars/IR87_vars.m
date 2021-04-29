@@ -15,7 +15,7 @@ SBJ_vars.low_srate  = [0];
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
-SBJ_vars.dirs.nlx     = [SBJ_vars.dirs.raw '/'];
+SBJ_vars.dirs.nlx     = [SBJ_vars.dirs.raw 'nlx_run1/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];

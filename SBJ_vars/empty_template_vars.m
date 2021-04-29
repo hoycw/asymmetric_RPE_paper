@@ -55,25 +55,26 @@ SBJ_vars.recon.fs_Dx      = [SBJ_vars.dirs.recon 'Scans/' SBJ_vars.SBJ '_fs_preo
 %--------------------------------------
 % Channel Selection
 %--------------------------------------
-SBJ_vars.ch_lab.probes     = {};
-SBJ_vars.ch_lab.probe_type = {};
-SBJ_vars.ch_lab.ref_type   = {};
+SBJ_vars.ch_lab.probes     = {}; % e.g., {'ROF','RAC','LAC',...}
+SBJ_vars.ch_lab.probe_type = {}; % 'ecog' or 'seeg'
+SBJ_vars.ch_lab.ref_type   = {}; % 'BP', 'CAR', 'CARall', 'CMR'
 if ~all(numel(SBJ_vars.ch_lab.probes)==[numel(SBJ_vars.ch_lab.probe_type) numel(SBJ_vars.ch_lab.ref_type)]); error('probes ~= type+ref');end;
-SBJ_vars.ch_lab.nlx        = [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0];
-SBJ_vars.ch_lab.ROI        = {'all'};
-SBJ_vars.ch_lab.eeg_ROI    = {};
-SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrth','mlam','mlhh','mlth'};
-SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su'};
-SBJ_vars.ch_lab.wire_ref   = {'','','','','','',''};
-SBJ_vars.ch_lab.wire_ROI   = {'all'};
+SBJ_vars.ch_lab.nlx        = [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0]; % 0/1 if these macros are also in NLX system
+SBJ_vars.ch_lab.ROI        = {'all'}; % 'all' or subset of probes
+SBJ_vars.ch_lab.eeg_ROI    = {}; % 'all' or subset of channels
+SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrth','mlam','mlhh','mlth'}; % list of microwire bundles {'mram','mlac',...}
+SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su'}; % 'su' (anything else?)
+SBJ_vars.ch_lab.wire_ref   = {'','','','','','',''}; % theoretically which one is the reference, but unused?
+SBJ_vars.ch_lab.wire_ROI   = {'all'}; % which microwires to use
 
 %SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
 
-SBJ_vars.ch_lab.nlx_suffix   = '';
-SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
-SBJ_vars.nlx_macro_inverted  = 1;
+SBJ_vars.ch_lab.nlx_suffix   = ''; % session suffix for files, e.g., '_0007'
+SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % shared macros fro clinical-NLX alignment, 1 for unipolar or 2 for bipolar
+SBJ_vars.nlx_macro_inverted  = 1; % 0/1 is NLX recorded inverted? usually 1
+%SBJ_vars.nlx_analysis_time   = {{[start end]}}; % cut to time in NLX photodiode (e.g., discontinuities)
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
@@ -82,12 +83,12 @@ SBJ_vars.ch_lab.bad = {...
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
 SBJ_vars.ch_lab.bad_code = [];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
-SBJ_vars.ch_lab.eeg = {};
-% SBJ_vars.ch_lab.CZ_lap_ref = {};
-SBJ_vars.ch_lab.eog = {};
-SBJ_vars.ch_lab.photod = {};
-SBJ_vars.photo_inverted = 1;
-SBJ_vars.ch_lab.mic    = {};
+SBJ_vars.ch_lab.eeg = {}; % scalp channel labels
+% SBJ_vars.ch_lab.CZ_lap_ref = {}; % reference channels for scalp laplacian
+SBJ_vars.ch_lab.eog = {}; % EOG channel labels
+SBJ_vars.ch_lab.photod = {}; % photodiode label
+SBJ_vars.photo_inverted = 1; % 0/1
+SBJ_vars.ch_lab.mic    = {}; % microphone label
 
 %--------------------------------------
 % Line Noise Parameters

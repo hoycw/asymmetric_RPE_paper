@@ -9,9 +9,9 @@ end
 % Basics
 %--------------------------------------
 SBJ_vars.SBJ = 'IR67';
-SBJ_vars.raw_file = {'BA0315NW_24-Jan-2018_090350-11350.mat'};
+SBJ_vars.raw_file = {'IR67_error_raw.mat'};
 SBJ_vars.block_name = {''};
-SBJ_vars.low_srate  = [0];
+SBJ_vars.low_srate  = [500]; % 0 or actual sample rate e.g, [500, 500]
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
@@ -55,39 +55,57 @@ SBJ_vars.recon.fs_Dx      = [SBJ_vars.dirs.recon 'Scans/' SBJ_vars.SBJ '_fs_preo
 %--------------------------------------
 % Channel Selection
 %--------------------------------------
-SBJ_vars.ch_lab.probes     = {};
-SBJ_vars.ch_lab.probe_type = {};
-SBJ_vars.ch_lab.ref_type   = {};
+SBJ_vars.ch_lab.probes     = {'RAM','RHH','RTH','RAC','ROF','RIN','RPC','RPT','RSM',...
+                              'LAM','LHH','LTH','LAC','LOF','LPL'};
+SBJ_vars.ch_lab.probe_type = {'seeg','seeg','seeg','seeg','seeg','seeg','seeg','seeg',...
+                              'seeg','seeg','seeg','seeg','seeg','seeg','seeg'};
+SBJ_vars.ch_lab.ref_type   = {'BP','BP','BP','BP','BP','BP','BP','BP',...
+                              'BP','BP','BP','BP','BP','BP','BP'};
 if ~all(numel(SBJ_vars.ch_lab.probes)==[numel(SBJ_vars.ch_lab.probe_type) numel(SBJ_vars.ch_lab.ref_type)]); error('probes ~= type+ref');end;
 SBJ_vars.ch_lab.nlx        = [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0];
 SBJ_vars.ch_lab.ROI        = {'all'};
 SBJ_vars.ch_lab.eeg_ROI    = {};
-SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrth','mlam','mlhh','mlth'};
-SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su'};
+SBJ_vars.ch_lab.wires      = {'mrhh','mlhh','mlth','mlof','mlac'};
+SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su'};
 SBJ_vars.ch_lab.wire_ref   = {'','','','','','',''};
 SBJ_vars.ch_lab.wire_ROI   = {'all'};
 
-%SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
-%SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
-%SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
+% SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
+% SBJ_vars.ch_lab.suffix = '';    % after every channel except 'EDF Annotations'
+SBJ_vars.ch_lab.mislabel = {{'RPC','RPC3'}};
 
 SBJ_vars.ch_lab.nlx_suffix   = '';
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
+SBJ_vars.nlx_analysis_time   = {{[220 1435]}};
 SBJ_vars.nlx_macro_inverted  = 1;
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
+    'RTH1','RTH2','RTH3','RTH4',...% epileptic
+    'LHH1','LHH2','LHH3','LTH1','LTH2','LTH3','LHT4','RHH1','RHH2','RHH3',...% similar HF+slowing pattern
+    'RPC1','RPC2',...%spikes too
+    'LAM10','LPL10','RSM9','RSM10','RPT10',...% out of brain
+    'RHH9','RHH10',...% mistaken for normal probe when actually BF microwires with only 8 contacts?
+    'EKG',...% EKG
+    'Mark1','Mark2','XREF',...% not real data
+    'DC01','DC02','DC03','DC04','E','Events','GRND',...% not real data
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [];
+SBJ_vars.ch_lab.bad_code = [...
+    1,1,2,2,...
+    2,2,2,2,2,2,2,2,2,2,...
+    2,2,...
+    3,3,3,3,3,...
+    3,3,...
+    0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
-SBJ_vars.ch_lab.eeg = {};
+SBJ_vars.ch_lab.eeg = {'C3','C4','CZ','FZ','OZ'};
+SBJ_vars.ch_lab.eog = {'RUE','RLE','LLE','LUE'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
-SBJ_vars.ch_lab.eog = {};
-SBJ_vars.ch_lab.photod = {};
+SBJ_vars.ch_lab.photod = {'PH_Diode'};
 SBJ_vars.photo_inverted = 1;
-SBJ_vars.ch_lab.mic    = {};
+SBJ_vars.ch_lab.mic = {'Mic'};
 
 %--------------------------------------
 % Line Noise Parameters

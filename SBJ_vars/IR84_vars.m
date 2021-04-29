@@ -9,9 +9,9 @@ end
 % Basics
 %--------------------------------------
 SBJ_vars.SBJ = 'IR84';
-SBJ_vars.raw_file = {'BA0316RA_25-Oct-2018_102750-122750.mat'};
+SBJ_vars.raw_file = {'IR84_error_raw.mat'};
 SBJ_vars.block_name = {''};
-SBJ_vars.low_srate  = [0];
+SBJ_vars.low_srate  = [500];
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
@@ -55,39 +55,45 @@ SBJ_vars.recon.fs_Dx      = [SBJ_vars.dirs.recon 'Scans/' SBJ_vars.SBJ '_fs_preo
 %--------------------------------------
 % Channel Selection
 %--------------------------------------
-SBJ_vars.ch_lab.probes     = {};
-SBJ_vars.ch_lab.probe_type = {};
-SBJ_vars.ch_lab.ref_type   = {};
+SBJ_vars.ch_lab.probes     = {'LAC','LPC','LOF','LAM','LHH','LTH',...
+                              'AII','ASI','PI','RAC','RPC','ROF','RAM','RHH','RTH'};
+SBJ_vars.ch_lab.probe_type = {'seeg','seeg','seeg','seeg','seeg','seeg','seeg','seeg',...
+                              'seeg','seeg','seeg','seeg','seeg','seeg','seeg'};
+SBJ_vars.ch_lab.ref_type   = {'BP','BP','BP','BP','BP','BP','BP','BP',...
+                              'BP','BP','BP','BP','BP','BP','BP'};
 if ~all(numel(SBJ_vars.ch_lab.probes)==[numel(SBJ_vars.ch_lab.probe_type) numel(SBJ_vars.ch_lab.ref_type)]); error('probes ~= type+ref');end;
-SBJ_vars.ch_lab.nlx        = [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0];
+SBJ_vars.ch_lab.nlx        = [1,0,1,1,1,0,0,0,0,1,0,1,1,1,0];
 SBJ_vars.ch_lab.ROI        = {'all'};
 SBJ_vars.ch_lab.eeg_ROI    = {};
-SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrth','mlam','mlhh','mlth'};
-SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su'};
-SBJ_vars.ch_lab.wire_ref   = {'','','','','','',''};
+SBJ_vars.ch_lab.wires      = {'mrac','mram','mrhh','mrof','mlac','mlof','mlam','mlhh'};
+SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su','su'};
+SBJ_vars.ch_lab.wire_ref   = {'','','','','','','',''};
 SBJ_vars.ch_lab.wire_ROI   = {'all'};
 
 %SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
-%SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
+SBJ_vars.ch_lab.mislabel = {{'ASI1_103','ASI2'}};
 
 SBJ_vars.ch_lab.nlx_suffix   = '';
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
 SBJ_vars.nlx_macro_inverted  = 1;
+SBJ_vars.nlx_analysis_time   = {{[110 1728]}};
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
+    'EKG',... % EKG
+    'Mark1','Mark2','DC01','DC02','DC03','DC04','E','GND','xREF','Events'... % not real data
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [];
+SBJ_vars.ch_lab.bad_code = [0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
-SBJ_vars.ch_lab.eeg = {};
+SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
-SBJ_vars.ch_lab.eog = {};
-SBJ_vars.ch_lab.photod = {};
+SBJ_vars.ch_lab.eog = {'LUC','LLC','RUC','RLC'};
+SBJ_vars.ch_lab.photod = {'photo1'};
 SBJ_vars.photo_inverted = 1;
-SBJ_vars.ch_lab.mic    = {};
+SBJ_vars.ch_lab.mic    = {'mic1'};
 
 %--------------------------------------
 % Line Noise Parameters
