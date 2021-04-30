@@ -19,6 +19,13 @@ ft_defaults
 
 %% SBJ vars
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
+if ~isfield(SBJ_vars.dirs,'nlx')
+    error([SBJ ' does not have NLX data, run only SBJ01a!']);
+end
+if numel(SBJ_vars.analysis_time{block_ix})>1
+    error('havent set up processing for multi block concat!');
+end
+
 eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 
 %% Read photodiode, NLX macro, clinical data
@@ -119,14 +126,6 @@ if numel(SBJ_vars.ch_lab.nlx_nk_align)>1
     clin = ft_preprocessing(cfg,clin);
 end
 
-% % Cut clincial macro to analysis time
-% if numel(SBJ_vars.analysis_time{block_ix})>1
-%     error('havent set up processing for multi block concat!');
-% end
-% cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
-% clin = ft_selectdata(cfgs,clin);
-% clin.time{1} = clin.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
-
 % Match sampling rates
 if macro.fsample > clin.fsample
     fprintf('downsampling Neuralynx from %d to %d Hz\n', macro.fsample, clin.fsample)
@@ -220,15 +219,26 @@ if save_it
     evnt.trial{1}(1,t3(t3>0 & t3<numel(evnt.trial{1}))) = evnt_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
 %     evnt.trial{1}(2,t3(t3>0 & t3<numel(evnt.trial{1}))) = mic_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
     
+    %% Cut photodiode channel to clinical analysis time
+    cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
+    evnt = ft_selectdata(cfgs,evnt);
+    evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
+
     %% Save out mic.wav for listening
 %     % Rescale to prevent clipping, add 0.05 fudge factor
+%     warning('mic not cut to analysis_time!');
 %     mic_data_rescale = mic_data./(max(abs(mic_data))+0.05);
 %     mic_data_fname = strcat(SBJ_vars.dirs.import,SBJ,'_mic_recording',block_suffix,'.wav');
 %     fprintf('Saving %s\n',mic_data_fname);
 %     audiowrite(mic_data_fname,mic_data_rescale,mic_full_srate);
     
     %% Save data out
-    evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt',block_suffix,'.mat');
+    if SBJ_vars.low_srate(b_ix)~=0
+        evnt_srate = SBJ_vars.low_srate(b_ix);
+    else
+        evnt_srate = proc_vars.resample_freq;
+    end
+    evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt_srate),'hz',block_suffix,'.mat');
     fprintf('Saving %s\n',evnt_out_fname);
     save(evnt_out_fname, '-v7.3', 'evnt');
 end

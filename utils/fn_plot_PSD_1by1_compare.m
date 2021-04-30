@@ -2,7 +2,7 @@ function fn_plot_PSD_1by1_compare(data1, data2, labels1, labels2, sample_freq,..
                                        data_type1, data_type2)
 
 if numel(labels1)~=numel(labels2)
-    fprintf('!!!WARNING!!! different number of channels in data1 (%i) and data2 (%i)\n',...
+    fprintf('PSD comparison warning: different number of channels in data1 (%i) and data2 (%i)\n',...
         numel(labels1),numel(labels2));
 end
 min_n_labels = min(numel(labels1),numel(labels2));

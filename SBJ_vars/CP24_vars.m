@@ -113,6 +113,9 @@ SBJ_vars.bs_width    = 2;
 % see cut scripts for timing info
 % miscut first run (not redoing it), so first event is ~158s in R1
 SBJ_vars.analysis_time = {{[1 1429]},{[1 1289]}};
+if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name)
+    error('Mismatch number of runs to concatenate!');
+end
 
 %--------------------------------------
 % Artifact Rejection Parameters

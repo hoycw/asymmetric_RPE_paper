@@ -62,10 +62,6 @@ fprintf('\tReading photodiode data\n');
 % photodiode elevation must be at least this long (in sec)
 %   assumes trial onset trigger = 0.2
 min_event_length = 0.1*evnt_srate;
-if evnt_srate < 1000
-    fprintf('================================================\n');
-    fprintf('WARNING: evnt sample rate is less than 1000 Hz!! s_rate = %f\n',evnt_srate);
-end
 
 %% Process photodiode
 % 2 different shades (bsln, event), so set to 0
@@ -83,7 +79,7 @@ trl_ix = 0;
 fb_ix  = 0;
 for evnt_ix = 1:numel(all_onsets{2})
     evnt_len = all_offsets{2}(evnt_ix)-all_onsets{2}(evnt_ix);
-    if evnt_len < mean([trig_dur_trl trig_dur_fb])*1000
+    if evnt_len < mean([trig_dur_trl trig_dur_fb])*evnt_srate
         trl_ix = trl_ix+1;
 %         fprintf('trl_ix %d, evnt_len = %d\n',trl_ix,evnt_len);
         trl_onsets(trl_ix) = all_onsets{2}(evnt_ix);
@@ -128,7 +124,7 @@ if(length(trl_info.trl_n) ~= length(trl_onsets))
 end
 
 %% Put all the information into correct structures
-fprintf('\t\tMean response time: %1.2f seconds from word onset\n', nanmean(trl_info.rt)); % Ignore NaNs
+fprintf('\t\tMean +/- SD response time = %1.2f +/- %.3f sec\n', nanmean(trl_info.rt), nanstd(trl_info.rt)); % Ignore NaNs
 trl_info.trl_onset = trl_onsets;
 trl_info.rsp_onset = trl_onsets + floor(trl_info.rt*evnt_srate);
 trl_info.fb_onset  = fb_onsets;
@@ -169,16 +165,18 @@ if (plot_it ~= 0)
     plot(linspace(0, len_in_sec, n_samples), plot_photo, 'Color', [0.5 0.8 0.8]);
     plot([0 len_in_sec],[0.25 0.25],'k');
     
-    % Plot word onsets
+    % Plot trial onsets
     for trial_ix = 1:length(trl_info.trl_onset)
         plot([trl_info.trl_onset(trial_ix)/s_rate_ratio trl_info.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[1.30 1.40],'b','LineWidth',2);
         plot([trl_info.trl_onset(trial_ix)/s_rate_ratio trl_info.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[-0.35 0.35],'b','LineWidth',2);
     end
     
-    % Plot resp onsets
+    % Plot RTs
     for resp_n = 1:length(trl_info.rsp_onset)
-        plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[1.35 1.45],'g','LineWidth',2);
-        plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'g','LineWidth',2);
+        if trl_info.rt(resp_n)>0
+            plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[1.35 1.45],'g','LineWidth',2);
+            plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'g','LineWidth',2);
+        end
     end
     
     % Plot feedback onsets

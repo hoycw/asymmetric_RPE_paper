@@ -86,6 +86,9 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 SBJ_vars.analysis_time = {{[85.0 1431.09]}};
 SBJ_vars.ignore_trials = [];
+if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name)
+    error('Mismatch number of runs to concatenate!');
+end
 
 %--------------------------------------
 % Artifact Rejection Parameters

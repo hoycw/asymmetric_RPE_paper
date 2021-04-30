@@ -1,6 +1,6 @@
-%% SBJ01_import_data.m
+function SBJ01a_import_data(SBJ,proc_id)
+%% SBJ01a_import_data.m
 % Extract data with fieldtrip and save out by data type
-function SBJ01_import_data(SBJ,proc_id)
 
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end

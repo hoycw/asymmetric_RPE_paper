@@ -23,13 +23,38 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 %   Step 1- Quick Import and Processing for Data Cleaning/Inspection
 %  ========================================================================
 % FILE TOO BIG, RUNNING THIS VIA SGE
-% SBJ00_cleaning_prep(SBJ,proc_vars.plot_psd);
+% SBJ00a_cleaning_prep(SBJ,proc_vars.plot_psd);
 
 %% ========================================================================
-%   Step 2- Import Data, Resample, and Save Individual Data Types
+%   Step 2- Initial Viewing of Raw Data (colored by QA)
 %  ========================================================================
-% FILE TOO BIG, RUNNING THIS VIA SGE
-% SBJ01_import_data(SBJ,proc_id);
+block_ix    = 1;
+keep_db_out = 1;
+reorder     = {};   % {} for alphabetical
+browser_out = SBJ00b_view_preclean(SBJ,block_ix,keep_db_out,'reorder',reorder);
+
+% Save out the bad_epochs from the preprocessed data
+bad_epochs = browser_out.artfctdef.visual.artifact;
+tiny_bad = find(diff(bad_epochs,1,2)<10);
+if ~isempty(tiny_bad)
+    warning([num2str(numel(tiny_bad)) ' tiny bad epochs detected:\n']);
+    disp(bad_epochs(tiny_bad,:));
+    bad_epochs(tiny_bad,:) = [];
+end
+save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preclean.mat'),'-v7.3','bad_epochs');
+
+%% ========================================================================
+%   Step 3- Import Data, Resample, and Save Individual Data Types
+%  ========================================================================
+%   Run this after rejecting bad channels from preclean viewing
+%   If file is too big, run this via SGE
+
+SBJ01a_import_data(SBJ,proc_id);
+
+nlx_align_save_it = 1;
+if isfield(SBJ_vars.dirs,'nlx')
+    SBJ01b_align_nlx_evnt(SBJ,proc_id,block_ix,nlx_align_save_it);
+end
 
 %% ========================================================================
 %   Step 3- Preprocess Neural Data
@@ -85,6 +110,11 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     
     % Plot event channels
     plot(evnt.time{1}, evnt.trial{1});
+    
+%     % Save .edf for pd-parser
+%     evnt_hdr  = ft_fetch_header(evnt);
+%     evnt_edf_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt_srate),'hz',block_suffix,'.edf');
+%     ft_write_data(evnt_edf_fname,evnt.trial{1},'header',evnt_hdr);
     
     %% ========================================================================
     %   Step 5b- Manually Clean Photodiode Trace: Mark Sections to Correct

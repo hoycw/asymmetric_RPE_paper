@@ -26,6 +26,13 @@ eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'));
 
+% Get sampling rate
+if SBJ_vars.low_srate(b_ix)~=0
+    data_srate = SBJ_vars.low_srate(b_ix);
+else
+    data_srate = proc_vars.resample_freq;
+end
+
 % Load different trl_infos
 trl_infos = cell(size(SBJ_vars.block_name));
 trl_cnt   = zeros(size(SBJ_vars.block_name));
@@ -46,7 +53,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     
     % Get block length
     tmp = load(strcat(SBJ_vars.dirs.import,SBJ,'_',...
-        num2str(proc_vars.resample_freq),'hz',block_suffix,'.mat'));
+        num2str(data_srate),'hz',block_suffix,'.mat'));
     blk_lens(b_ix) = size(tmp.data.trial{1},2);
     blk_times(b_ix) = tmp.data.time{1}(end);
     

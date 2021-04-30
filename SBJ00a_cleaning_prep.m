@@ -1,7 +1,7 @@
-%% SBJ00_cleaning_prep
+function SBJ00a_cleaning_prep(SBJ,plot_psd)
+%% SBJ00a_cleaning_prep
 % Load raw data, extract channel labels, downsample, bandstop line noise,
 % and save the result for visual cleaning inspection.
-function SBJ00_cleaning_prep(SBJ,plot_psd)
 % Inputs:
 %   SBJ [str]- name of the subject
 %   plot_psd [str]- name of function to plot+save PSDs of raw channels
