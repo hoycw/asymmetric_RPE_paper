@@ -27,8 +27,15 @@ load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'));
 
 % Get sampling rate
-if SBJ_vars.low_srate(b_ix)~=0
-    data_srate = SBJ_vars.low_srate(b_ix);
+if numel(SBJ_vars.block_name)>1
+    for b_ix = 2:numel(SBJ_vars.block_name)
+        if SBJ_vars.low_srate(b_ix)~=SBJ_vars.low_srate(1)
+            error('Are there really differences across runs in sample rate?');
+        end
+    end
+end
+if SBJ_vars.low_srate(1)~=0
+    data_srate = SBJ_vars.low_srate(1);
 else
     data_srate = proc_vars.resample_freq;
 end
@@ -52,8 +59,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     trl_infos{b_ix} = tmp.trl_info;
     
     % Get block length
-    tmp = load(strcat(SBJ_vars.dirs.import,SBJ,'_',...
-        num2str(data_srate),'hz',block_suffix,'.mat'));
+    tmp = load(strcat(SBJ_vars.dirs.import,SBJ,'_',num2str(data_srate),'hz',block_suffix,'.mat'));
     blk_lens(b_ix) = size(tmp.data.trial{1},2);
     blk_times(b_ix) = tmp.data.time{1}(end);
     
@@ -101,11 +107,13 @@ for b_ix = 2:numel(SBJ_vars.block_name)
         if numel(trl_infos{b_ix}.(ti_fields{f_ix}))==trl_cnt(b_ix)
             % Concatenate fields that don't need modification
             %   NOTE: keeping blk in original numbers (helps toss training)
-            if any(strcmp(ti_fields{f_ix},{'cond','blk','run','hit','rt','tol','blk_trl_n','score','ITI','ITI_type'}))
+            if any(strcmp(ti_fields{f_ix},{'cond','blk','run','fb','bad_fb','sound',...
+                                    'hit','rt','tol','blk_trl_n','score','ITI','ITI_type'}))
                 trl_info.(ti_fields{f_ix}) = vertcat(trl_info.(ti_fields{f_ix}),trl_infos{b_ix}.(ti_fields{f_ix}));
             % Modify then concatenate counts and indices
             elseif any(strcmp(ti_fields{f_ix},{'trl_onset','rsp_onset','fb_onset'}))
-                trl_info.(ti_fields{f_ix}) = vertcat(trl_info.(ti_fields{f_ix}),trl_infos{b_ix}.(ti_fields{f_ix})+sum(blk_lens(1:b_ix-1)));
+                trl_info.(ti_fields{f_ix}) = vertcat(trl_info.(ti_fields{f_ix}),...
+                            trl_infos{b_ix}.(ti_fields{f_ix})+sum(blk_lens(1:b_ix-1)));
             elseif strcmp(ti_fields{f_ix},'trl_n')
                 trl_info.trl_n = vertcat(trl_info.trl_n,trl_infos{b_ix}.trl_n+sum(trl_cnt(1:b_ix-1)));
             elseif strcmp(ti_fields{f_ix},'time')
@@ -213,7 +221,7 @@ if ~isempty(RT_early)
     fprintf('WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
 end
 fprintf('Num trials excluded for training  : %i\n',length(skip_training));
-fprintf('Num trials excluded for skip RT    : %i\n',length(skip_rt));
+fprintf('Num trials excluded for skip RT   : %i\n',length(skip_rt));
 fprintf('Num trials excluded for outlier RT: %i\n',length(skip_rt_outlier));
 fprintf('Num trials excluded by visual rej : %i\n',length(skip_vis));
 fprintf('Num trials excluded for other     : %i\n',length(skip_bad));

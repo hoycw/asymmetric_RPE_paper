@@ -100,6 +100,7 @@ if isfield(SBJ_vars.ch_lab,'suffix')
     end
     SBJ_vars.ch_lab.photod = {[SBJ_vars.ch_lab.photod{1} SBJ_vars.ch_lab.suffix]};
 end
+
 % bad_ch_neg = fn_ch_lab_negate(SBJ_vars.ch_lab.bad);
 % eeg_ch_neg = fn_ch_lab_negate(SBJ_vars.ch_lab.eeg);
 % eog_ch_neg = fn_ch_lab_negate(SBJ_vars.ch_lab.eog);
@@ -120,6 +121,21 @@ junk_ch_neg = fn_ch_lab_negate(SBJ_vars.ch_lab.bad(SBJ_vars.ch_lab.bad_code==0))
 cfg = [];
 cfg.channel = [{'all','-EDF Annotations'},junk_ch_neg,photod_ch_neg];
 data = ft_selectdata(cfg,data);
+
+% Fix any mislabeled channels
+if isfield(SBJ_vars.ch_lab,'mislabel')
+    for ch_ix = 1:numel(SBJ_vars.ch_lab.mislabel)
+        if any(strcmp(data.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1)))
+            data.label(strcmp(data.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1))) = SBJ_vars.ch_lab.mislabel{ch_ix}(2);
+        elseif any(strcmp(eeg.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1)))
+            eeg.label(strcmp(eeg.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1))) = SBJ_vars.ch_lab.mislabel{ch_ix}(2);
+        elseif any(strcmp(eog.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1)))
+            eog.label(strcmp(eog.label,SBJ_vars.ch_lab.mislabel{ch_ix}(1))) = SBJ_vars.ch_lab.mislabel{ch_ix}(2);
+        else
+            error(['Could not find mislabeled channel: ' SBJ_vars.ch_lab.mislabel{ch_ix}(1)]);
+        end
+    end
+end
 
 % Name EEG/EOG to stick together, move to bottom of sort, add # if necessary for sorting
 for l = 1:numel(data.label)

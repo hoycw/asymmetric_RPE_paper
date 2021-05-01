@@ -233,8 +233,8 @@ if save_it
 %     audiowrite(mic_data_fname,mic_data_rescale,mic_full_srate);
     
     %% Save data out
-    if SBJ_vars.low_srate(b_ix)~=0
-        evnt_srate = SBJ_vars.low_srate(b_ix);
+    if SBJ_vars.low_srate(block_ix)~=0
+        evnt_srate = SBJ_vars.low_srate(block_ix);
     else
         evnt_srate = proc_vars.resample_freq;
     end
