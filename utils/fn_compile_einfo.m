@@ -1,4 +1,4 @@
-function fn_compile_einfo(SBJ,pipeline_id)
+function fn_compile_einfo(SBJ,proc_id)
 %% Compile ROI info from single electrodes into bipolar pairs
 %   Goes from smallest to largest (ELEC1-ELEC2, ELEC2-ELEC3, etc.)
 %   Pairs are drawn from preprocessed data labels
@@ -17,14 +17,14 @@ ft_defaults
 
 %% Load data
 eval(['run /home/knight/hoycw/PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
-eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' pipeline_id '_proc_vars.m']);
+eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
 % % Original (single electrode) labels
 % import  = load([SBJ_vars.dirs.import SBJ '_1000hz.mat']);
 % raw_lab = import.data.label;
 
 % Bipolar ROI Labels
-preproc = load([SBJ_vars.dirs.preproc SBJ '_preproc_' pipeline_id '.mat']);
+preproc = load([SBJ_vars.dirs.preproc SBJ '_preproc_' proc_id '.mat']);
 cfgs = [];
 cfgs.channel = SBJ_vars.ch_lab.ROI;
 data = ft_selectdata(cfgs,preproc.data);
@@ -92,7 +92,7 @@ for e_ix = 1:numel(new_lab)
 end
 
 %% Save data
-output_filename = strcat(SBJ_vars.dirs.preproc,SBJ,'_einfo_',pipeline_id,'.mat');
+output_filename = strcat(SBJ_vars.dirs.preproc,SBJ,'_einfo_',proc_id,'.mat');
 fprintf('============== Saving %s ==============\n',output_filename);
 save(output_filename, '-v7.3', 'einfo');
 

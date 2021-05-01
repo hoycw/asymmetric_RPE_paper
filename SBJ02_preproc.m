@@ -20,7 +20,7 @@ ft_defaults
 %% Load data
 fprintf('============== Loading Data %s ==============\n',SBJ);
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
 data_all = {};
 for b_ix = 1:numel(SBJ_vars.block_name)
@@ -32,7 +32,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     if any(SBJ_vars.low_srate)
         import_fname = [SBJ_vars.dirs.import SBJ '_',num2str(SBJ_vars.low_srate(b_ix)),'hz',block_suffix,'.mat'];
     else
-        import_fname = [SBJ_vars.dirs.import SBJ '_',num2str(proc_vars.resample_freq),'hz',block_suffix,'.mat'];
+        import_fname = [SBJ_vars.dirs.import SBJ '_',num2str(proc.resample_freq),'hz',block_suffix,'.mat'];
     end
     load(import_fname);
     data_orig = data;
@@ -40,20 +40,20 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     %% High and low pass data
     fprintf('============== High and Low Pass Filtering %s ==============\n',SBJ);
     cfg           = [];
-    cfg.demean    = proc_vars.demean_yn;
+    cfg.demean    = proc.demean_yn;
     if numel(SBJ_vars.block_name)>1
         cfg.demean = 'yes';
     end
-    if proc_vars.lp_freq > data.fsample/2
+    if proc.lp_freq > data.fsample/2
         cfg.lpfilter = 'no';
     else
-        cfg.lpfilter = proc_vars.lp_yn;
-        cfg.lpfreq   = proc_vars.lp_freq;
+        cfg.lpfilter = proc.lp_yn;
+        cfg.lpfreq   = proc.lp_freq;
     end
-    cfg.hpfilter  = proc_vars.hp_yn;
-    cfg.hpfreq    = proc_vars.hp_freq;
+    cfg.hpfilter  = proc.hp_yn;
+    cfg.hpfreq    = proc.hp_freq;
     if isfield(proc_vars,'hp_order')
-        cfg.hpfiltord = proc_vars.hp_order;
+        cfg.hpfiltord = proc.hp_order;
     end
     data = ft_preprocessing(cfg,data);
     data_bp = data;
@@ -152,15 +152,15 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     % SBJ_vars.ch_lab.left_out = [left_out_ch{:}];
     
     %% Filter out line noise
-    fprintf('============== Filtering Line Noise %s via %s ==============\n',SBJ,proc_vars.notch_type);
+    fprintf('============== Filtering Line Noise %s via %s ==============\n',SBJ,proc.notch_type);
     
-    if strcmp(proc_vars.notch_type,'dft')
+    if strcmp(proc.notch_type,'dft')
         cfg           = [];
         cfg.dftfilter = 'yes'; % line noise removal using discrete fourier transform
         cfg.dftfreq   = SBJ_vars.notch_freqs;
         cfg.dftfreq(cfg.dftfreq > data.fsample/2) = [];
         data = ft_preprocessing(cfg,data);
-    elseif strcmp(proc_vars.notch_type,'bandstop')
+    elseif strcmp(proc.notch_type,'bandstop')
         % Calculate frequency limits
         bs_freq_lim = NaN([length(SBJ_vars.notch_freqs) 2]);
         for f_ix = 1:length(SBJ_vars.notch_freqs)
@@ -171,10 +171,10 @@ for b_ix = 1:numel(SBJ_vars.block_name)
         cfg.bsfilter = 'yes';
         cfg.bsfreq   = bs_freq_lim;
         data = ft_preprocessing(cfg,data);
-    elseif strcmp(proc_vars.notch_type,'cleanline')
+    elseif strcmp(proc.notch_type,'cleanline')
         data = fn_cleanline(data,SBJ_vars.notch_freqs);
     else
-        error('ERROR: proc_vars.notch_type type not in [dft, bandstop, cleanline]');
+        error('ERROR: proc.notch_type type not in [dft, bandstop, cleanline]');
     end
     
     if strcmp(psd_line,'yes')

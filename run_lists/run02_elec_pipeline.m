@@ -9,28 +9,35 @@ addpath(ft_dir);
 ft_defaults
 
 %% Load SBJ list
-SBJ_id = 'goodall';
+SBJ_id = 'init_rep3';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Prepare for inspections
-for s = 1:numel(SBJs)
+% Requires SBJ_vars to be set up
+
+for s = 2:numel(SBJs)
     % Convert raw pipeline elec files to my SBJ_vars
-%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
-%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
-%     fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
+    fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
+    fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
+    fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
     
     % Match elec to atlas labels + tissue (ONLY orig!)
     % run in SGE: fn_elec_match_atlas(SBJs{s},'main_ft','pat','','Dx');
     
     % Export reref atlas info to CSV for manual adjustments
-    fn_elec_export_csv(SBJs{s},'main_ft','pat','','Dx', 0);
+%     fn_elec_export_csv(SBJs{s},'main_ft','pat','','Dx', 0);
     
 end
 
 %% Manual adjustments of orig elec
+% Import .csv to google sheet, then check assignments for manual adjustments
+
+% Run subsections of this manually to plot elecs relative to pial, white
+%   matter, and inflated surfaces for each probe
 % fn_elec_check_ROIs(SBJ);
 
 %% Compile manual orig into auto bipolar
+% Download manual adjustments into .tsv
 for s = 1:numel(SBJs)
     fn_elec_import_manual(SBJs{s}, 'main_ft', 'pat', '', 'Dx', 0);
     fn_elec_compile_man_reref(SBJs{s}, 'main_ft', 'pat', '', 'Dx');
@@ -54,9 +61,9 @@ end
 % fn_view_recon(SBJ,'main_ft','ortho','mni','v',1,'b');
 % 
 % % Check atlas assignments
-% fn_view_recon_atlas(SBJ,pipeline_id,'pat','',1,'b','DK','gROI');
-% fn_view_recon_atlas(SBJ,pipeline_id,'pat','',1,'b','Dx','gROI');
-% fn_view_recon_atlas(SBJ,pipeline_id,'mni','v',1,'b','Yeo7','Yeo7');
+% fn_view_recon_atlas(SBJ,proc_id,'pat','',1,'b','DK','gROI');
+% fn_view_recon_atlas(SBJ,proc_id,'pat','',1,'b','Dx','gROI');
+% fn_view_recon_atlas(SBJ,proc_id,'mni','v',1,'b','Yeo7','Yeo7');
 
 %% ROI comparison
 roi_id = 'ROI';

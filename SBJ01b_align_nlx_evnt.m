@@ -26,7 +26,7 @@ if numel(SBJ_vars.analysis_time{block_ix})>1
     error('havent set up processing for multi block concat!');
 end
 
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
 %% Read photodiode, NLX macro, clinical data
 % First check for invalid samples
@@ -236,7 +236,7 @@ if save_it
     if SBJ_vars.low_srate(block_ix)~=0
         evnt_srate = SBJ_vars.low_srate(block_ix);
     else
-        evnt_srate = proc_vars.resample_freq;
+        evnt_srate = proc.resample_freq;
     end
     evnt_out_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt_srate),'hz',block_suffix,'.mat');
     fprintf('Saving %s\n',evnt_out_fname);

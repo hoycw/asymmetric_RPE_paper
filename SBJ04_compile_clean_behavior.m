@@ -22,7 +22,7 @@ SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
 
 %% Load data
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'));
 
@@ -37,7 +37,7 @@ end
 if SBJ_vars.low_srate(1)~=0
     data_srate = SBJ_vars.low_srate(1);
 else
-    data_srate = proc_vars.resample_freq;
+    data_srate = proc.resample_freq;
 end
 
 % Load different trl_infos
@@ -135,23 +135,23 @@ end
 
 %% Parameters
 if ~isfield(proc_vars,'RT_std_thresh')
-    proc_vars.RT_std_thresh = 3;
+    proc.RT_std_thresh = 3;
 end
 if ~isfield(proc_vars,'trial_lim_s')
-    proc_vars.trial_lim_s = [-0.25 3];
+    proc.trial_lim_s = [-0.25 3];
 end
 
 %% Select channels and events of interest
-if strcmp(proc_vars.event_type,'stim')
+if strcmp(proc.event_type,'stim')
     events = trl_info.trl_onset;
-elseif strcmp(proc_vars.event_type,'resp')
+elseif strcmp(proc.event_type,'resp')
     events = trl_info.rsp_onset;
 else
-    error(stract('ERROR: unknown event_type ',proc_vars.event_type));
+    error(stract('ERROR: unknown event_type ',proc.event_type));
 end
 
 % Convert trial_lim into samples
-trial_lim = proc_vars.trial_lim_s*data.fsample;
+trial_lim = proc.trial_lim_s*data.fsample;
 
 %% Reject known artifacts
 skip_rt  = find(trl_info.rt<0);     % no response (-1)
@@ -170,11 +170,11 @@ skip_vis = fn_find_trials_overlap_epochs(bad_epochs,1:size(data.trial{1},2),even
 % Find RT outliers
 RT_mean = nanmean(trl_info.rt);
 RT_std  = nanstd(trl_info.rt);
-skip_rt_outlier = find(abs(trl_info.rt-RT_mean)>proc_vars.RT_std_thresh*RT_std);
+skip_rt_outlier = find(abs(trl_info.rt-RT_mean)>proc.RT_std_thresh*RT_std);
 
 % Check against RT bounds, toss late but only warn for early
-RT_late = find(trl_info.rt>proc_vars.rt_bounds(2));
-RT_early = find(trl_info.rt(trl_info.rt>0)<proc_vars.rt_bounds(1));
+RT_late = find(trl_info.rt>proc.rt_bounds(2));
+RT_early = find(trl_info.rt(trl_info.rt>0)<proc.rt_bounds(1));
 skip_rt_outlier = [skip_rt_outlier; RT_late; RT_early];
 
 % Toss training trials
@@ -187,10 +187,10 @@ ok_trial_ix = setdiff(1:numel(trl_info.trl_n),skip_trial_ix);
 %% Compile Bad Trials
 % error('adjust trl_n for the training trials!');
 trl_info_cln = trl_info;
-trl_info_cln.event_type    = proc_vars.event_type;
+trl_info_cln.event_type    = proc.event_type;
 trl_info_cln.trial_lim     = trial_lim;
-trl_info_cln.trial_lim_s   = proc_vars.trial_lim_s;
-trl_info_cln.RT_std_thresh = proc_vars.RT_std_thresh;
+trl_info_cln.trial_lim_s   = proc.trial_lim_s;
+trl_info_cln.RT_std_thresh = proc.RT_std_thresh;
 
 % Document bad trials
 trl_info_cln.bad_trials.RT_bad = trl_info.trl_n(skip_rt);
@@ -215,10 +215,10 @@ trl_info_cln.rsp_onset = round(trl_info_cln.rsp_onset);
 %% Print results
 fprintf('==============================================================================================\n');
 if ~isempty(RT_late)
-    fprintf('WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc_vars.rt_bounds(2));
+    fprintf('WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc.rt_bounds(2));
 end
 if ~isempty(RT_early)
-    fprintf('WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
+    fprintf('WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc.rt_bounds(1));
 end
 fprintf('Num trials excluded for training  : %i\n',length(skip_training));
 fprintf('Num trials excluded for skip RT   : %i\n',length(skip_rt));
@@ -236,10 +236,10 @@ if save_it
     r_file = fopen(results_fname,'a');
     fprintf(r_file,'%s\n',datestr(datetime));
     if ~isempty(RT_late)
-        fprintf(r_file,'WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc_vars.rt_bounds(2));
+        fprintf(r_file,'WARNING! %i RTs > %f sec excluded!\n',numel(RT_late),proc.rt_bounds(2));
     end
     if ~isempty(RT_early)
-        fprintf(r_file,'WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc_vars.rt_bounds(1));
+        fprintf(r_file,'WARNING! %i RTs < %f sec excluded!\n',numel(RT_early),proc.rt_bounds(1));
     end
     fprintf(r_file,'Num trials excluded for training  : %i\n',length(skip_training));
     fprintf(r_file,'Num trials excluded for skip RT   : %i\n',length(skip_rt));

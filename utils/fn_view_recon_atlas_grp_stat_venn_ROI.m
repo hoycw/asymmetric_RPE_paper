@@ -3,7 +3,7 @@ function fn_view_recon_atlas_grp_stat_venn_ROI(SBJs, proc_id, stat_id, an_id, re
 %% Plot a reconstruction with electrodes colored according to statistics
 % INPUTS:
 %   SBJ [str] - subject ID to plot
-%   pipeline_id [str] - name of analysis pipeline, used to pick elec file
+%   proc_id [str] - name of analysis pipeline, used to pick elec file
 %   stat_id [str] - ID of the stats
 %       'actv': red for active, blue for deactive, yellow for both
 %       NOPE: 'CI': inc vs. con via ft statistics (not run for all patients!)

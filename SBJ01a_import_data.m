@@ -11,7 +11,7 @@ ft_defaults
 %% Load and preprocess the data
 SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
-proc_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m'];
+proc_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m'];
 eval(proc_vars_cmd);
 
 %% Process channel labels
@@ -166,9 +166,9 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     end
     
     %% Resample data
-    if strcmp(proc_vars.resample_yn,'yes') && (data.fsample > proc_vars.resample_freq)
+    if strcmp(proc.resample_yn,'yes') && (data.fsample > proc.resample_freq)
         cfg = [];
-        cfg.resamplefs = proc_vars.resample_freq;
+        cfg.resamplefs = proc.resample_freq;
         cfg.detrend = 'no';
         data = ft_resampledata(cfg, data);
         if ~isfield(SBJ_vars.dirs,'nlx')

@@ -1,5 +1,6 @@
 function fn_elec_match_atlas(SBJ, proc_id, view_space, reg_type, atlas_id)
 %% Match elec_orig to atlas ROIs and tissue
+%   Uses fn_atlas_lookup to add tissue, gROI, ROI, etc.
 % INPUTS:
 %   SBJ [str] - subject ID to plot
 %   proc_id [str] - name of analysis pipeline, used to pick elec file

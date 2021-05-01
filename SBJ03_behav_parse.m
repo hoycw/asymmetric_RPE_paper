@@ -29,11 +29,11 @@ addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
 
 %% Determine event onset sample points
 % Load preprocessing variables to get sampling rate
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 if any(SBJ_vars.low_srate)
     nrl_srate = SBJ_vars.low_srate(block);
 else
-    nrl_srate = proc_vars.resample_freq;
+    nrl_srate = proc.resample_freq;
 end
 
 % Load paradigm variables

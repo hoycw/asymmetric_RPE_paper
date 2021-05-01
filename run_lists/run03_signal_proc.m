@@ -36,6 +36,23 @@ for s = 1:numel(SBJs)
 end
 
 %% Compute High Frequency Activity via Sun Grid Engine
+% HFA filtering (especially with multitapers) take a long time, so use SGE
+% On the cluster, run:
+%   `cd /${root_dir}/PRJ_Error/scripts/
+%   `submit -s SGE/calls/SBJ07a_HFA_save.sh -f SBJ_lists/list.sbj \
+%       -o SGE/opts/SBJ07a_save_HGm_F25t121_zbtS_sm0_l1_wn100.opts`
+% INPUTS:
+%   -s script.sh: shell script to cd to scripts, load the SBJ_list and options, 
+%       create a one line .m script to call the function, open MATLAB, run
+%       the script, and delete it before exiting the job
+%   -f SBJ_list.sbj: text file with SBJ names, one per line, will run one
+%       qsub job per SBJ
+%   -o file.opts: options for SGE job
+%       -o /full/path/to/standard_out output file
+%       -e /full/path/to/standard_error output file
+%       -v bash script ${variables} that can be used within script.sh (e.g., an_id, proc_id, etc.)
+%       -l mem_free=16G - request memory for a node
+%       -N name of the job (e.g., to view progress via `qstat`)
 
 %% Compute and Save Active Channels with High Frequency Activity
 for s = 1:numel(SBJs)
@@ -48,69 +65,8 @@ conditions = 'DifOut';
 an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
 stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
 for s = 1:numel(SBJs)
-%     plt_id     = 'stack_S2to3_evnt_c5';%'stack_F2to12_evnt_c5';
-%     SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
-%     close all;
-    
-    plt_id = 'ts_S0to3_evnts_sigline';%'ts_F0to1_evnts_sigline';
-    SBJ08b_HFA_plot_corrRT_ANOVA(SBJs{s}, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
+    plt_id     = 'stack_S2to3_evnt_c5';%'stack_F2to12_evnt_c5';
+    SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
     close all;
 end
 
-%%
-for s = 1:numel(SBJs)
-    SBJ07ab_HFA_actv(SBJs{s},an_id,actv_win);
-end
-
-%%
-stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
-SBJ08a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id);
-
-%%
-plt_id = 'ts_S0to3_evnts_sigline';
-fig_vis = 'off';
-SBJ08b_HFA_plot_corrRT_ANOVA(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
-
-%%
-roi_id = 'gROI';
-atlas_id = 'Dx';
-gm_thresh = 0;
-plot_out = 0;
-plot_scat = 1;
-plt_id      = '';
-fig_ftype = 'png';
-SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
-                                                            atlas_id,gm_thresh,plt_id,plot_out,plot_scat,save_fig,fig_vis,fig_ftype);
-SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI_DO(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
-                                                            atlas_id,gm_thresh,plt_id,plot_out,plot_scat,save_fig,fig_vis,fig_ftype);
-
-%%
-for s = 1:numel(SBJs)
-    SBJ = SBJs{s};
-    fprintf('%s\n',SBJ);
-    load([root_dir 'PRJ_Error/data/' SBJ '/05_recon/' SBJ '_elec_main_ft_pat_Dx_full.mat']);
-    if any(strcmp(SBJ,{'CP24','IR57','IR68'}))
-        elec.roi = fn_atlas2roi_labels(elec.atlas_lab,'Dx','gROI');
-    end
-    mpfc_ix = find(strcmp(elec.roi,'MPFC'));
-    disp(elec.label(mpfc_ix));
-end
-
-%% Recon viewing
-SBJs = {'CP24','IR57','IR68'};%'IR66' - doesn't have mni_v_Dx yet
-an_id = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%
-mirror = 1;
-for s = 1:numel(SBJs)
-%     fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'r', 0, 'save_fig', 1);
-    fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'l', mirror, 0, 'save_fig', 1);
-    %close all;
-end
-
-%%
-SBJs = {'CP24','IR57','IR68'};%'IR66' - doesn't have mni_v_Dx yet
-roi_id = 'gROI';
-atlas_id = 'Dx';
-plot_out = 0;
-show_lab = 0;
-fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'r', atlas_id, roi_id, plot_out);
-fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'l', atlas_id, roi_id, plot_out);

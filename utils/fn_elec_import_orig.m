@@ -1,6 +1,6 @@
 function fn_elec_import_orig(SBJ,proc_id,view_space,reg_type,reref)
 %% Convert recon pipeline elec struct to personal format
-%   Fix labels, select imported channels, sort alphanumerically
+%   Fix labels, select imported channels (ROI, cleaning), sort alphanumerically
 %   Rereference: if 1, does bipolar (no difference for ECoG)
 %       Goes from smallest to largest (ELEC1-ELEC2, ELEC2-ELEC3, etc.)
 %   adds channel type, hemisphere

@@ -16,14 +16,14 @@ ft_defaults
 %% Step 0 - Processing Variables
 % SBJ = 'IR';
 proc_id = 'main_ft';
-eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_proc_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 
 %% ======================================================================== 
 %   Step 1- Quick Import and Processing for Data Cleaning/Inspection
 %  ========================================================================
 % FILE TOO BIG, RUNNING THIS VIA SGE
-% SBJ00a_cleaning_prep(SBJ,proc_vars.plot_psd);
+% SBJ00a_cleaning_prep(SBJ,proc.plot_psd);
 
 %% ========================================================================
 %   Step 2- Initial Viewing of Raw Data (colored by QA)
@@ -103,7 +103,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     if SBJ_vars.low_srate(b_ix)~=0
         evnt_srate = SBJ_vars.low_srate(b_ix);
     else
-        evnt_srate = proc_vars.resample_freq;
+        evnt_srate = proc.resample_freq;
     end
     evnt_fname = strcat(SBJ_vars.dirs.import,SBJ,'_evnt_',num2str(evnt_srate),'hz',block_suffix,'.mat');
     load(evnt_fname);
@@ -184,15 +184,15 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % data = ft_selectdata(cfg,data);
 % 
 % % Segment into trials
-% if strcmp(proc_vars.event_type,'stim')
+% if strcmp(proc.event_type,'stim')
 %     events = trl_info_cln.trl_onset;
-% elseif strcmp(proc_vars.event_type,'resp')
+% elseif strcmp(proc.event_type,'resp')
 %     events = trl_info_cln.rsp_onset;
 % else
-%     error(stract('ERROR: unknown event_type ',proc_vars.event_type));
+%     error(stract('ERROR: unknown event_type ',proc.event_type));
 % end
 % trials = fn_ft_cut_trials_equal_len(data,events,...
-%     trl_info_cln.condition_n',proc_vars.trial_lim_s*data.fsample);
+%     trl_info_cln.condition_n',proc.trial_lim_s*data.fsample);
 % 
 % % Compute Derivative
 % cfg = [];
@@ -203,18 +203,18 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % [trial_mat,~] = fn_format_trials_ft2KLA(trials);
 % var_mat = std(trial_mat,0,3);
 % ch_var_mean = mean(var_mat,2);
-% ch_var_thresh = mean(ch_var_mean)+std(ch_var_mean)*proc_vars.var_std_warning_thresh;
+% ch_var_thresh = mean(ch_var_mean)+std(ch_var_mean)*proc.var_std_warning_thresh;
 % 
 % trial_var_mean = mean(var_mat,1);
-% trial_var_thresh = mean(trial_var_mean)+std(trial_var_mean)*proc_vars.var_std_warning_thresh;
+% trial_var_thresh = mean(trial_var_mean)+std(trial_var_mean)*proc.var_std_warning_thresh;
 % 
 % [trial_mat_dif,~] = fn_format_trials_ft2KLA(trials_dif);
 % var_mat_dif = std(trial_mat_dif,0,3);
 % ch_var_mean_dif = mean(var_mat_dif,2);
-% ch_var_dif_thresh = mean(ch_var_mean_dif)+std(ch_var_mean_dif)*proc_vars.var_std_warning_thresh;
+% ch_var_dif_thresh = mean(ch_var_mean_dif)+std(ch_var_mean_dif)*proc.var_std_warning_thresh;
 % 
 % trial_var_mean_dif = mean(var_mat_dif,1);
-% trial_var_dif_thresh = mean(trial_var_mean_dif)+std(trial_var_mean_dif)*proc_vars.var_std_warning_thresh;
+% trial_var_dif_thresh = mean(trial_var_mean_dif)+std(trial_var_mean_dif)*proc.var_std_warning_thresh;
 % 
 % % Report on potentially bad channels
 % bad_var_ch      = trials.label(abs(ch_var_mean) > ch_var_thresh);
@@ -282,7 +282,7 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % data = ft_selectdata(cfg,data);
 % 
 % trials = fn_ft_cut_trials_equal_len(data,events,...
-%     trl_info_cln.condition_n',proc_vars.trial_lim_s*data.fsample);
+%     trl_info_cln.condition_n',proc.trial_lim_s*data.fsample);
 % 
 % 
 % %% ========================================================================

@@ -1,10 +1,10 @@
-function fn_view_recon_stat(SBJ, pipeline_id, stat_id, an_id, view_space, reg_type, show_labels, hemi, mirror, plot_out, varargin)
+function fn_view_recon_stat(SBJ, proc_id, stat_id, an_id, view_space, reg_type, show_labels, hemi, mirror, plot_out, varargin)
 %% Plot a reconstruction with electrodes colored according to statistics
 %   FUTURE 1: this is a static brain, need to adapt to a movie!
 %   FUTURE 2: add option for stat_var to be a cell with 2nd stat for edge
 % INPUTS:
 %   SBJ [str] - subject ID to plot
-%   pipeline_id [str] - name of analysis pipeline, used to pick elec file
+%   proc_id [str] - name of analysis pipeline, used to pick elec file
 %   stat_id [str] - ID of the stats
 %       'actv': red for active, blue for deactive, yellow for both
 %       NOPE: 'CI': inc vs. con via ft statistics (not run for all patients!)
@@ -78,7 +78,7 @@ else
 end
 
 %% Load elec struct
-load([SBJ_vars.dirs.recon,SBJ,'_elec_',pipeline_id,'_',view_space,reg_suffix,'.mat']);
+load([SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_',view_space,reg_suffix,'.mat']);
 
 %% Remove electrodes that aren't in hemisphere
 cfgs = [];

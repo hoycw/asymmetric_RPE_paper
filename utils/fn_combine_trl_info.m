@@ -15,7 +15,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
         block_suffix = strcat('_',SBJ_vars.block_name{b_ix});
         % Get block length
         tmp = load(strcat(SBJ_vars.dirs.import,SBJ,'_',...
-            num2str(proc_vars.resample_freq),'hz',block_suffix,'.mat'));
+            num2str(proc.resample_freq),'hz',block_suffix,'.mat'));
         block_lens(b_ix) = size(tmp.data.trial{1},2);
         block_times(b_ix) = tmp.data.time{1}(end);
     else

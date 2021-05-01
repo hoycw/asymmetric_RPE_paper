@@ -1,9 +1,6 @@
 %% IR87 Processing Variables
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
-if isempty(strfind(path,'fieldtrip'))
-    addpath(ft_dir);
-    ft_defaults
-end
+if isempty(strfind(path,'fieldtrip')); addpath(ft_dir); ft_defaults; end
 
 %--------------------------------------
 % Basics
@@ -21,20 +18,13 @@ SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];
 SBJ_vars.dirs.proc    = [SBJ_vars.dirs.SBJ '04_proc/'];
 SBJ_vars.dirs.recon   = [SBJ_vars.dirs.SBJ '05_recon/'];
-if ~exist(SBJ_vars.dirs.import,'dir')
-    mkdir(SBJ_vars.dirs.import);
-end
-if ~exist(SBJ_vars.dirs.preproc,'dir')
-    mkdir(SBJ_vars.dirs.preproc);
-end
-if ~exist(SBJ_vars.dirs.events,'dir')
-    mkdir(SBJ_vars.dirs.events);
-end
-if ~exist(SBJ_vars.dirs.proc,'dir')
-    mkdir(SBJ_vars.dirs.proc);
-end
-if ~exist(SBJ_vars.dirs.recon,'dir')
-    mkdir(SBJ_vars.dirs.recon);
+SBJ_vars.dirs.models  = [SBJ_vars.dirs.SBJ '06_models/'];
+SBJ_vars.dirs.stats   = [SBJ_vars.dirs.SBJ '07_stats/'];
+dirs_fields = fieldnames(SBJ_vars.dirs);
+for field_ix = 1:numel(dirs_fields)
+    if ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
+        mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
+    end
 end
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);

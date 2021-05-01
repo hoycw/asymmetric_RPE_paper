@@ -1,9 +1,9 @@
-function fn_view_recon(SBJ, pipeline_id, plot_type, view_space, reg_type,...
+function fn_view_recon(SBJ, proc_id, plot_type, view_space, reg_type,...
                        show_labels, hemi, plot_out, varargin)
 %% Plot a reconstruction with electrodes
 % INPUTS:
 %   SBJ [str] - subject ID to plot
-%   pipeline_id [str] - name of analysis pipeline, used to pick elec file
+%   proc_id [str] - name of processing pipeline, used to pick elec file
 %   plot_type [str] - {'ortho', '3d'} choose 3 slice orthogonal plot or 3D surface rendering
 %   view_space [str] - {'pat', 'mni'}
 %   reg_type [str] - {'v', 's'} choose volume-based or surface-based registration
@@ -52,7 +52,7 @@ else
 end
 
 %% Load elec struct
-if isempty(pipeline_id)
+if isempty(proc_id)
     % Original elec files
     elec_fname = eval(['SBJ_vars.recon.elec_' view_space reg_suffix]);
     slash = strfind(elec_fname,'/'); elec_suffix = elec_fname(slash(end)+numel(SBJ)+2:end-4);
@@ -65,7 +65,7 @@ if isempty(pipeline_id)
     eval(['elec = tmp.' elec_var_name{1} ';']); clear tmp;
 else
     % Preprocessed (bipolar) elec files
-    load([SBJ_vars.dirs.recon,SBJ,'_elec_',pipeline_id,'_',view_space,reg_suffix,'.mat']);
+    load([SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_',view_space,reg_suffix,'.mat']);
 end
 
 %% Remove electrodes that aren't in hemisphere
