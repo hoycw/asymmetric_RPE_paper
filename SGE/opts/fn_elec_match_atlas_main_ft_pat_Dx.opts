@@ -1,5 +1,5 @@
--o /home/knight/hoycw/PRJ_Stroop/scripts/NotBackedUp/SGEout
--e /home/knight/hoycw/PRJ_Stroop/scripts/NotBackedUp/SGEout
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
 -v proc_id="main_ft",view_space="pat",reg_type="",atlas_id="Dx"
 -N elecDx
 
