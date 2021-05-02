@@ -54,7 +54,7 @@ l = camlight;
 set(i_r, 'windowkeypressfcn',   @cb_keyboard);
 
 %% Plot elecs + meshes
-p = 18;
+p = 2;
 % for p = 1:numel(SBJ_vars.ch_lab.probes)
     cfgs.channel = ft_channelselection([SBJ_vars.ch_lab.probes{p} '*'], elec.label);
     probe = fn_select_elec(cfgs, elec);
@@ -76,20 +76,20 @@ p = 18;
     set(pial, 'windowkeypressfcn',   @cb_keyboard);
     
     % Plot WM
-    if strcmp(SBJ_vars.ch_lab.probe_type,'seeg')
-        wm = figure('Name',[SBJ ' white ' probe.label{1} ' : ' probe.label{end}],...
-                    'Units','normalized');
-        set(wm, 'OuterPosition', [0.5 0 0.5 1]);
-        ft_plot_mesh(eval(['wm_' hemi]), 'vertexcolor', 'curv', 'facealpha', 0.5);
-        for e = 1:numel(probe.label)
-            cfgs.channel = probe.label(e);
-            tmp = fn_select_elec(cfgs, probe);
-            ft_plot_sens(tmp, 'elecshape', 'sphere', 'facecolor', tmp.color, 'label', 'label');
-        end
-        material dull; lighting gouraud;
-        l = camlight;
-        set(wm, 'windowkeypressfcn',   @cb_keyboard);
-    end
+%     if strcmp(SBJ_vars.ch_lab.probe_type,'seeg')
+%         wm = figure('Name',[SBJ ' white ' probe.label{1} ' : ' probe.label{end}],...
+%                     'Units','normalized');
+%         set(wm, 'OuterPosition', [0.5 0 0.5 1]);
+%         ft_plot_mesh(eval(['wm_' hemi]), 'vertexcolor', 'curv', 'facealpha', 0.5);
+%         for e = 1:numel(probe.label)
+%             cfgs.channel = probe.label(e);
+%             tmp = fn_select_elec(cfgs, probe);
+%             ft_plot_sens(tmp, 'elecshape', 'sphere', 'facecolor', tmp.color, 'label', 'label');
+%         end
+%         material dull; lighting gouraud;
+%         l = camlight;
+%         set(wm, 'windowkeypressfcn',   @cb_keyboard);
+%     end
 % end
 
 %% Plot Elecs

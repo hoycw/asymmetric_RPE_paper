@@ -53,7 +53,7 @@ SBJ_vars.ch_lab.ref_type   = {'BP','BP','BP','BP','BP','BP','BP','BP',...
                               'BP','BP','BP','BP','BP','BP','BP'};
 if ~all(numel(SBJ_vars.ch_lab.probes)==[numel(SBJ_vars.ch_lab.probe_type) numel(SBJ_vars.ch_lab.ref_type)]); error('probes ~= type+ref');end;
 SBJ_vars.ch_lab.nlx        = [1,0,1,1,1,0,0,0,0,1,0,1,1,1,0];
-SBJ_vars.ch_lab.ROI        = {'LAC*','LPC*','LOF*','AII*','ASI*','PI*','RAC*','RPC*','ROF*'};
+SBJ_vars.ch_lab.ROI        = {'all'};%'LAC*','LPC*','LOF*','AII*','ASI*','PI*','RAC*','RPC*','ROF*'};
 SBJ_vars.ch_lab.eeg_ROI    = {'all'};
 SBJ_vars.ch_lab.wires      = {'mrac','mram','mrhh','mrof','mlac','mlof','mlam','mlhh'};
 SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su','su'};

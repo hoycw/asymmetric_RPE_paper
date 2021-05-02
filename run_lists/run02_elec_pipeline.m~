@@ -15,11 +15,11 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 %% Prepare for inspections
 % Requires SBJ_vars to be set up
 
-for s = 1:numel(SBJs)
+for s = 2:numel(SBJs)
     % Convert raw pipeline elec files to my SBJ_vars
-    fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
-    fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
-    fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
+%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
+%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
+%     fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
     
     % Match elec to atlas labels + tissue (ONLY orig!)
     % run in SGE: fn_elec_match_atlas(SBJs{s},'main_ft','pat','','Dx');
@@ -31,10 +31,6 @@ end
 
 %% Manual adjustments of orig elec
 % Import .csv to google sheet, then check assignments for manual adjustments
-%   -duplicate to keep coloring
-%   -import new data at cell 2A
-%       -File -> Import; Replace data at selected cell; convert text to numbers, data, and formulas
-%   -delete remaining rows from old data
 
 % Run subsections of this manually to plot elecs relative to pial, white
 %   matter, and inflated surfaces for each probe
@@ -48,16 +44,10 @@ for s = 1:numel(SBJs)
     fn_elec_export_csv(SBJs{s},'main_ft','pat','','Dx', 1);
 end
 
-%% Manual adjustments of reref elec
-% Import .csv to google sheet, then check assignments for manual adjustments
-%   -especially check logic for merging ROIs
-
-% fn_elec_check_ROIs(SBJ);
-
 %% Complete manual updates
 for s = 1:numel(SBJs)
     % Reimport manual adjustments
-    fn_elec_import_manual(SBJs{s}, 'main_ft', 'pat', '', 'Dx', 1);
+%     fn_elec_import_manual(SBJs{s}, 'main_ft', 'pat', '', 'Dx', 1);
     
     % Copy corrected labels to MNI elec files
     fn_elec_copy_atlas_pat2mni(SBJs{s},'main_ft','v','Dx');
