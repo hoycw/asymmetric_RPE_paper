@@ -1,7 +1,4 @@
 %% Photodiode Trace Cleaning Parameters: IR68
-% Mark trials to ignore e.g., interruptions
-ignore_trials = [];
-
 % Set zero/baseline during a block
 bsln_val = 0;
 

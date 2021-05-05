@@ -1,8 +1,4 @@
 %% Photodiode Trace Cleaning Parameters: IR84
-% Mark trials to ignore e.g., interruptions
-%   first 5 full vis must've been cut off in clinical extraction
-ignore_trials = [1:5];
-
 % Large drift in the shift over time:
 %   plot(evnt(1,:)); Tools --> Basic Fitting --> linear, show equations:
 lin_fits   = {[-0.12*evnt.time{1} + 45], ...

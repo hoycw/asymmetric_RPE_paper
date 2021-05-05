@@ -91,8 +91,8 @@ save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'),'-v7.3','bad_epo
 %   Step 5a- Manually Clean Photodiode Trace: Load & Plot
 %  ========================================================================
 % Load data
-trl_info     = cell(size(SBJ_vars.block_name));
-trl_info_cln = cell(size(SBJ_vars.block_name));
+bhv     = cell(size(SBJ_vars.block_name));
+bhv_cln = cell(size(SBJ_vars.block_name));
 for b_ix = 1:numel(SBJ_vars.block_name)
     % Create a block suffix in cases with more than one recording block
     if numel(SBJ_vars.raw_file)==1 || isfield(SBJ_vars.dirs,'nlx')
@@ -148,7 +148,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     
     %% Save corrected data
     out_fname = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];
-    save(out_fname, 'evnt', 'ignore_trials');
+    save(out_fname, 'evnt');
     
     %% ========================================================================
     %   Step 6- Parse Event Traces into Behavioral Data
@@ -159,8 +159,8 @@ end
 %% ========================================================================
 %   Step 7- Reject Bad Trials (Behavior, Visual Cleaning) and Compile Runs
 %  ========================================================================
-clear trl_info
-trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
+clear bhv
+bhv = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 
 %% ========================================================================
 %   Step 8- Create elec files from recon
@@ -185,14 +185,14 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % 
 % % Segment into trials
 % if strcmp(proc.event_type,'stim')
-%     events = trl_info_cln.trl_onset;
+%     events = bhv_cln.trl_onset;
 % elseif strcmp(proc.event_type,'resp')
-%     events = trl_info_cln.rsp_onset;
+%     events = bhv_cln.rsp_onset;
 % else
 %     error(stract('ERROR: unknown event_type ',proc.event_type));
 % end
 % trials = fn_ft_cut_trials_equal_len(data,events,...
-%     trl_info_cln.condition_n',proc.trial_lim_s*data.fsample);
+%     bhv_cln.condition_n',proc.trial_lim_s*data.fsample);
 % 
 % % Compute Derivative
 % cfg = [];
@@ -219,8 +219,8 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % % Report on potentially bad channels
 % bad_var_ch      = trials.label(abs(ch_var_mean) > ch_var_thresh);
 % bad_var_dif_ch  = trials.label(abs(ch_var_mean_dif) > ch_var_dif_thresh);
-% bad_var_trl     = trl_info_cln.trl_n(abs(trial_var_mean) > trial_var_thresh);
-% bad_var_dif_trl = trl_info_cln.trl_n(abs(trial_var_mean_dif) > trial_var_dif_thresh);
+% bad_var_trl     = bhv_cln.trl_n(abs(trial_var_mean) > trial_var_thresh);
+% bad_var_dif_trl = bhv_cln.trl_n(abs(trial_var_mean_dif) > trial_var_dif_thresh);
 % fprintf('==============================================================================================\n');
 % fprintf('Simple Variance Rejection:\n');
 % fprintf('\tChannel Variance Names: %s\n',bad_var_ch{:});
@@ -282,7 +282,7 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % data = ft_selectdata(cfg,data);
 % 
 % trials = fn_ft_cut_trials_equal_len(data,events,...
-%     trl_info_cln.condition_n',proc.trial_lim_s*data.fsample);
+%     bhv_cln.condition_n',proc.trial_lim_s*data.fsample);
 % 
 % 
 % %% ========================================================================
@@ -305,12 +305,12 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % report.std_thresh  = 1; % print only total rejected
 % report.std_plot    = 1; % plot the std distribution and threshold
 % 
-% trl_info_KLA_clean = SBJ06_reject_artifacts_KLA_report(trials,trl_info_cln,...
+% bhv_KLA_clean = SBJ06_reject_artifacts_KLA_report(trials,bhv_cln,...
 %                                         SBJ_vars.artifact_params,plot_ch,report);
 % 
-% bad_samples = NaN([size(trl_info_KLA_clean.bad_trials.var,1) 2]);
+% bad_samples = NaN([size(bhv_KLA_clean.bad_trials.var,1) 2]);
 % for t_ix = 1:size(bad_samples,1)
-%     bad_samples(t_ix,:) = trials.sampleinfo(trl_info_cln.trl_n==trl_info_KLA_clean.bad_trials.var(t_ix),:);
+%     bad_samples(t_ix,:) = trials.sampleinfo(bhv_cln.trl_n==bhv_KLA_clean.bad_trials.var(t_ix),:);
 % end
 % cfg = [];
 % cfg.continuous = 'no';
@@ -328,27 +328,27 @@ trl_info = SBJ04_compile_clean_behavior(SBJ,proc_id,1);
 % eval(clear_cmd); %needed to delete cached version
 % eval(SBJ_vars_cmd);
 % 
-% clear trl_info
-% trl_info = trl_info_cln;
+% clear bhv
+% bhv = bhv_cln;
 % % Document bad trials
-% trl_info.bad_trials.variance = SBJ_vars.trial_reject_n';
-% trl_info.bad_trials.all = sort([trl_info.bad_trials.all; trl_info.bad_trials.variance]);
+% bhv.bad_trials.variance = SBJ_vars.trial_reject_n';
+% bhv.bad_trials.all = sort([bhv.bad_trials.all; bhv.bad_trials.variance]);
 % 
 % % Remove bad trials
-% trial_rejected = ismember(trl_info.trl_n,SBJ_vars.trial_reject_n);
+% trial_rejected = ismember(bhv.trl_n,SBJ_vars.trial_reject_n);
 % trial_reject_ix = find(trial_rejected);
-% trl_info.block_n(trial_reject_ix) = [];
-% trl_info.trl_n(trial_reject_ix) = [];
-% trl_info.word(trial_reject_ix) = [];
-% trl_info.color(trial_reject_ix) = [];
-% trl_info.trialtype(trial_reject_ix) = [];
-% trl_info.blocktype(trial_reject_ix) = [];
-% trl_info.response_time(trial_reject_ix) = [];
-% trl_info.marker_time(trial_reject_ix) = [];
-% trl_info.onset_time(trial_reject_ix) = [];
-% trl_info.trl_onset(trial_reject_ix) = [];
-% trl_info.rsp_onset(trial_reject_ix) = [];
-% trl_info.condition_n(trial_reject_ix) = [];
-% trl_info.error(trial_reject_ix) = [];
+% bhv.block_n(trial_reject_ix) = [];
+% bhv.trl_n(trial_reject_ix) = [];
+% bhv.word(trial_reject_ix) = [];
+% bhv.color(trial_reject_ix) = [];
+% bhv.trialtype(trial_reject_ix) = [];
+% bhv.blocktype(trial_reject_ix) = [];
+% bhv.response_time(trial_reject_ix) = [];
+% bhv.marker_time(trial_reject_ix) = [];
+% bhv.onset_time(trial_reject_ix) = [];
+% bhv.trl_onset(trial_reject_ix) = [];
+% bhv.rsp_onset(trial_reject_ix) = [];
+% bhv.condition_n(trial_reject_ix) = [];
+% bhv.error(trial_reject_ix) = [];
 
 

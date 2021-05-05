@@ -22,7 +22,7 @@ SBJ_vars.dirs.models  = [SBJ_vars.dirs.SBJ '06_models/'];
 SBJ_vars.dirs.stats   = [SBJ_vars.dirs.SBJ '07_stats/'];
 dirs_fields = fieldnames(SBJ_vars.dirs);
 for field_ix = 1:numel(dirs_fields)
-    if ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
+    if ~strcmp(dirs_fields{field_ix},'raw_filename') && ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
@@ -97,7 +97,11 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 SBJ_vars.analysis_time = {{[172 1800]}};
-if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name)
+%   first 5 full vis must've been cut off in clinical extraction
+SBJ_vars.ignore_trials = {[1:5]};
+if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
+        numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
+        numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
     error('Mismatch number of runs to concatenate!');
 end
 

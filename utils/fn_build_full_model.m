@@ -1,4 +1,5 @@
 function [model,model_names] = fn_build_full_model(SBJ,design,design_names,proc_id,an_id,stat_id,atlas_id,roi_id,log_yn)
+error('check for 2021 updates');
 %% Build design matrix of predictors for regression analysis
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 

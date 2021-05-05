@@ -1,4 +1,5 @@
 function [design,col_names] = fn_build_design_predictors(SBJ,stat_id)
+error('check for 2021 updates');
 %% Build design matrix of predictors for regression analysis
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 

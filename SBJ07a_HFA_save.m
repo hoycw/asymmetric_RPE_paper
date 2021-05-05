@@ -17,7 +17,7 @@ eval(an_vars_cmd);
 
 % Load Data
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
-load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
+load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_' proc_id '_final.mat'));
 
 % Toss sampleinfo which can mess up trial cutting
 if isfield(data,'sampleinfo')
@@ -50,29 +50,29 @@ end
 trial_lim_s_pad = [min(an.bsln_lim)-pad_len an.trial_lim_s(2)+pad_len+0.01];
 
 % Always normalize to pre-stimulus baseline for HFA
-bsln_events = trl_info.trl_onset;
+bsln_events = bhv.trl_onset;
 if strcmp(an.evnt_lab,'S')
     % Check that baseline will be included in data cut to trial_lim_s
     if an.trial_lim_s(1) < an.bsln_lim(1)
         error(['ERROR: an.trial_lim_s does not include an.bsln_lim for an_id = ' an_id]);
     end
     % Cut to desired trial_lim_s
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
         round(trial_lim_s_pad*roi.fsample));
 elseif strcmp(an.evnt_lab,'R')
     % Check that baseline will be included in data cut to trial_lim_s
-    if an.trial_lim_s(1)+min(trl_info.response_time) < an.bsln_lim(1)
+    if an.trial_lim_s(1)+min(bhv.response_time) < an.bsln_lim(1)
         error(['ERROR: an.trial_lim_s does not include an.bsln_lim for an_id = ' an_id]);
     end
     % Cut to max_RT+trial_lim_s(2) to include S baseline + full R-locked trial_lim_s
-    max_RT  = max(trl_info.rt);
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
+    max_RT  = max(bhv.rt);
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
         round([trial_lim_s_pad(1) max_RT+trial_lim_s_pad(2)]*roi.fsample));
 elseif strcmp(an.evnt_lab,'F')
     % Cut from S baseline to full F-locked:
     %   [trl_onset+an.trial_lim_s(1) to fb+an.trial_lim_s(2)]
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',trl_info),...
-        round([trial_lim_s_pad(1) trl_info.prdm.trl_len+trial_lim_s_pad(2)]*roi.fsample));
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
+        round([trial_lim_s_pad(1) bhv.prdm.trl_len+trial_lim_s_pad(2)]*roi.fsample));
 else
     error(['Unknown an.evnt_lab: ' an.evnt_lab]);
 end
@@ -118,7 +118,7 @@ if strcmp(an.evnt_lab,'S')
 elseif strcmp(an.evnt_lab,'R') && strcmp(an.bsln_evnt,'S')
     cfg_trim.latency = [an.bsln_lim(1) max_RT+an.trial_lim_s(2)];
 elseif strcmp(an.evnt_lab,'F') && strcmp(an.bsln_evnt,'S')
-    cfg_trim.latency = [an.bsln_lim(1) trl_info.prdm.trl_len+an.trial_lim_s(2)];
+    cfg_trim.latency = [an.bsln_lim(1) bhv.prdm.trl_len+an.trial_lim_s(2)];
 else
     error('mismatched event without S-locked baseline!');
 end
@@ -186,10 +186,10 @@ hfa = ft_selectdata(cfg_avg,hfa);
 
 %% Re-align to event of interest if necessary (e.g., response)
 if strcmp(an.evnt_lab,'R')
-    hfa = fn_realign_tfr_s2r(hfa,trl_info.rt,an.trial_lim_s);
+    hfa = fn_realign_tfr_s2r(hfa,bhv.rt,an.trial_lim_s);
 elseif strcmp(an.evnt_lab,'F')
     hfa = fn_realign_tfr_s2r(hfa,...
-        ones(size(trl_info.rt))*trl_info.prdm.target+trl_info.prdm.fb_delay,...
+        ones(size(bhv.rt))*bhv.prdm.target+bhv.prdm.fb_delay,...
         an.trial_lim_s);
 elseif ~strcmp(an.evnt_lab,'S')
     error(['ERROR: unknown an.evnt_lab ' an.evnt_lab]);
@@ -204,7 +204,7 @@ if an.resample_ts && hfa.fsample~=an.resample_freq
 end
 
 %% Save Results
-data_out_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat');
+data_out_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat');
 fprintf('===================================================\n');
 fprintf('--- Saving %s ------------------\n',data_out_fname);
 fprintf('===================================================\n');

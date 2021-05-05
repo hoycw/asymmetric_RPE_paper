@@ -1,55 +1,88 @@
-function condition_num = fn_condition_index(conditions, trl_info)
+function condition_n = fn_condition_index(cond_lab, bhv)
 % Returns index of trial condition assignments based on requested conditions
 % INPUTS:
-%   conditions [str] - name of the set of conditions requested
-%   trl_info [struct] - trial informatino structure contianing info for logic sorting
+%   cond_lab [cell array] - strings with names of the set of conditions requested
+%   bhv [struct] - trial information structure contianing info for logic sorting
+%       fields: Total_Trial, Block, Feedback, RT, Timestamp, Tolerance, Trial, Hit, Score, bad_fb, Condition, ITI, ITI type
 % OUTPUTS:
 %   condition_n [int vector] - integer assignment of each trial based on conditions
 
-[cond_lab, ~, ~, ~] = fn_condition_label_styles(conditions);
-
-condition_num = zeros(size(trl_info.trl_n));
+condition_n = zeros(size(bhv.trl_n));
 for cond_ix = 1:numel(cond_lab)
     switch cond_lab{cond_ix}
+        % Target Time block and trial types
+        case 'All'
+            condition_n = ones(size(condition_n));
         case 'Ez'
-            condition_num(strcmp('easy',trl_info.cond)) = cond_ix;
+            condition_n(strcmp('easy',bhv.cond)) = cond_ix;
         case 'Hd'
-            condition_num(strcmp('hard',trl_info.cond)) = cond_ix;
+            condition_n(strcmp('hard',bhv.cond)) = cond_ix;
         case 'Wn'
-            condition_num(trl_info.hit==1) = cond_ix;
+            condition_n(strcmp(bhv.fb,'W')) = cond_ix;
         case 'Ls'
-            condition_num(trl_info.hit==0) = cond_ix;
-        case 'Er'
-            condition_num(trl_info.rt<trl_info.prdm.target) = cond_ix;
-        case 'Lt'
-            condition_num(trl_info.rt>trl_info.prdm.target) = cond_ix;
+            condition_n(strcmp(bhv.fb,'L')) = cond_ix;
+        case 'Nu'
+            condition_n(strcmp(bhv.fb,'N')) = cond_ix;
+        
+        % Target Time specific conditions
         case 'EzWn'
-            matches = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==1);
-            condition_num(matches) = cond_ix;
+            matches = logical(strcmp('easy',bhv.cond)) & strcmp(bhv.fb,'W');
+            condition_n(matches) = cond_ix;
         case 'EzLs'
-            matches = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==0);
-            condition_num(matches) = cond_ix;
+            matches = logical(strcmp('easy',bhv.cond)) & strcmp(bhv.fb,'L');
+            condition_n(matches) = cond_ix;
+        case 'EzNu'
+            matches = logical(strcmp('easy',bhv.cond)) & strcmp(bhv.fb,'N');
+            condition_n(matches) = cond_ix;
         case 'HdWn'
-            matches = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==1);
-            condition_num(matches) = cond_ix;
+            matches = logical(strcmp('hard',bhv.cond)) & strcmp(bhv.fb,'W');
+            condition_n(matches) = cond_ix;
         case 'HdLs'
-            matches = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==0);
-            condition_num(matches) = cond_ix;
-        case 'Ex'
-            match1 = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==1);
-            match2 = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==0);
-            condition_num(match1 | match2) = cond_ix;
-        case 'Ue'
-            match1 = logical(strcmp('easy',trl_info.cond)) & logical(trl_info.hit==0);
-            match2 = logical(strcmp('hard',trl_info.cond)) & logical(trl_info.hit==1);
-            condition_num(match1 | match2) = cond_ix;
+            matches = logical(strcmp('hard',bhv.cond)) & strcmp(bhv.fb,'L');
+            condition_n(matches) = cond_ix;
+        case 'HdNu'
+            matches = logical(strcmp('hard',bhv.cond)) & strcmp(bhv.fb,'N');
+            condition_n(matches) = cond_ix;
+%         case 'Ex'
+%             match1 = logical(strcmp('easy',bhv.cond)) & logical(bhv.hit==1);
+%             match2 = logical(strcmp('hard',bhv.cond)) & logical(bhv.hit==0);
+%             condition_n(match1 | match2) = cond_ix;
+%         case 'Ue'
+%             match1 = logical(strcmp('easy',bhv.cond)) & logical(bhv.hit==0);
+%             match2 = logical(strcmp('hard',bhv.cond)) & logical(bhv.hit==1);
+%             condition_n(match1 | match2) = cond_ix;
+            
+        % Target Time conditions based on RPE valence
+        case 'AllPos'
+            matches = fn_condition_index({'EzWn','HdWn','HdNu'}, bhv);
+            condition_n(matches~=0) = cond_ix;
+        case 'AllNeg'
+            matches = fn_condition_index({'EzLs','HdLs','EzNu'}, bhv);
+            condition_n(matches~=0) = cond_ix;
+        
+        % Target Time RT performance assignment
+        case 'Er'
+            condition_n(bhv.rt<bhv.prdm.target) = cond_ix;
+        case 'Lt'
+            condition_n(bhv.rt>bhv.prdm.target) = cond_ix;
+        
+        % Oddball task conditions
+        case 'Odd'
+            matches = logical(strcmp('odd',bhv.cond));
+            condition_n(matches) = cond_ix;
+        case 'Std'
+            matches = logical(strcmp('std',bhv.cond));
+            condition_n(matches) = cond_ix;
+        case 'Tar'
+            matches = logical(strcmp('tar',bhv.cond));
+            condition_n(matches) = cond_ix;
         otherwise
-            error(['Invalid condition label: ' conditions]);
+            error(['Invalid condition label: ' cond_lab{cond_ix}]);
     end
 end
 
-if sum(condition_num==0)~=0
-    warning(['Not all trials accounted for by conditions: ' conditions]);
+if sum(condition_n==0)~=0
+    warning(['Not all trials accounted for by conditions: ' strjoin(cond_lab,',')]);
 end
 
 end

@@ -1,7 +1,4 @@
 %% Photodiode Trace Cleaning Parameters: CP24 
-% Mark trials to ignore e.g., interruptions
-ignore_trials = [];
-
 %  % Fix drift over first half of recording
 %  x = [1:find(evnt.time{1}==867)];
 %  y = -0.000042201*x + 283.93;

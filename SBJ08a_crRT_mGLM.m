@@ -1,4 +1,4 @@
-function SBJ08a_crRT_mGLM(SBJ,an_id,stat_id)
+function SBJ08a_crRT_mGLM(SBJ, proc_id, an_id, model_id, stat_id)
 %% function SBJ08a_crRT_mGLM(SBJ,an_id,stat_id)
 %   Run GLM with sliding windows for given time-frequency analysis
 %   Correlation with RT and regression of RT as confound supported
@@ -6,8 +6,10 @@ function SBJ08a_crRT_mGLM(SBJ,an_id,stat_id)
 %       reward prediction, signed PE, unsigned PE
 % INPUTS:
 %   SBJ [str] - subject ID
-%   an_id [str] - HFA analysis to run stats
-%   stat_id [str] - ID of the statistical parameters and design
+%   proc_id [str] - ID of processing pipeline
+%   an_id [str] - ID of HFA analysis to run stats
+%   model_id [str] - ID of the model used in GLM
+%   stat_id [str] - ID of the statistical parameters to extract from HFA
 % OUTPUTS:
 %   w2 [struct] - pseudo-FT structure with main ANOVA output
 %   rt [FT struct] - output of correlation with RT if st.rt_corr==1
@@ -21,80 +23,45 @@ addpath([root_dir 'PRJ_Error/scripts/utils/']);
 addpath(ft_dir);
 ft_defaults
 
-rng('shuffle'); % seed randi with time
+% rng('shuffle'); % seed randi with time
 
 %% Load Data
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 % eval(['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 
-load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
-load(strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat'));
-[cond_lab, ~, ~, ~] = fn_condition_label_styles(st.trial_cond{1});
-cond_idx = fn_condition_index(st.trial_cond{1}, trl_info);
+% Load behavioral data, model, and HFA
+load([SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_final.mat']);
+load([SBJ_vars.dirs.models SBJ '_model_' mdl.model_id '.mat']);
+load([SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat']);
 
 % Check if more than one frequency, error for now
 if numel(hfa.freq)>1
     error('HFA has more than one frequency, can''t run on that for now!');
 end
 
+%% Select conditions of interest
+[reg_lab, ~, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+[cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(st.stat_cond);
+[mdl_cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(mdl.model_cond);
+if ~all(contains(cond_lab,mdl_cond_lab))
+    error([model_id ' does not cover all conditions in ' stat_id '!']);
+end
+cond_idx = fn_condition_index(cond_lab, bhv);
+bhv = fn_select_bhv(bhv, cond_idx);
+
 % Select data in stat window
 cfg_trim = [];
 cfg_trim.latency = st.stat_lim;
+cfg_trim.trials  = cond_idx~=0;
 hfa = ft_selectdata(cfg_trim,hfa);
-
-%% Exclude trials based on RT and trial type
-% Select trial types of interest
-if ~strcmp(st.trial_cond,'all')
-    good_cond_idx = cond_idx~=0;
-else
-    good_cond_idx = true(size(trl_info.trl_n));
-end
 
 % Log combined bad trial types
 % good_trl_idx = all([~bad_rt_idx good_cond_idx],2);
-% st.bad_trials.all  = trl_info.trial_n(~good_trl_idx);
-% %st.bad_trials.rt   = trl_info.trial_n(bad_rt_idx);
-% st.bad_trials.cond = trl_info.trial_n(~good_cond_idx);
-
-% Exclude bad trials
-ti_fields = fieldnames(trl_info);
-orig_n_trials = numel(trl_info.trl_n);
-for f_ix = 1:numel(ti_fields)
-    if numel(trl_info.(ti_fields{f_ix}))==orig_n_trials
-        trl_info.(ti_fields{f_ix}) = trl_info.(ti_fields{f_ix})(good_cond_idx);
-    end
-end
-
-%% Create RL Model: Fit Behavior, Compute Regressors
-% Run Logistic Regression for Win Prediction
-pWin = nan(size(trl_info.trl_n));
-sPE  = nan(size(trl_info.trl_n));
-uPE  = nan(size(trl_info.trl_n));
-
-% Select Data (fit on everything except surprise since no outcome)
-% s_idx = fn_condition_index({'Su'},bhvs{s});
-X = trl_info.tol; %(~s_idx);
-y = double(trl_info.hit); %(~s_idx));
-
-% Logistic regression
-rl_betas = glmfit(X,y,'binomial','link','logit');
-
-z = rl_betas(1) + (trl_info.tol * rl_betas(2));
-pWin = 1 ./ (1+exp(-z));
-expected_score = pWin*2 - 1;
-sPE = double(trl_info.score)/100 - expected_score;
-uPE = abs(sPE);
-
-% Build full model
-model = nan([numel(trl_info.trl_n) numel(st.regressors)]);
-for reg_ix = 1:numel(st.regressors)
-    if strcmp(st.regressors{reg_ix},'offset')
-        model(:,reg_ix) = ones(size(trl_info.trl_n));
-    else
-        eval(['model(:,reg_ix) = ' st.regressors{reg_ix} ';']);
-    end
-end
+% st.bad_trials.all  = bhv.trial_n(~good_trl_idx);
+% %st.bad_trials.rt   = bhv.trial_n(bad_rt_idx);
+% st.bad_trials.cond = bhv.trial_n(~good_cond_idx);
 
 %% Compute max z score per condition (for later exclusions)
 max_z = zeros(size(hfa.label));
@@ -111,7 +78,7 @@ end
 %% Run correlations with RT
 if st.rt_corr
     fprintf('================== Running Correlation with RT =======================\n');
-    cfg_rt.design           = zscore(trl_info.rt);
+    cfg_rt.design           = zscore(bhv.rt);
     cfg_rt.ivar             = 1;
     rt = ft_freqstatistics(cfg_rt, hfa);
 end
@@ -125,7 +92,7 @@ if st.regress_rt
     fprintf('================== Regressing RT =======================\n');
     cfg_conf = [];
     cfg_conf.output = 'residual';
-    cfg_conf.confound = zscore(trl_info.rt);
+    cfg_conf.confound = zscore(bhv.rt);
     hfa = ft_regressconfound(cfg_conf, hfa);
 end
 % OUTPUT:
@@ -142,8 +109,8 @@ end
 fprintf('================== Averaging HFA within Windows =======================\n');
 % Sliding window parameters
 win_lim    = fn_sliding_window_lim(squeeze(hfa.powspctrm(1,1,1,:)),...
-    round(st.win_len*trl_info.sample_rate),...
-    round(st.win_step*trl_info.sample_rate));
+    round(st.win_len*bhv.sample_rate),...
+    round(st.win_step*bhv.sample_rate));
 win_center = round(mean(win_lim,2));
 
 % Average in windows
@@ -155,8 +122,12 @@ end
 %% Run ANOVA
 fprintf('================== Running ANOVA =======================\n');
 % Create structure for w2 in fieldtrip style
+if ~any(strcmp(reg_lab,'offset'))
+    reg_lab = ['offset' reg_lab];
+    model   = [ones(size(model,1), 1) model];
+end
 beta.model     = model;
-beta.feature   = st.regressors;
+beta.feature   = reg_lab;
 beta.time      = hfa.time(win_center);
 beta.win_lim   = win_lim;
 beta.label     = hfa.label;
@@ -168,12 +139,7 @@ beta.boot      = zeros([numel(beta.feature) length(hfa.label) length(beta.time) 
 beta.win_lim_s = hfa.time(win_lim);
 
 % Compute ANOVA and Explained Variance for real model
-if any(strcmp(st.regressors,'offset'))
-    add_offset = false;
-else
-    add_offset = true;
-end
-beta.trial = fn_mass_GLM(beta.model,hfa_win,add_offset);
+beta.trial = fn_mass_GLM(beta.model,hfa_win,0);
 
 % Compute ANOVA for permuted data
 rand_model = beta.model;
@@ -184,7 +150,7 @@ for boot_ix = 1:st.n_boots
 %     fprintf([b m]); b = repmat('\b',[1 length(m)]);
     fprintf('%i..',boot_ix);
     rand_model = rand_model(randperm(size(rand_model,1)),:);
-    beta.boot(:,:,:,boot_ix) = fn_mass_GLM(rand_model,hfa_win,add_offset);
+    beta.boot(:,:,:,boot_ix) = fn_mass_GLM(rand_model,hfa_win,0);
     if mod(boot_ix,20)==0
         fprintf('\n');
     end
@@ -206,17 +172,17 @@ end
 
 %% Print results
 % Prep report
-sig_report_fname = [SBJ_vars.dirs.proc SBJ '_mGLM_ROI_' stat_id '_' an_id '_sig_report.txt'];
+sig_report_fname = [SBJ_vars.dirs.stats SBJ '_mGLM_ROI_' model_id '_' stat_id '_' an_id '_sig_report.txt'];
 if exist(sig_report_fname)
     system(['mv ' sig_report_fname ' ' sig_report_fname(1:end-4) '_bck.txt']);
 end
 sig_report = fopen(sig_report_fname,'a');
-if st.rt_corr; cond_lab = [st.regressors {'RT'}]; else cond_lab = st.regressors; end
-result_str = ['%-10s' repmat('%-10i',[1 numel(cond_lab)]) '\n'];
+if st.rt_corr; reg_lab = [reg_lab {'RT'}]; end
+result_str = ['%-10s' repmat('%-10i',[1 numel(reg_lab)]) '\n'];
 
 % Print header
 fprintf(sig_report,'%s (n = %i)\n',SBJ,numel(beta.label));
-fprintf(sig_report,[repmat('%-10s',[1 1+numel(cond_lab)]) '\n'],'label',cond_lab{:});
+fprintf(sig_report,[repmat('%-10s',[1 1+numel(reg_lab)]) '\n'],'label',reg_lab{:});
 
 % Print summary lines (absolute)
 if st.rt_corr
@@ -230,16 +196,16 @@ else
 end
 
 % Print Channel Lines
-sig_mat = zeros([numel(beta.label) numel(cond_lab)]);
+sig_mat = zeros([numel(beta.label) numel(reg_lab)]);
 for ch_ix = 1:numel(beta.label)
     % Consolidate to binary sig/non-sig
-    for grp_ix = 1:numel(st.regressors)
-        if any(squeeze(beta.qval(grp_ix,ch_ix,:))<st.alpha)
-            sig_mat(ch_ix,grp_ix) = 1;
+    for reg_ix = 1:numel(reg_lab)
+        if any(squeeze(beta.qval(reg_ix,ch_ix,:))<st.alpha)
+            sig_mat(ch_ix,reg_ix) = 1;
         end
     end
     if st.rt_corr && any(rt.mask(ch_ix,1,:))
-        sig_mat(ch_ix,grp_ix) = 1;
+        sig_mat(ch_ix,numel(reg_lab)+1) = 1;
     end
     
     % Report on significant electrodes for this SBJ
@@ -249,7 +215,7 @@ end
 fclose(sig_report);
 
 %% Save Results
-out_fname = [SBJ_vars.dirs.proc SBJ '_mGLM_ROI_' stat_id '_' an_id '.mat'];
+out_fname = [SBJ_vars.dirs.stats SBJ '_mGLM_ROI_' model_id '_' stat_id '_' an_id '.mat'];
 if st.rt_corr
     save(out_fname,'-v7.3','beta','rt','st');
 else

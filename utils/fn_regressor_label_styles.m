@@ -38,7 +38,8 @@ regressors  = {...
     'Sign','Val','Mag',... % Categorical reward features
     'EV','bAcc','rAcc','rAcc10','score',... % Outcome predictors
     'sRPE','uRPE',... % Reward Feedback
-    'Lik',... % Outcome Likelihood
+    'Lik','rLik',... % Outcome Likelihood, residualized Likelihood
+    'ERB','rough','mxS','mnS','mxdS','mndS', ... % Auditory salience properties (via Sijia Zhao)
     'ITI', ... % preceding inter-trial interval
     'SBJ' ... % SBJ only null model (baseline model fit using only SBJ random intercepts)
     };
@@ -46,7 +47,8 @@ regressor_names = {...
     'Valence','Value','Magnitude',...
     'Expected Value','Block Accuracy','Rolling Accuracy','Rolling Accuracy 10','Total Score',...
     'RPE Value','RPE Magnitude',...
-    'Likelihood',...
+    'Likelihood','Likelihood',...
+    'Loudness','Roughness','Max Salience','Mean Salience','Max dSalience','Mean dSalience',...
     'ITI', ...
     'SBJ' ...
     };
@@ -54,7 +56,9 @@ regressor_colors = {...
     [209 151 105]./255, [209 151 105]./255, [118 160 156]./255, ... % tan, tan, teal, purple [152 78 163]./255,
     [0 0 0], [0 0 0], [0 0 0], [0 0 0], [0.4 0.4 0.4],... % dark blue, blacks, gray
     [209 151 105]./255, [118 160 156]./255, ... % tan, teal
-    [152 78 163]./255,... % purple
+    [152 78 163]./255,[152 78 163]./255,... % purple
+    [231,41,138]./255, [102,166,30]./255, ... %magenta, lime green
+    [217,95,2]./255, [217,95,2]./255, [117,112,179]./255, [117,112,179]./255, ... % dark orange, mauve purple
     [0.3 0.3 0.3], ...   % dark gray
     [0.3 0.3 0.3] ...   % dark gray
     };
@@ -62,12 +66,14 @@ regressor_markers = {...
     's','s','d',...%'*',
     'x','x','x','x','^',...
     's','d',...
-    '*',...
+    '*','*',...
+    '*','*','*','*','*','*',...
     'v','v'...
     };
 
 %% Convert model_id into set of conditions
 switch model_id
+    %======================================================================
     % Categorical Outcome Features
     case 'S'
         labels = {'Sign'};
@@ -77,11 +83,16 @@ switch model_id
         labels = {'Val','Lik'};
     case 'VM'
         labels = {'Val','Mag'};
+    case 'ML'
+        labels = {'Mag','Lik'};
     case 'VML'
         labels = {'Val','Mag','Lik'};
     case 'SML'
         labels = {'Sign','Mag','Lik'};
+    case 'VSML'
+        labels = {'Val','Sign','Mag','Lik'};
     
+    %======================================================================
     % RL models without EV
     case 'sRPE'
         labels = {'sRPE'};
@@ -91,30 +102,64 @@ switch model_id
         labels = {'sRPE','uRPE'};
     case 'RPEsL'
         labels = {'sRPE','uRPE','Lik'};
+    case 'uRPEL'
+        labels = {'uRPE','Lik'};
         
     case 'RSVPE'
         labels = {'Sign','Val','sRPE'};
         
+    %======================================================================
     % RL models with EV
-    case {'ERPEs','pWinPEus'}
+    case 'ERPEs'
         labels = {'EV','sRPE','uRPE'};
     case 'EsRPE'
         labels = {'EV','sRPE'};
+    case 'EsRPEL'
+        labels = {'EV','sRPE','Lik'};
     case 'EuRPE'
         labels = {'EV','uRPE'};
     case 'ERPEsL'
         labels = {'EV','sRPE','uRPE','Lik'};
+    case 'ERPEsrL'
+        labels = {'EV','sRPE','uRPE','rLik'};
     case 'ERPEsiti'
         labels = {'EV','sRPE','uRPE','ITI'};
     case 'ERPEsscr'
         labels = {'EV','score','sRPE','uRPE'};
         
+    %======================================================================
     % Combinations of Outcome and RL models
     case 'VMLsRPE'
         labels = {'Val','Lik','Mag','sRPE'};
     case 'VMLRPEsL'
         labels = {'Val','Lik','Mag','EV','sRPE','uRPE','Lik'};
+        
+    %======================================================================
+    % Auditory Salience Features
+    %   Only ERB should be used because "loudness" is different across my
+    %   sounds, making the other features uninterpretable (even if they fit)
+    case 'ERB'
+        labels = {'ERB'};
+%     case 'rough'
+%         labels = {'rough'};
+%     case 'ERBr'
+%         labels = {'ERB','rough'};
+%     case 'Kayser'
+%         labels = {'mxS','mnS','mxdS','mndS'};
+%     case 'AudSal'
+%         labels = {'ERB','rough','mxS','mnS','mxdS','mndS'};
+    case 'ERBuRPE'
+        labels = {'uRPE','ERB'};
+    case 'ERBsRPE'
+        labels = {'sRPE','ERB'};
+%     case 'rsRPE'
+%         labels = {'sRPE','rough'};
+    case 'ERBrsRPE'
+        labels = {'sRPE','ERB','rough'};
+%     case 'ASsRPE'
+%         labels = {'sRPE','ERB','rough','mxS','mnS','mxdS','mndS'};
     
+    %======================================================================
     % RL models with alternative accuracy
 %     case 'RLbA'
 %         labels = {'bAcc','sRPE','uRPE'};
@@ -127,10 +172,12 @@ switch model_id
 %     case 'RLrApW'
 %         labels = {'rAcc','pWin','sRPE','uRPE'};
     
+    %======================================================================
     % Null SBJ only control model
     case 'SBJonly'
         labels = {'SBJ'};
         
+    %======================================================================
     % Previous Trial Regressors:
 %     case 'RLpT'
 %         error('why running with previous trial regressors?');
@@ -171,7 +218,7 @@ end
 unique_colors = unique(vertcat(colors{:}),'rows');
 if size(unique_colors,1)~=numel(labels)
     for reg_ix = 1:numel(labels)
-        if any(strcmp(labels{reg_ix},{'Val','Mag'}))
+        if any(strcmp(labels{reg_ix},{'Val','Mag','mnS','mndS'}))
             line_styles{reg_ix} = ':';
         elseif strcmp(labels{reg_ix},'Sign')
             line_styles{reg_ix} = '-.';

@@ -1,7 +1,7 @@
 function SBJ06a_ERP_stats(SBJ,conditions,proc_id,an_id)
 % Calculates ERPs, computes cluster-based statistics, and plots the results
 % clear all; %close all;
-
+error('check this for 2021 updates!');
 %% Data Preparation
 % Set up paths
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];

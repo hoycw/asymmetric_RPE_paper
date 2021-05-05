@@ -52,7 +52,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     end
     cfg.hpfilter  = proc.hp_yn;
     cfg.hpfreq    = proc.hp_freq;
-    if isfield(proc_vars,'hp_order')
+    if isfield(proc,'hp_order')
         cfg.hpfiltord = proc.hp_order;
     end
     data = ft_preprocessing(cfg,data);

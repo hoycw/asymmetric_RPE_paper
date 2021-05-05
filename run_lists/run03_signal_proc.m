@@ -9,16 +9,8 @@ addpath(ft_dir);
 ft_defaults
 
 %% Load SBJ list
-SBJ_id = 'goodall';
+SBJ_id = 'preproc';
 SBJs = fn_load_SBJ_list(SBJ_id);
-
-%%
-proc_id    = 'main_ft';
-an_id      = 'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';
-actv_win   = 100;
-save_fig   = 1;
-fig_vis    = 'on';
-fig_ftype  = 'png';
 
 %% ERP Analysis and Plotting
 an_id   = 'ERP_F_trl2to1_stat1';
@@ -54,19 +46,25 @@ end
 %       -l mem_free=16G - request memory for a node
 %       -N name of the job (e.g., to view progress via `qstat`)
 
-%% Compute and Save Active Channels with High Frequency Activity
-for s = 1:numel(SBJs)
-    SBJ07ab_HFA_actv(SBJs{s},an_id,actv_win)
-end
-
-%%
-fig_vis = 'off';
+%% Test and Plot Active HFA Channels
 conditions = 'DifOut';
-an_id      = 'HGm_S_zbtS_trl2to3001_sm0_wn100_stat3';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
-stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
+proc_id    = 'main_ft';
+an_id      = 'HGm_F25t121_zbtS_sm0_l1_wn100';
+actv_win   = 100;
+atlas_id   = 'Dx';
+
+plt_id     = 'stack_F2to12_evnt_c5';%'stack_S2to3_evnt_c5';
+save_fig   = 1;
+fig_ftype  = 'png';
+fig_vis    = 'on';
+
 for s = 1:numel(SBJs)
-    plt_id     = 'stack_S2to3_evnt_c5';%'stack_F2to12_evnt_c5';
-    SBJ07b_HFA_plot_stack_cond_saved(SBJs{s}, conditions, an_id, actv_win, plt_id, save_fig, fig_vis, fig_ftype);
+    % Compute and Save Active Channels with High Frequency Activity
+%     SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
+    
+    % Plot Single Trial HFA Stacks
+    SBJ07c_HFA_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, actv_win, plt_id, save_fig,...
+        'atlas_id', atlas_id, 'fig_vis', fig_vis, 'fig_ftype', fig_ftype);
     close all;
 end
 

@@ -1,6 +1,6 @@
 %% IR57 Processing Variables
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
-if isempty(strfind(path,'fieldtrip')); addpath(ft_dir); ft_defaults; end
+if ~contains(path,'fieldtrip'); addpath(ft_dir); ft_defaults; end
 
 %--------------------------------------
 % Basics
@@ -22,7 +22,7 @@ SBJ_vars.dirs.models  = [SBJ_vars.dirs.SBJ '06_models/'];
 SBJ_vars.dirs.stats   = [SBJ_vars.dirs.SBJ '07_stats/'];
 dirs_fields = fieldnames(SBJ_vars.dirs);
 for field_ix = 1:numel(dirs_fields)
-    if ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
+    if ~strcmp(dirs_fields{field_ix},'raw_filename') && ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
@@ -85,8 +85,10 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % data starts ~62s, goes to ~1410
 SBJ_vars.analysis_time = {{[52 1420]}};
-SBJ_vars.ignore_trials = [];
-if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name)
+SBJ_vars.ignore_trials = {[]};
+if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
+        numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
+        numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
     error('Mismatch number of runs to concatenate!');
 end
 

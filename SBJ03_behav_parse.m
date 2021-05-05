@@ -1,4 +1,4 @@
-function [trl_info] = SBJ03_behav_parse(SBJ, block, proc_id, plot_it, save_it)
+function [bhv] = SBJ03_behav_parse(SBJ, block_ix, proc_id, plot_it, save_it)
 %
 % SBJ [str] -- uniquely identifies the subject, e.g., 'IR54'
 % block [int] -- index of which block of data should be analyzed
@@ -15,14 +15,14 @@ else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtri
 SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
 eval(SBJ_vars_cmd);
 if numel(SBJ_vars.raw_file)>1
-    block_suffix = strcat('_',SBJ_vars.block_name{block});
+    block_suffix = strcat('_',SBJ_vars.block_name{block_ix});
 else
-    block_suffix = SBJ_vars.block_name{block};   % should just be ''
+    block_suffix = SBJ_vars.block_name{block_ix};   % should just be ''
 end
 
 evnt_fname   = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];
 bhv_fname    = [SBJ_vars.dirs.events SBJ '_behav',block_suffix,'.csv'];
-output_fname = [SBJ_vars.dirs.events SBJ '_trl_info_auto',block_suffix,'.mat'];
+output_fname = [SBJ_vars.dirs.events SBJ '_bhv_auto',block_suffix,'.mat'];
 
 % Import helper functions to Matlab path
 addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
@@ -31,7 +31,7 @@ addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
 % Load preprocessing variables to get sampling rate
 eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 if any(SBJ_vars.low_srate)
-    nrl_srate = SBJ_vars.low_srate(block);
+    nrl_srate = SBJ_vars.low_srate(block_ix);
 else
     nrl_srate = proc.resample_freq;
 end
@@ -104,11 +104,11 @@ if plot_it
 end
 
 %% Read in log file
-trl_info = fn_load_behav_csv(bhv_fname,ignore_trials);
-fprintf('\t\tKeeping %d trials from log file\n', numel(trl_info.trl_n));
+bhv = fn_load_behav_csv(bhv_fname,SBJ_vars.ignore_trials{block_ix});
+fprintf('\t\tKeeping %d trials from log file\n', numel(bhv.trl_n));
 
 %% Check if log and photodiode have different n_trials, plot and error out
-if(length(trl_info.trl_n) ~= length(trl_onsets))
+if(length(bhv.trl_n) ~= length(trl_onsets))
     figure;
     % Plot photodiode data
     plot_photo = data_photo_orig - min(data_photo_orig);
@@ -124,32 +124,32 @@ if(length(trl_info.trl_n) ~= length(trl_onsets))
 end
 
 %% Put all the information into correct structures
-fprintf('\t\tMean +/- SD response time = %1.2f +/- %.3f sec\n', nanmean(trl_info.rt), nanstd(trl_info.rt)); % Ignore NaNs
-trl_info.trl_onset = trl_onsets;
-trl_info.rsp_onset = trl_onsets + floor(trl_info.rt*evnt_srate);
-trl_info.fb_onset  = fb_onsets;
+fprintf('\t\tMean +/- SD response time = %1.2f +/- %.3f sec\n', nanmean(bhv.rt), nanstd(bhv.rt)); % Ignore NaNs
+bhv.trl_onset = trl_onsets;
+bhv.rsp_onset = trl_onsets + floor(bhv.rt*evnt_srate);
+bhv.fb_onset  = fb_onsets;
 
 % Track no response trials
-trl_info.rsp_onset(trl_info.rt<0) = -1;
-trl_info.hit(trl_info.rt<0)       = -1;
-trl_info.score(trl_info.rt<0)     = 0;
+bhv.rsp_onset(bhv.rt<0) = -1;
+bhv.hit(bhv.rt<0)       = -1;
+bhv.score(bhv.rt<0)     = 0;
 
 % Book keeping
-trl_info.ignore_trials = ignore_trials;
-trl_info.SBJ     = SBJ;
-trl_info.rt_type = 'auto_log';
-trl_info.prdm    = prdm_vars;
+bhv.ignore_trials = SBJ_vars.ignore_trials{block_ix};
+bhv.SBJ     = SBJ;
+bhv.rt_type = 'auto_log';
+bhv.prdm    = prdm_vars;
 
 %% Convert samples from event channel sample rate to iEEG channel sample rate
 s_rate_ratio = nrl_srate / evnt.fsample;
-trl_info.trl_onset = round(trl_info.trl_onset*s_rate_ratio);
-trl_info.rsp_onset = round(trl_info.rsp_onset*s_rate_ratio);
-trl_info.fb_onset  = round(trl_info.fb_onset*s_rate_ratio);
-trl_info.sample_rate = nrl_srate;
+bhv.trl_onset = round(bhv.trl_onset*s_rate_ratio);
+bhv.rsp_onset = round(bhv.rsp_onset*s_rate_ratio);
+bhv.fb_onset  = round(bhv.fb_onset*s_rate_ratio);
+bhv.sample_rate = nrl_srate;
 
 %% Save results
 if save_it
-    save(output_fname, '-v7.3', 'trl_info');
+    save(output_fname, '-v7.3', 'bhv');
 end
 
 %% Plot results
@@ -166,23 +166,23 @@ if (plot_it ~= 0)
     plot([0 len_in_sec],[0.25 0.25],'k');
     
     % Plot trial onsets
-    for trial_ix = 1:length(trl_info.trl_onset)
-        plot([trl_info.trl_onset(trial_ix)/s_rate_ratio trl_info.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[1.30 1.40],'b','LineWidth',2);
-        plot([trl_info.trl_onset(trial_ix)/s_rate_ratio trl_info.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[-0.35 0.35],'b','LineWidth',2);
+    for trial_ix = 1:length(bhv.trl_onset)
+        plot([bhv.trl_onset(trial_ix)/s_rate_ratio bhv.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[1.30 1.40],'b','LineWidth',2);
+        plot([bhv.trl_onset(trial_ix)/s_rate_ratio bhv.trl_onset(trial_ix)/s_rate_ratio]/evnt_srate,[-0.35 0.35],'b','LineWidth',2);
     end
     
     % Plot RTs
-    for resp_n = 1:length(trl_info.rsp_onset)
-        if trl_info.rt(resp_n)>0
-            plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[1.35 1.45],'g','LineWidth',2);
-            plot([trl_info.rsp_onset(resp_n)/s_rate_ratio trl_info.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'g','LineWidth',2);
+    for resp_n = 1:length(bhv.rsp_onset)
+        if bhv.rt(resp_n)>0
+            plot([bhv.rsp_onset(resp_n)/s_rate_ratio bhv.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[1.35 1.45],'g','LineWidth',2);
+            plot([bhv.rsp_onset(resp_n)/s_rate_ratio bhv.rsp_onset(resp_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'g','LineWidth',2);
         end
     end
     
     % Plot feedback onsets
-    for fb_n = 1:length(trl_info.fb_onset)
-        plot([trl_info.fb_onset(fb_n)/s_rate_ratio trl_info.fb_onset(fb_n)/s_rate_ratio]/evnt_srate,[1.4 1.5],'r','LineWidth',2);
-        plot([trl_info.fb_onset(fb_n)/s_rate_ratio trl_info.fb_onset(fb_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'r','LineWidth',2);
+    for fb_n = 1:length(bhv.fb_onset)
+        plot([bhv.fb_onset(fb_n)/s_rate_ratio bhv.fb_onset(fb_n)/s_rate_ratio]/evnt_srate,[1.4 1.5],'r','LineWidth',2);
+        plot([bhv.fb_onset(fb_n)/s_rate_ratio bhv.fb_onset(fb_n)/s_rate_ratio]/evnt_srate,[-0.30 0.30],'r','LineWidth',2);
     end
     
     if save_it

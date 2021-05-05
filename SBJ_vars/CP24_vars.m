@@ -22,7 +22,7 @@ SBJ_vars.dirs.models  = [SBJ_vars.dirs.SBJ '06_models/'];
 SBJ_vars.dirs.stats   = [SBJ_vars.dirs.SBJ '07_stats/'];
 dirs_fields = fieldnames(SBJ_vars.dirs);
 for field_ix = 1:numel(dirs_fields)
-    if ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
+    if ~strcmp(dirs_fields{field_ix},'raw_filename') && ~exist(SBJ_vars.dirs.(dirs_fields{field_ix}),'dir')
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
@@ -103,7 +103,10 @@ SBJ_vars.bs_width    = 2;
 % see cut scripts for timing info
 % miscut first run (not redoing it), so first event is ~158s in R1
 SBJ_vars.analysis_time = {{[1 1429]},{[1 1289]}};
-if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name)
+SBJ_vars.ignore_trials = {[111],[]};
+if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
+        numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
+        numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
     error('Mismatch number of runs to concatenate!');
 end
 
