@@ -1,0 +1,5 @@
+-o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
+-v pipeline_id="main_ft",an_id="HGh_F25t121_zbtS_sm0_l1"
+-l mem_free=16G
+-N HFAsave
