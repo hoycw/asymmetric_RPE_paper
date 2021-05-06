@@ -19,6 +19,8 @@ eval(an_vars_cmd);
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
 load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_final.mat'));
 
+[cond_lab, ~, ~, ~, ~] = fn_condition_label_styles('DifFB'); % keep all conditions
+
 % Toss sampleinfo which can mess up trial cutting
 if isfield(data,'sampleinfo')
     data = rmfield(data,'sampleinfo');
@@ -57,7 +59,7 @@ if strcmp(an.evnt_lab,'S')
         error(['ERROR: an.trial_lim_s does not include an.bsln_lim for an_id = ' an_id]);
     end
     % Cut to desired trial_lim_s
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index(cond_lab,bhv),...
         round(trial_lim_s_pad*roi.fsample));
 elseif strcmp(an.evnt_lab,'R')
     % Check that baseline will be included in data cut to trial_lim_s
@@ -66,12 +68,12 @@ elseif strcmp(an.evnt_lab,'R')
     end
     % Cut to max_RT+trial_lim_s(2) to include S baseline + full R-locked trial_lim_s
     max_RT  = max(bhv.rt);
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index(cond_lab,bhv),...
         round([trial_lim_s_pad(1) max_RT+trial_lim_s_pad(2)]*roi.fsample));
 elseif strcmp(an.evnt_lab,'F')
     % Cut from S baseline to full F-locked:
     %   [trl_onset+an.trial_lim_s(1) to fb+an.trial_lim_s(2)]
-    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index('DifOut',bhv),...
+    roi_trl = fn_ft_cut_trials_equal_len(roi,bsln_events,fn_condition_index(cond_lab,bhv),...
         round([trial_lim_s_pad(1) bhv.prdm.trl_len+trial_lim_s_pad(2)]*roi.fsample));
 else
     error(['Unknown an.evnt_lab: ' an.evnt_lab]);
@@ -114,7 +116,7 @@ end
 % Trim back down to original trial_lim_s to exclude NaNs
 cfg_trim = [];
 if strcmp(an.evnt_lab,'S')
-    cfg_trim.latency = trial_lim_s;
+    cfg_trim.latency = an.trial_lim_s;
 elseif strcmp(an.evnt_lab,'R') && strcmp(an.bsln_evnt,'S')
     cfg_trim.latency = [an.bsln_lim(1) max_RT+an.trial_lim_s(2)];
 elseif strcmp(an.evnt_lab,'F') && strcmp(an.bsln_evnt,'S')
