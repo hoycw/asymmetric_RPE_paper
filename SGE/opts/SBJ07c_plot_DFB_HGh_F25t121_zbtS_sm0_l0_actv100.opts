@@ -1,5 +1,5 @@
 -o /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
 -e /home/knight/hoycw/PRJ_Error/scripts/NotBackedUp/SGEout
--v proc_id="main_ft"
+-v conditions="DifFB",proc_id="main_ft",an_id="HGh_F25t121_zbtS_sm0_l0",actv_win="100",plt_id="stack_F2t12_evnt_c5"
 -l mem_free=8G
--N preproc
+-N HFAplot

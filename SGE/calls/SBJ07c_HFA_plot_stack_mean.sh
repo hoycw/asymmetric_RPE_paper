@@ -12,15 +12,15 @@ cd /home/knight/hoycw/PRJ_Error/scripts/
 SBJ="${SGE_TASK}"
 
 # define function
-FUNCTION='SBJ07a_HFA_save'
+FUNCTION='SBJ07c_HFA_plot_stack_mean'
 
 # set up matlab function call
-func_call="${FUNCTION}('${SBJ}', '${proc_id}', '${an_id}')"
+func_call="${FUNCTION}('${SBJ}', '${conditions}', '${proc_id}', '${an_id}', '${actv_win}', '${plt_id}', 1, 'fig_vis', 'off')"
 
 # define commands to execute via SGE
 echo ${SBJ}
 echo ${func_call}
 echo $$
-echo ${func_call} > NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
-time matlab -nodesktop -nosplash -nodisplay < NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
-rm NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${an_id}.m
+echo ${func_call} > NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${conditions}_${an_id}.m
+time matlab -nodesktop -nosplash -nodisplay < NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${conditions}_${an_id}.m
+rm NotBackedUp/tmpSGE/${FUNCTION}_${SBJ}_${conditions}_${an_id}.m
