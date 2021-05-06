@@ -1,10 +1,11 @@
-function [event_times] = fn_get_evnt_times(an_event_type,plt_event_lab)
+function [event_times] = fn_get_evnt_times(an_event_type,plt_event_lab,bhv)
 %% Find the time (sec) of an event relative to the time-locked events for plotting
 % INPUTS:
 %   an_event_type [str] - label of the time-locked event
 %       {'S','R','F'} for stimulus, response, feedback (FB)
 %   plt_event_lab [cell array] - set of labels of events to plot
 %       {'S','R','F','Fon','Foff'} for stimulus, response, feedback, FB onset, FB offset
+%   bhv [struct] - contains bhv.prdm field with paradigm design timing info
 % OUTPUTS:
 %   event_times [array] - times of the events (in sec) relative to analysis time-locked event
 
@@ -15,8 +16,9 @@ if strcmp(an_event_type,'S')
             case 'S'
                 event_times(evnt_ix) = 0;
             case 'R'
-                error('this looks like a bug, would need to load and add bhv.rt');
                 event_times(evnt_ix) = bhv.prdm.target;
+                % nevermind, this is just a rough marker of the target time:
+                % error('this looks like a bug, would need to load and add bhv.rt');
             case {'F','Fon'}
                 event_times(evnt_ix) = bhv.prdm.target+bhv.prdm.fb_delay;
             case 'Foff'

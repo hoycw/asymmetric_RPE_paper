@@ -1,4 +1,4 @@
-function fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJs, proc_id, stat_id, an_id, reg_type, show_labels,...
+function fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_id, stat_id, reg_type, show_labels,...
                             hemi, atlas_id, roi_id, plot_roi, mirror, varargin)
 %% Plot a reconstruction with electrodes colored according to statistics
 % INPUTS:
@@ -95,18 +95,21 @@ else
 end
 
 %% Load data
+eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
-[grp_lab, ~, ~] = fn_group_label_styles(st.model_lab);
-if numel(grp_lab) < 2 || numel(grp_lab) > 3; error('why venn?'); end
-venn_colors = fn_venn_colors(0,'model_id',st.model_lab);
+[reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+if numel(reg_lab) < 2 || numel(reg_lab) > 3; error('why venn?'); end
+venn_colors = fn_venn_colors(0,'model_lab',mdl.model_lab);
 all_color   = [0.1 0.1 0.1];
+
+SBJs = fn_load_SBJ_list(SBJ_id);
 
 elec_sbj    = cell([numel(SBJs) 1]);
 elec_sig    = cell([numel(SBJs) 1]);
 good_sbj    = true([numel(SBJs) 1]);
 sig_roi_mat = cell([numel(SBJs) 1]);
 roi_mat     = cell([numel(SBJs) 1]);
-all_roi_colors = cell([numel(grp_lab) 1]);
+all_roi_colors = cell([numel(reg_lab) 1]);
 for sbj_ix = 1:numel(SBJs)
     SBJ = SBJs{sbj_ix};
     fprintf('================= Processing: %s =================\n',SBJ);
@@ -147,7 +150,7 @@ for sbj_ix = 1:numel(SBJs)
     end
     
     %% Load Stats
-    sig_mat = zeros([numel(elec_sbj{sbj_ix}.label) numel(grp_lab)]);
+    sig_mat = zeros([numel(elec_sbj{sbj_ix}.label) numel(reg_lab)]);
     if any(roi_mat{sbj_ix})
         % Mirror hemispheres
         if mirror
@@ -155,7 +158,7 @@ for sbj_ix = 1:numel(SBJs)
                 -elec_sbj{sbj_ix}.chanpos(~strcmp(elec_sbj{sbj_ix}.hemi,hemi),1);
         end
         
-        load([SBJ_vars.dirs.proc SBJ '_mGLM_ROI_' stat_id '_' an_id '.mat'],'beta');
+        load([SBJ_vars.dirs.stats SBJ '_mGLM_ROI_' model_id '_' stat_id '_' an_id '.mat'],'beta');
 %         % HACK!!! remove some to match with PRJ_Stroop elec files
 %         cfgs = [];
 %         if strcmp(SBJ,'CP24')
@@ -174,9 +177,10 @@ for sbj_ix = 1:numel(SBJs)
             elec_ix = strcmp(beta.label{ch_ix},orig_labels);
             if any(elec_ix)
                 % Consolidate to binary sig/non-sig
-                for grp_ix = 1:numel(grp_lab)
-                    if any(beta.qval(grp_ix,ch_ix,:)<=0.05,3)
-                        sig_mat(elec_ix,grp_ix) = 1;
+                for reg_ix = 1:numel(reg_lab)
+                    beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
+                    if any(beta.qval(beta_reg_ix,ch_ix,:)<=st.alpha,3)
+                        sig_mat(elec_ix,reg_ix) = 1;
                     end
                 end
             else
@@ -187,12 +191,12 @@ for sbj_ix = 1:numel(SBJs)
         %% Compile Statistics (if any significance in plot_roi)
         if any(any(sig_mat(roi_mat{sbj_ix}~=0,:),2))
             % Print # and % sig
-            print_nums = zeros([2 numel(grp_lab)]);
-            for st_ix = 1:numel(grp_lab)
+            print_nums = zeros([2 numel(reg_lab)]);
+            for st_ix = 1:numel(reg_lab)
                 print_nums(1,st_ix) = sum(sig_mat(:,st_ix));
                 print_nums(2,st_ix) = sum(sig_mat(:,st_ix))/size(sig_mat,1);
             end
-            fprintf(['%-10s' repmat('%-3i(%.3f)\t',[1 numel(grp_lab)]) '\n'],[SBJ ' sig:'],print_nums(:));
+            fprintf(['%-10s' repmat('%-3i(%.3f)\t',[1 numel(reg_lab)]) '\n'],[SBJ ' sig:'],print_nums(:));
             
             % Keep intersection of significant and ROI matched electrodes
             sig_idx = any(sig_mat,2);
@@ -205,13 +209,13 @@ for sbj_ix = 1:numel(SBJs)
             % For significant elecs in plot_roi, select color and add to elec
             all_roi_colors{sbj_ix} = zeros([numel(elec_sig{sbj_ix}.label) 3]);
             for sig_ix = 1:numel(elec_sig{sbj_ix}.label)
-                grp_ix = find(sig_roi_mat{sbj_ix}(sig_ix,:));
-                if numel(grp_ix)==numel(grp_lab) && numel(grp_lab) == 3
+                reg_ix = find(sig_roi_mat{sbj_ix}(sig_ix,:));
+                if numel(reg_ix)==numel(reg_lab) && numel(reg_lab) == 3
                     all_roi_colors{sbj_ix}(sig_ix,:) = all_color;
-                elseif numel(grp_ix)==2
-                    all_roi_colors{sbj_ix}(sig_ix,:) = venn_colors{grp_ix(1),grp_ix(2)};
+                elseif numel(reg_ix)==2
+                    all_roi_colors{sbj_ix}(sig_ix,:) = venn_colors{reg_ix(1),reg_ix(2)};
                 else
-                    all_roi_colors{sbj_ix}(sig_ix,:) = venn_colors{grp_ix,grp_ix};
+                    all_roi_colors{sbj_ix}(sig_ix,:) = venn_colors{reg_ix,reg_ix};
                 end
             end
             
@@ -293,12 +297,12 @@ end
 
 %% 3D Surface + Grids (3d, pat/mni, vol/srf, 0/1)
 if save_fig
-    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP_recon_venn/' stat_id '/' an_id '/'];
+    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP_recon_venn/' model_id '/' stat_id '/' an_id '/'];
     if ~exist(out_dir,'dir')
         [~] = mkdir(out_dir);
     end
 end
-plot_name = ['GRP_' strjoin(grp_lab,'-') '_' stat_id '_' an_id '_' plot_roi '_' hemi_str '_' view_str];
+plot_name = [SBJ_id '_' model_id '_' stat_id '_' an_id '_' plot_roi '_' hemi_str '_' view_str];
 f = figure('Name',plot_name);
 
 % Plot 3D mesh
@@ -333,25 +337,25 @@ end
 venn_name = [plot_name '_leg'];
 v = figure('Name',venn_name); hold on;
 venn_legend = {}; leg_ix = 0;
-for grp_ix1 = 1:numel(grp_lab)
-    for grp_ix2 = grp_ix1:numel(grp_lab)
-        scatter(grp_ix1,grp_ix2,500,'MarkerFaceColor',venn_colors{grp_ix1,grp_ix2},...
+for reg_ix1 = 1:numel(reg_lab)
+    for reg_ix2 = reg_ix1:numel(reg_lab)
+        scatter(reg_ix1,reg_ix2,500,'MarkerFaceColor',venn_colors{reg_ix1,reg_ix2},...
                 'MarkerEdgeColor','k');
         leg_ix = leg_ix + 1;
-        if grp_ix1==grp_ix2
-            venn_legend{leg_ix} = [grp_lab{grp_ix1} num2str(grp_ix1)];
+        if reg_ix1==reg_ix2
+            venn_legend{leg_ix} = [reg_lab{reg_ix1} num2str(reg_ix1)];
         else
-            venn_legend{leg_ix} = [grp_lab{grp_ix1} num2str(grp_ix1) '+'...
-                                   grp_lab{grp_ix2} num2str(grp_ix2)];
+            venn_legend{leg_ix} = [reg_lab{reg_ix1} num2str(reg_ix1) '+'...
+                                   reg_lab{reg_ix2} num2str(reg_ix2)];
         end
     end
 end
-if numel(grp_lab)>2
-    scatter(numel(grp_lab),1,500,'MarkerFaceColor',all_color,'MarkerEdgeColor','k');
-    venn_legend{leg_ix+1} = strjoin(grp_lab,'+');
+if numel(reg_lab)>2
+    scatter(numel(reg_lab),1,500,'MarkerFaceColor',all_color,'MarkerEdgeColor','k');
+    venn_legend{leg_ix+1} = strjoin(reg_lab,'+');
 end
-xlim([0 numel(grp_lab)+1]);
-ylim([0 numel(grp_lab)+1]);
+xlim([0 numel(reg_lab)+1]);
+ylim([0 numel(reg_lab)+1]);
 legend(venn_legend);
 
 if save_fig

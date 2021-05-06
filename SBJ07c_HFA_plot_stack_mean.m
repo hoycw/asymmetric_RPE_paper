@@ -72,7 +72,7 @@ eval(plt_vars_cmd);
 
 %% Load Results
 % Load RTs
-load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_',final.mat'),'bhv');
+load([SBJ_vars.dirs.events SBJ '_bhv_' proc_id '_final.mat'],'bhv');
 
 % Load data
 hfa_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat');
@@ -92,15 +92,8 @@ end
 % Select conditions
 [cond_lab, cond_names, cond_colors, cond_styles, cond_mrkrs] = fn_condition_label_styles(conditions);
 full_cond_idx = fn_condition_index(cond_lab,bhv);
-n_full_trials = numel(bhv.trl_n);
-error('add fn here');
-bhv_fields = fieldnames(bhv);
-for f_ix = 1:numel(bhv_fields)
-    if numel(bhv.(bhv_fields{f_ix}))==n_full_trials
-        bhv.(bhv_fields{f_ix}) = bhv.(bhv_fields{f_ix})(full_cond_idx~=0);
-    end
-end
-cond_idx = fn_condition_index(cond_lab,bhv);
+bhv = fn_select_bhv(bhv, full_cond_idx);
+cond_idx = fn_condition_index(cond_lab, bhv);
 
 % Sort trials by condition, RT, then trial number
 cond_mat   = horzcat(cond_idx,round(1000*bhv.rt),[1:numel(bhv.trl_n)]');
@@ -122,7 +115,7 @@ cfg_trim.latency = plt.plt_lim;
 hfa = ft_selectdata(cfg_trim,hfa);
 
 % Get event times for plotting
-[evnt_times] = fn_get_evnt_times(an.evnt_lab,plt.evnt_lab);
+[evnt_times] = fn_get_evnt_times(an.evnt_lab,plt.evnt_lab,bhv);
 
 %% Plot Results
 fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/stack_mn_' conditions '/' an_id '/'];

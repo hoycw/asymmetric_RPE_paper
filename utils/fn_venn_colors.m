@@ -2,7 +2,7 @@ function colors = fn_venn_colors(n_categories, varargin)
 %% function colors = fn_venn_colors(n_categories)
 % returns [n_cat, n_cat] matrix of colors for the number of categories
 % Color determination:
-%   if cond_id or model_id is provided via varargin, pulls those
+%   if cond_id or model_lab is provided via varargin, pulls those
 %       overlap is mean of cond_colors (or reg_colors)
 %   if no cond_id:
 %       n=3 colors based on R, G, B (Y, P, C)
@@ -20,8 +20,8 @@ if ~isempty(varargin)
     for v = 1:2:numel(varargin)
         if strcmp(varargin{v},'cond_id')
             cond_id = varargin{v+1};
-        elseif strcmp(varargin{v},'model_id')
-            model_id = varargin{v+1};
+        elseif strcmp(varargin{v},'model_lab')
+            model_lab = varargin{v+1};
         elseif strcmp(varargin{v},'color_id')
             color_id = varargin{v+1};
         else
@@ -41,10 +41,10 @@ if exist('cond_id','var')
             colors{c1,c2} = mean([cond_colors{c1};cond_colors{c2}],1);
         end
     end
-elseif exist('model_id','var')
-    [reg_lab, ~, reg_colors, ~] = fn_regressor_label_styles(model_id);
+elseif exist('model_lab','var')
+    [reg_lab, ~, reg_colors, ~] = fn_regressor_label_styles(model_lab);
     colors = cell(numel(reg_colors));
-    if strcmp(model_id,'pWinPEus')
+    if any(strcmp(model_lab,{'pWinPEus','ERPEs'}))
         colors{1,1} = [189 65 45]./256;     % EV - tomato (red)
         colors{2,2} = [209 151 105]./256;   % sRPE - tan
         colors{3,3} = [118 160 156]./256;   % uRPE - aqua

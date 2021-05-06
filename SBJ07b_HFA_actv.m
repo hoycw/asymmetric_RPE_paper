@@ -33,9 +33,9 @@ eval(an_vars_cmd);
 % eval(['run /home/knight/hoycw/PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
 % Load Data
-hfa_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat');
+hfa_fname = [SBJ_vars.dirs.proc SBJ '_ROI_' proc_id '_' an_id '.mat'];
 load(hfa_fname);
-load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_' proc_id '_final.mat'));
+load([SBJ_vars.dirs.events SBJ '_bhv_' proc_id '_final.mat']);
 
 % Convert
 sample_rate = (numel(hfa.time)-1)/(hfa.time(end)-hfa.time(1));

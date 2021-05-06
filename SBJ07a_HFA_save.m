@@ -17,7 +17,7 @@ eval(an_vars_cmd);
 
 % Load Data
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
-load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_' proc_id '_final.mat'));
+load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_final.mat'));
 
 % Toss sampleinfo which can mess up trial cutting
 if isfield(data,'sampleinfo')
@@ -42,7 +42,7 @@ if strcmp(an.HFA_type,'multiband')
     pad_len = 0.5*max(cfg_hfa.t_ftimwin)*3;
 elseif any(strcmp(an.HFA_type,{'broadband','hilbert'}))
     % add 250 ms as a rule of thumb, or longer if necessary
-    pad_len = 0.5*max([1/min(fois)*3 0.25]);
+    pad_len = 0.5*max([1/min(an.fois)*3 0.25]);
 end
 % Cut data to an.bsln_lim to be consistent across S and R locked (confirmed below)
 %   Add extra 10 ms just because trimming back down to trial_lim_s exactly leave

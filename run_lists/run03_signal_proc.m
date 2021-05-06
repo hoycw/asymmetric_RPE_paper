@@ -47,20 +47,20 @@ end
 %       -N name of the job (e.g., to view progress via `qstat`)
 
 %% Test and Plot Active HFA Channels
-conditions = 'DifOut';
+conditions = 'DifFB';
 proc_id    = 'main_ft';
-an_id      = 'HGm_F25t121_zbtS_sm0_l1_wn100';
+an_id      = 'HGm_S25t301_zbtS_sm0_l1_wn100';%'HGm_F25t121_zbtS_sm0_l1_wn100';
 actv_win   = 100;
 atlas_id   = 'Dx';
 
-plt_id     = 'stack_F2to12_evnt_c5';%'stack_S2to3_evnt_c5';
+plt_id     = 'stack_S2t3_evnt_c5';%'stack_F2t12_evnt_c5';%
 save_fig   = 1;
 fig_ftype  = 'png';
-fig_vis    = 'on';
+fig_vis    = 'off';
 
-for s = 1:numel(SBJs)
+for s = 2:numel(SBJs)
     % Compute and Save Active Channels with High Frequency Activity
-%     SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
+    SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
     
     % Plot Single Trial HFA Stacks
     SBJ07c_HFA_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, actv_win, plt_id, save_fig,...
