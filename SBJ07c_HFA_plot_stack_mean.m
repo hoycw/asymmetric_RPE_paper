@@ -119,12 +119,13 @@ hfa = ft_selectdata(cfg_trim,hfa);
 
 %% Plot Results
 fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/stack_mn_' conditions '/' an_id '/'];
-if ~exist(fig_dir,'dir')
-    [~] = mkdir(fig_dir);
-end
+if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
+sig_ln_dir = [fig_dir 'sig_ch/'];
+if ~exist(sig_ln_dir,'dir'); [~] = mkdir(sig_ln_dir); end
 
 % Create a figure for each channel
 for ch_ix = 1:numel(hfa.label)
+    sig_flag = 0;
     %% Compute Plotting Data
     % Average HFA per condition
     means = NaN([numel(cond_lab) numel(hfa.time)]);
@@ -230,9 +231,10 @@ for ch_ix = 1:numel(hfa.label)
         main_lines(main_line_ix) = cond_lines{cond_ix}.mainLine;
     end
     
-    % Plot Significance per Regressor
+    % Plot Significance for Activation vs. Baseline
     ylims = ylim;
     if actv.actv_ch(ch_ix)
+        sig_flag = 1;
         for sig_ix = 1:size(actv.actv_epochs{ch_ix},1)
             % Plot rectangular patch over epoch
             patch([actv.actv_epochs{ch_ix}(sig_ix,1) actv.actv_epochs{ch_ix}(sig_ix,1) ...
@@ -270,6 +272,13 @@ for ch_ix = 1:numel(hfa.label)
         % Ensure vector graphics if saving
         if any(strcmp(fig_ftype,{'svg','eps'})); set(gcf, 'Renderer', 'painters'); end
         saveas(gcf,fig_fname);
+        
+        % Symbolic link for significant plots
+        if sig_flag
+            cd(sig_ln_dir);
+            link_cmd = ['ln -s ../' fig_name '.' fig_ftype ' .'];
+            system(link_cmd);
+        end
     end
 end
 

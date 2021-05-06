@@ -15,7 +15,7 @@ SBJ="${SGE_TASK}"
 FUNCTION='SBJ02_preproc'
 
 # set up matlab function call
-func_call="${FUNCTION}('${SBJ}', '${pipeline_id}')"
+func_call="${FUNCTION}('${SBJ}', '${proc_id}')"
 
 # define commands to execute via SGE
 echo ${SBJ}

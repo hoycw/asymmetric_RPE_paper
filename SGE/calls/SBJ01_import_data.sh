@@ -15,7 +15,7 @@ DATASET="${SGE_TASK}"
 FUNCTION='SBJ01_import_data'
 
 # set up matlab function call
-func_call="${FUNCTION}('${DATASET}', '${pipeline_id}')"
+func_call="${FUNCTION}('${DATASET}', '${proc_id}')"
 
 # define commands to execute via SGE
 echo ${DATASET}
