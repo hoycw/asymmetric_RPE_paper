@@ -35,7 +35,7 @@ if ~strcmp(st.an_style,'mGLM'); error('This script is only for mass GLM!'); end
 % Load behavioral data, model, and HFA
 load([SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_final.mat']);
 load([SBJ_vars.dirs.models SBJ '_model_' mdl.model_id '.mat']);
-load([SBJ_vars.dirs.proc,SBJ,'_ROI_',an_id,'.mat']);
+load([SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat']);
 
 % Check if more than one frequency, error for now
 if numel(hfa.freq)>1
@@ -123,8 +123,8 @@ for w_ix = 1:size(win_lim,1)
 end
 
 %% Run ANOVA
-fprintf('================== Running ANOVA =======================\n');
-% Create structure for w2 in fieldtrip style
+fprintf('================== Running Mass GLM =======================\n');
+% Create structure for beta in fieldtrip style
 if ~any(strcmp(reg_lab,'offset'))
     reg_lab = ['offset' reg_lab];
     model   = [ones(size(model,1), 1) model];

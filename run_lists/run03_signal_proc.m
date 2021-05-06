@@ -49,16 +49,16 @@ end
 %% Test and Plot Active HFA Channels
 conditions = 'DifFB';
 proc_id    = 'main_ft';
-an_id      = 'HGm_S25t301_zbtS_sm0_l1_wn100';%'HGm_F25t121_zbtS_sm0_l1_wn100';
+an_id      = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_S25t301_zbtS_sm0_l1_wn100';%'HGm_F25t121_zbtS_sm0_l1_wn100';
 actv_win   = 100;
 atlas_id   = 'Dx';
 
-plt_id     = 'stack_S2t3_evnt_c5';%'stack_F2t12_evnt_c5';%
+plt_id     = 'stack_F2t12_evnt_c5';%'stack_S2t3_evnt_c5';%
 save_fig   = 1;
 fig_ftype  = 'png';
 fig_vis    = 'off';
 
-for s = 2:numel(SBJs)
+for s = 1:numel(SBJs)
     % Compute and Save Active Channels with High Frequency Activity
     SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
     

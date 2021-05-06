@@ -60,9 +60,9 @@ end
 
 %% Run Model (SGE...)
 proc_id   = 'main_ft';
-an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
+an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st05t6_WL05_WS25'};
 atlas_id  = 'Dx';
 % stat_ids  = {'lme_st05t5'};%'ERPEsL_DifFB_lme_st05t5'};
 % stat_id = 'RL_DifOut_F0t1_WL01_WS25';%'ERPEs_DO_glm_F0t5_WL01_WS25';
@@ -74,23 +74,23 @@ fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 1:numel(SBJs)
+        for s = 2:numel(SBJs)
             % Run Mass GLM Stats
-            SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+            % SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
-%             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
-%                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-%             close all;
+            SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+                plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+            close all;
         end
     end
 end
 
 %% Plot Group GLM Proportion of Effects by ROI
 proc_id   = 'main_ft';
-an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
+an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
 atlas_id  = 'Dx';
 roi_id    = 'mgROI';
 gm_thresh = 0;
@@ -115,9 +115,9 @@ end
 
 %% Plot Group Stat ROI Recon
 proc_id   = 'main_ft';
-an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_F_zbtS_trl2to1201_sm0_wn100_stat1';%
+an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
 hemi      = 'l';
 roi_id    = 'mgROI';
 atlas_id  = 'Dx';
@@ -149,14 +149,14 @@ show_lab = 0;
 mirror = 1;
 
 for s = 1:numel(SBJs)
-%     fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'r', 0, 'save_fig', 1);
-    fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'l', mirror, 0, 'save_fig', 1);
+% %     fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'r', 0, 'save_fig', 1);
+%     fn_view_recon_stat(SBJs{s},proc_id,stat_id,an_id, 'pat', '', 0, 'l', mirror, 0, 'save_fig', 1);
     %close all;
 end
 
 % Group Stat Recon Viewing
-fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'r', atlas_id, roi_id, plot_out);
-fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'l', atlas_id, roi_id, plot_out);    
+% fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'r', atlas_id, roi_id, plot_out);
+% fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'l', atlas_id, roi_id, plot_out);    
 
 %% Print MPFC electrodes
 for s = 1:numel(SBJs)
