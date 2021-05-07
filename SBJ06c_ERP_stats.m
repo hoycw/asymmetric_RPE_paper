@@ -1,7 +1,6 @@
 function SBJ06a_ERP_stats(SBJ,conditions,proc_id,an_id)
 % Calculates ERPs, computes cluster-based statistics, and plots the results
-% clear all; %close all;
-error('check this for 2021 updates!');
+
 %% Data Preparation
 % Set up paths
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
@@ -10,16 +9,17 @@ addpath([root_dir 'PRJ_Error/scripts/utils/']);
 addpath(ft_dir);
 ft_defaults
 
+%%
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m']);
 
 % Load Data
 load(strcat(SBJ_vars.dirs.preproc,SBJ,'_preproc_',proc_id,'.mat'));
-load(strcat(SBJ_vars.dirs.events,SBJ,'_trl_info_final.mat'));
+load(strcat(SBJ_vars.dirs.events,SBJ,'_bhv_',proc_id,'_final.mat'));
 
 % Select Conditions of Interest
 [cond_lab, ~, ~] = fn_condition_label_styles(conditions);
-cond_idx = fn_condition_index(conditions,trl_info);
+cond_idx = fn_condition_index(conditions,bhv);
 
 % Select Channel(s)
 cfgs = [];
@@ -37,12 +37,12 @@ cfgpp.lpfreq    = lp_freq;
 roi = ft_preprocessing(cfgpp,roi);
 
 % Cut into Trials
-if strcmp(event_type,'stim')
-    events = trl_info.trl_onset;
+if strcmp(an.event_type,'stim')
+    events = bhv.trl_onset;
 elseif strcmp(event_type,'resp')
-    events = trl_info.rsp_onset;
+    events = bhv.rsp_onset;
 elseif strcmp(event_type,'fb')
-    events = trl_info.fb_onset;
+    events = bhv.fb_onset;
 else
     error(stract('ERROR: unknown event_type ',event_type));
 end

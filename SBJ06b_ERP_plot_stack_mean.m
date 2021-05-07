@@ -1,6 +1,6 @@
-function SBJ07c_HFA_plot_stack_mean(SBJ, conditions, proc_id, an_id, actv_win,...
+function SBJ06b_ERP_plot_stack_mean(SBJ, conditions, proc_id, an_id,...
                                         plt_id, save_fig, varargin)
-%% Plots single trial stack and condition averaged HFA per electrode with activation vs. baseline
+%% Plots single trial stack and condition averaged ERP per electrode with activation vs. baseline
 %   sorts by condition, then by RT; scatter for events to show conditions
 %   Optional: grand median instead of grand average
 % INPUTS:
@@ -8,7 +8,6 @@ function SBJ07c_HFA_plot_stack_mean(SBJ, conditions, proc_id, an_id, actv_win,..
 %   conditions [str] - - group of condition labels to segregate trials
 %   proc_id [str] - ID of preprocessing pipeline
 %   an_id [str] - ID of the analysis parameters to use
-%   actv_win [int] - length in ms of minimum difference from baseline to be active
 %   plt_id [str] - ID of the plotting parameters to use
 %   save_fig [0/1] - binary flag to save figure
 %   varargin:
@@ -25,7 +24,6 @@ function SBJ07c_HFA_plot_stack_mean(SBJ, conditions, proc_id, an_id, actv_win,..
 %   saves figure
 
 if ischar(save_fig); save_fig = str2num(save_fig); end
-if isnumeric(actv_win); actv_win = num2str(actv_win); end
 
 %% Data Preparation
 % Set up paths
@@ -75,10 +73,8 @@ eval(plt_vars_cmd);
 load([SBJ_vars.dirs.events SBJ '_bhv_' proc_id '_final.mat'],'bhv');
 
 % Load data
-hfa_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat');
-load(hfa_fname,'hfa');
-actv_fname = strcat(hfa_fname(1:end-4),'_actv_mn',num2str(actv_win),'.mat');
-load(actv_fname);
+erp_fname = strcat(SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat');
+load(erp_fname,'erp_trl');
 
 % Load ROI and GM/WM info
 elec_fname = [SBJ_vars.dirs.recon SBJ '_elec_' proc_id '_pat_' atlas_id '_final.mat'];
@@ -94,6 +90,7 @@ end
 full_cond_idx = fn_condition_index(cond_lab,bhv);
 bhv = fn_select_bhv(bhv, full_cond_idx);
 cond_idx = fn_condition_index(cond_lab, bhv);
+good_cond_ix = unique(cond_idx);
 
 % Sort trials by condition, RT, then trial number
 cond_mat   = horzcat(cond_idx,bhv.rt,[1:numel(bhv.trl_n)]');
@@ -112,44 +109,47 @@ end
 % Select channels, trials, and epochs in data
 cfg_trim.trials  = find(full_cond_idx);
 cfg_trim.latency = plt.plt_lim;
-hfa = ft_selectdata(cfg_trim,hfa);
+erp_trl = ft_selectdata(cfg_trim,erp_trl);
+
+% Extract Trials into Matrix
+erp_trl_mat = nan([numel(erp_trl.label) numel(erp_trl.trial) numel(erp_trl.time{1})]);
+for trl_ix = 1:numel(erp_trl.trial)
+    erp_trl_mat(:,trl_ix,:) = erp_trl.trial{trl_ix};
+end
+
+% Average ERPs
+erp = cell(size(cond_lab));
+sem = NaN([numel(erp_trl.label) numel(cond_lab) numel(erp_trl.time{1})]);
+cfgavg = [];
+cfgavg.keeptrials = 'yes';
+for cond_ix = 1:numel(cond_lab)
+    if any(good_cond_ix==cond_ix)
+        cfgavg.trials = find(cond_idx==cond_ix);
+        erp{cond_ix}  = ft_timelockanalysis(cfgavg,erp_trl);
+        sem(:,cond_ix,:) = squeeze(std(erp{cond_ix}.trial,[],1))./sqrt(sum(cond_idx==cond_ix))';
+    end
+end
 
 % Get event times for plotting
 [evnt_times] = fn_get_evnt_times(an.evnt_lab,plt.evnt_lab,bhv);
 
 %% Plot Results
-fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/stack_mn_' conditions '/' an_id '/'];
+fig_dir = [root_dir 'PRJ_Error/results/ERP/' SBJ '/stack_mn_' conditions '/' an_id '/'];
 if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
-sig_ln_dir = [fig_dir 'sig_ch/'];
-if ~exist(sig_ln_dir,'dir'); [~] = mkdir(sig_ln_dir); end
 
 % Create a figure for each channel
-for ch_ix = 1:numel(hfa.label)
-    sig_flag = 0;
-    %% Compute Plotting Data
-    % Average HFA per condition
-    means = NaN([numel(cond_lab) numel(hfa.time)]);
-    sems  = NaN([numel(cond_lab) numel(hfa.time)]);
-    for cond_ix = 1:numel(cond_lab)
-        if plot_median
-            means(cond_ix,:) = squeeze(median(hfa.powspctrm(cond_idx==cond_ix,ch_ix,1,:),1));
-        else
-            means(cond_ix,:) = squeeze(mean(hfa.powspctrm(cond_idx==cond_ix,ch_ix,1,:),1));
-        end
-        sems(cond_ix,:) = squeeze(std(hfa.powspctrm(cond_idx==cond_ix,ch_ix,1,:),[],1))./sqrt(sum(cond_idx==cond_ix))';
-    end
-    
+for ch_ix = 1:numel(erp{1}.label)
     %% Create Plot and Parameters
-    fig_name = [SBJ '_' conditions '_stack_' hfa.label{ch_ix}];
+    fig_name = [SBJ '_' conditions '_stack_' erp{cond_ix}.label{ch_ix}];
     figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 0.7 1],'Visible',fig_vis);
     
     % Get color limits
     clims = NaN([1 2]);
-    clims(1) = prctile(reshape(hfa.powspctrm(:,ch_ix,:,:),...
-        [1 size(cond_mat,1)*numel(hfa.time)]),plt.clim_perc(1));
-    clims(2) = prctile(reshape(hfa.powspctrm(:,ch_ix,:,:),...
-        [1 size(cond_mat,1)*numel(hfa.time)]),plt.clim_perc(2));
+    clims(1) = prctile(reshape(erp{cond_ix}.trial(:,ch_ix,:),...
+        [1 sum(cond_idx==cond_ix)*numel(erp{cond_ix}.time)]),plt.clim_perc(1));
+    clims(2) = prctile(reshape(erp{cond_ix}.trial(:,ch_ix,:),...
+        [1 sum(cond_idx==cond_ix)*numel(erp{cond_ix}.time)]),plt.clim_perc(2));
     clims = [min(clims(1)) max(clims(2))];
     
     %% Plot Single Trial Stack
@@ -157,7 +157,7 @@ for ch_ix = 1:numel(hfa.label)
     ax = gca;
     
     % Plot Single Trials Per Condition
-    imagesc(hfa.time,1:size(cond_mat,1),squeeze(hfa.powspctrm(cond_mat(:,3),ch_ix,:,:)));
+    imagesc(erp{cond_ix}.time,1:size(cond_mat,1),squeeze(erp_trl_mat(ch_ix,cond_mat(:,3),:)));
     set(gca,'YDir','normal');
     
     % Plot events: stim, target, feedback onset, feedback offset
@@ -193,9 +193,9 @@ for ch_ix = 1:numel(hfa.label)
     end
     
     % Plotting parameters
-    title_str = hfa.label{ch_ix};
+    title_str = erp{cond_ix}.label{ch_ix};
     if exist('elec','var')
-        title_str  = [title_str ' (' elec.ROI{strcmp(hfa.label{ch_ix},elec.label)} ')'];
+        title_str  = [title_str ' (' elec.ROI{strcmp(erp{cond_ix}.label{ch_ix},elec.label)} ')'];
     end
     ax.Title.String  = title_str;
     ax.XLim          = plt.plt_lim;
@@ -220,29 +220,21 @@ for ch_ix = 1:numel(hfa.label)
     
     % Plot HFA Means (and variance)
     cond_lines = cell(size(cond_lab));
-    main_lines = gobjects([numel(cond_lab)+numel(plt.evnt_lab) 1]);
+    main_lines = gobjects([numel(good_cond_ix)+numel(plt.evnt_lab) 1]);
     main_line_ix = 0;
     for cond_ix = 1:numel(cond_lab)
-        main_line_ix = main_line_ix + 1;
-        cond_lines{cond_ix} = shadedErrorBar(hfa.time, means(cond_ix,:), sems(cond_ix,:),...
-            'lineProps',{'Color',cond_colors{cond_ix},'LineWidth',plt.mean_width,...
-            'LineStyle',cond_styles{cond_ix}},'patchSaturation',plt.errbar_alpha);
-        main_lines(main_line_ix) = cond_lines{cond_ix}.mainLine;
+        if any(good_cond_ix==cond_ix)
+            main_line_ix = main_line_ix + 1;
+            cond_lines{cond_ix} = shadedErrorBar(erp{cond_ix}.time, ...
+                mean(erp{cond_ix}.trial(:,ch_ix,:),1), sem(ch_ix,cond_ix,:),...
+                'lineProps',{'Color',cond_colors{cond_ix},'LineWidth',plt.mean_width,...
+                'LineStyle',cond_styles{cond_ix}},'patchSaturation',plt.errbar_alpha);
+            main_lines(main_line_ix) = cond_lines{cond_ix}.mainLine;
+        end
     end
     
     % Plot Significance for Activation vs. Baseline
     ylims = ylim;
-    if actv.actv_ch(ch_ix)
-        sig_flag = 1;
-        for sig_ix = 1:size(actv.actv_epochs{ch_ix},1)
-            % Plot rectangular patch over epoch
-            patch([actv.actv_epochs{ch_ix}(sig_ix,1) actv.actv_epochs{ch_ix}(sig_ix,1) ...
-                actv.actv_epochs{ch_ix}(sig_ix,2) actv.actv_epochs{ch_ix}(sig_ix,2)],...
-                [ylims(1) ylims(2) ylims(2) ylims(1)],...
-                plt.sig_color,'FaceAlpha',plt.sig_alpha);
-        end
-    end
-    
     % Plot Events
     for evnt_ix = 1:numel(plt.evnt_lab)
         main_line_ix = main_line_ix + 1;
@@ -253,13 +245,13 @@ for ch_ix = 1:numel(hfa.label)
     end    
     
     % Axes and Labels
-    ax2.YLabel.String = 'HFA Power (z)';
+    ax2.YLabel.String = 'ERP (uV)';
     ax2.XLim          = [plt.plt_lim(1) plt.plt_lim(2)];
     ax2.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
     ax2.XLabel.String = 'Time (s)';
-    ax2.Title.String  = 'Condition Averaged HFA';
+    ax2.Title.String  = 'Condition Averaged ERP';
     if plt.legend
-        legend(main_lines,[cond_lab plt.evnt_lab],'Location',plt.legend_loc);
+        legend(main_lines,[cond_lab(good_cond_ix) plt.evnt_lab],'Location',plt.legend_loc);
     end
     set(gca,'FontSize',16);
     ax2.YLim = ylims;
@@ -271,13 +263,6 @@ for ch_ix = 1:numel(hfa.label)
         % Ensure vector graphics if saving
         if any(strcmp(fig_ftype,{'svg','eps'})); set(gcf, 'Renderer', 'painters'); end
         saveas(gcf,fig_fname);
-        
-        % Symbolic link for significant plots
-        if sig_flag
-            cd(sig_ln_dir);
-            link_cmd = ['ln -s ../' fig_name '.' fig_ftype ' .'];
-            system(link_cmd);
-        end
     end
 end
 

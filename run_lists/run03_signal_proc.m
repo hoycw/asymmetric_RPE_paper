@@ -13,18 +13,22 @@ SBJ_id = 'preproc';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% ERP Analysis and Plotting
-an_id   = 'ERP_F_trl2to1_stat1';
-fig_vis = 'off';
+conditions = 'DifFB';
+proc_id    = 'main_ft';
+an_id      = 'ERP_F25t1';
+atlas_id   = 'Dx';
+
+plt_id     = 'stack_F2t1_evnt_c5';
+save_fig   = 1;
+fig_ftype  = 'png';
+fig_vis    = 'off';
+
 for s = 1:numel(SBJs)
-%     conditions = 'EzOut';
-%     SBJ06a_ERP_stats(SBJs{s},conditions,proc_id,an_id);
-%     conditions = 'HdOut';
-%     SBJ06a_ERP_stats(SBJs{s},conditions,proc_id,an_id);
-%     
-%     conditions = 'DifOut';
-%     plt_id     = 'ts_trl2to1000_errbr';
-%     SBJ06b_ERP_plot_stats(SBJs{s},conditions,proc_id,an_id,plt_id,save_fig,fig_vis)
-%     close all;
+%     SBJ06a_ERP_save(SBJs{s},proc_id,an_id);
+    
+    SBJ06b_ERP_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, plt_id, save_fig,...
+        'atlas_id', atlas_id, 'fig_vis', fig_vis, 'fig_ftype', fig_ftype);
+    close all;
 end
 
 %% Compute High Frequency Activity via Sun Grid Engine

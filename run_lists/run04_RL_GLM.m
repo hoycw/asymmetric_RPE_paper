@@ -16,22 +16,6 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 proc_id   = 'main_ft';
 model_ids = {'ERPEs_DifFB'};
 
-% Main RL model:
-% stat_ids  = {'ERPEsL_DifFB_lme_st05t5'};
-% Split negative and positive outcomes:
-% stat_ids  = {'uRPEL_Neg_lme_st05t5','uRPEL_Pos_lme_st05t5'};%'uRPE_Neg_lme_st05t5','uRPE_Pos_lme_st05t5'};
-
-% Subjective rating bias models:
-% stat_ids  = {'ERPEsL_pW25hd_DifFB_lme_st05t5','ERPEsL_pW25_DifFB_lme_st05t5'};
-% Auditory Salience models:
-%   These results are not included in the manuscript because they complicate the story too much.
-%   The rough gist is auditory salience doesn't confound our results.
-%   More specifically, ERB "loudness" fits the N2 but doesn't explain the sRPE difference, and "roughness" fits the N1 window.
-% stat_ids  = {'rsRPE_EHNu_lme_st05t5','ERBsRPE_EHNu_lme_st05t5','ERBrsRPE_EHNu_lme_st05t5'};%'ERB_EHNu_lme_st0t5','ERBr_EHNu_lme_st0t5','rough_EHNu_lme_st0t5','AudSal_EHNu_lme_st0t5'};
-% Outcome-based models:
-% stat_ids  = {'VML_DifFB_lme_st05t5','SML_DifFB_lme_st05t5'};%'ERPEs_DifFB_lme_st05t5'};%'uRPE_Neg_lme_st05t5'};%'ML_Neg_lme_st05t5'};%'ERPEsL_all_lme_st05t5'};
-%   for plotting valence and value predictions: 'VSML_DifFB_lme_st05t5'
-
 fig_vis   = 'on';
 save_fig  = 1;
 fig_ftype = 'png';
@@ -39,44 +23,44 @@ fig_ftype = 'png';
 for mdl_ix = 1:numel(model_ids)
     for s = 1:numel(SBJs)
         % Run model
-        BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
-
-        % Fig. 1D: Plot model fit to tolerance and outcomes/accuracy
-        BHV02b_RL_model_plot(SBJs{s},proc_id,model_ids{mdl_ix},...
-            'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
+% 
+%         % Fig. 1D: Plot model fit to tolerance and outcomes/accuracy
+%         BHV02b_RL_model_plot(SBJs{s},proc_id,model_ids{mdl_ix},...
+%             'fig_vis',fig_vis,'fig_ftype',fig_ftype);
     end
-    
-    % Fig. 1D inset: Plot group model fits (overlapping sigmoids without tolerance)
-    BHV02c_RL_model_plot_grp(SBJ_id,proc_id,model_ids{mdl_ix},...
-        'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-    
-    % Sup. Fig. 1: Plot model predicitons by condition across group
-    plt_id    = 'line_cond';
-    BHV02d_RL_model_plot_grp_predictions(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
-        'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-    %close all;
+%     
+%     % Fig. 1D inset: Plot group model fits (overlapping sigmoids without tolerance)
+%     BHV02c_RL_model_plot_grp(SBJ_id,proc_id,model_ids{mdl_ix},...
+%         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%     
+%     % Sup. Fig. 1: Plot model predicitons by condition across group
+%     plt_id    = 'line_cond';
+%     BHV02d_RL_model_plot_grp_predictions(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
+%         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%     %close all;
 end
 
 
 %% Run Model (SGE...)
 proc_id   = 'main_ft';
-an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t6_WL05_WS25'};
+stat_ids  = {'mGLM_st05t6_WL05_WS25','mGLM_st05t10_WL1_WS25'};
 atlas_id  = 'Dx';
 % stat_ids  = {'lme_st05t5'};%'ERPEsL_DifFB_lme_st05t5'};
 % stat_id = 'RL_DifOut_F0t1_WL01_WS25';%'ERPEs_DO_glm_F0t5_WL01_WS25';
 
-plt_id    = 'ts_F0t1_evnts_sigline';%'ts_F0to1_evnts_sigline';
+plt_id    = 'ts_F0t1_evnts_sigline';
 save_fig  = 1;
-fig_vis   = 'on';
+fig_vis   = 'off';
 fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 2:numel(SBJs)
+        for s = 1:numel(SBJs)
             % Run Mass GLM Stats
-            % SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+%             SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
@@ -88,7 +72,7 @@ end
 
 %% Plot Group GLM Proportion of Effects by ROI
 proc_id   = 'main_ft';
-an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';%
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
 atlas_id  = 'Dx';
@@ -115,7 +99,7 @@ end
 
 %% Plot Group Stat ROI Recon
 proc_id   = 'main_ft';
-an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';%
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
 hemi      = 'l';

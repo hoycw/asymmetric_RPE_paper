@@ -1,7 +1,7 @@
 function SBJ07a_HFA_save(SBJ,proc_id,an_id)
 % Calculates high frequency activity, computes cluster-based statistics, and plots the results
-% clear all; %close all;
-% Set up paths
+
+%% Set up paths
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/';ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
 addpath([root_dir 'PRJ_Error/scripts/']);
