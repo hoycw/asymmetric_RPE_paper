@@ -75,7 +75,9 @@ load(elec_fname);
 
 %% Plot Results
 fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' model_id '/' stat_id '/' an_id '/'];
-if ~exist(fig_dir,'dir'); mkdir(fig_dir); end
+if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
+sig_ln_dir = [fig_dir 'sig_ch/'];
+if ~exist(sig_ln_dir,'dir'); [~] = mkdir(sig_ln_dir); end
 
 % Find plot limits
 max_beta = max(max(max(beta.trial)));
@@ -91,6 +93,7 @@ ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
 
 % Create a figure for each channel
 for ch_ix = 1:numel(beta.label)
+    sig_flag = 0;
     fig_name = [SBJ '_' model_id '_' stat_id '_' beta.label{ch_ix}];
     figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 1 0.8],'Visible',fig_vis);
@@ -115,6 +118,7 @@ for ch_ix = 1:numel(beta.label)
     for reg_ix = 1:numel(reg_lab)
         beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
         if any(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha)
+            sig_flag = 1;
             % Find significant periods
             sig_chunks = fn_find_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha);
             sig_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,sig_chunks(:,1)))>st.alpha,:) = [];
@@ -142,8 +146,8 @@ for ch_ix = 1:numel(beta.label)
                 end
             end
         else
-            fprintf('%s %s -- NO SIGNIFICANT CLUSTERS FOUND...\n',...
-                beta.label{ch_ix},reg_lab{reg_ix});
+%             fprintf('%s %s -- NO SIGNIFICANT CLUSTERS FOUND...\n',...
+%                 beta.label{ch_ix},reg_lab{reg_ix});
         end
     end
     
@@ -168,6 +172,13 @@ for ch_ix = 1:numel(beta.label)
         fig_fname = [fig_dir fig_name '.' fig_ftype];
         fprintf('Saving %s\n',fig_fname);
         saveas(gcf,fig_fname);
+        
+        % Symbolic link for significant plots
+        if sig_flag
+            cd(sig_ln_dir);
+            link_cmd = ['ln -s ../' fig_name '.' fig_ftype ' .'];
+            system(link_cmd);
+        end
     end
 end
 
