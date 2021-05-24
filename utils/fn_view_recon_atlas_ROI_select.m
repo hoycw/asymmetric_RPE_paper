@@ -1,8 +1,9 @@
-function fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, reg_type, show_labels,...
+function fn_view_recon_atlas_ROI_select(SBJ, proc_id, plot_elecs, show_label,...
                                  hemi, atlas_id, roi_id, plot_roi, mirror, varargin)
-%% Plot a reconstruction with electrodes
+error('didnt finish this! see run02_elec-Pipieline');
+                             %% Plot a SBJ reconstruction with a subset of electrodes
 % INPUTS:
-%   SBJ_id [str] - ID of subject list to load
+%   SBJ [str] - ID of subject
 %   proc_id [str] - name of analysis pipeline, used to pick elec file
 %   plot_type [str] - {'ortho', '3d'} choose 3 slice orthogonal plot or 3D surface rendering
 %   reg_type [str] - {'v', 's'} choose volume-based or surface-based registration
@@ -65,7 +66,7 @@ if ~exist('mesh_alpha','var')
     mesh_alpha = 0.3;
 end
 
-if show_labels
+if show_label
     lab_arg = 'label';
 else
     lab_arg = 'off';
@@ -78,7 +79,7 @@ else
 end
 
 if any(strcmp(plot_roi,{'deep','lat'}))
-    [plot_roi_list, ~] = fn_roi_label_styles(plot_roi);
+    [plot_roi_list, ~, ~] = fn_roi_label_styles(plot_roi);
 else
     plot_roi_list = {plot_roi};
 end
@@ -88,60 +89,41 @@ end
 out_dir = [root_dir 'PRJ_Error/results/recons/'];
 
 %% Load elec struct
-SBJs = fn_load_SBJ_list(SBJ_id);
-
-elec     = cell([numel(SBJs) 1]);
-good_sbj = true(size(SBJs));
-all_roi_labels = {};
-all_roi_colors = [];
-for sbj_ix = 1:numel(SBJs)
-    SBJ = SBJs{sbj_ix};
     SBJ_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m'];
     eval(SBJ_vars_cmd);
     
     % Load elec
-    elec_fname = [SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_mni',reg_suffix,'_',atlas_id,'_final.mat'];
-    tmp = load(elec_fname); elec{sbj_ix} = tmp.elec;
+    load([SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_pat_',atlas_id,'_final.mat']);
+    cfgs = []; cfgs.channel = plot_elecs;
+    elec = fn_select_elec(cfgs,elec);
+    elec.color = fn_roi2color(elec.(roi_id));
     
-    % Append SBJ name to labels
-    for e_ix = 1:numel(elec{sbj_ix}.label)
-        elec{sbj_ix}.label{e_ix} = [SBJs{sbj_ix} '_' elec{sbj_ix}.label{e_ix}];
-    end
-    
-    % Match ROIs to colors
-    elec{sbj_ix}.color = fn_roi2color(elec{sbj_ix}.(roi_field));
-    
-    % Select elecs matching hemi, atlas, and plot_roi_list
-    plot_elecs = zeros([numel(elec{sbj_ix}.label) numel(plot_roi_list)]);
-    for roi_ix = 1:numel(plot_roi_list)
-        plot_elecs(:,roi_ix) = strcmp(elec{sbj_ix}.(roi_field),plot_roi_list{roi_ix});
-    end
     % Remove electrodes that aren't in atlas ROIs & hemisphere
     if mirror
-        roi_elecs = fn_select_elec_lab_match(elec{sbj_ix}, 'b', atlas_id, roi_id);
+        roi_elecs = fn_select_elec_lab_match(elec, 'b', atlas_id, roi_id);
         hemi_str = [hemi 'b'];
     else
-        roi_elecs = fn_select_elec_lab_match(elec{sbj_ix}, hemi, atlas_id, roi_id);
+        roi_elecs = fn_select_elec_lab_match(elec, hemi, atlas_id, roi_id);
         hemi_str = hemi;
     end
-    good_elecs = intersect(roi_elecs, elec{sbj_ix}.label(any(plot_elecs,2)));
+    good_elecs = intersect(roi_elecs, elec.label(any(plot_elecs,2)));
     % fn_select_elec messes up if you try to toss all elecs
     if isempty(good_elecs)
-        elec{sbj_ix} = {};
+        elec = {};
         good_sbj(sbj_ix) = false;
     else
         cfgs = [];
         cfgs.channel = good_elecs;
-        elec{sbj_ix} = fn_select_elec(cfgs, elec{sbj_ix});
+        elec = fn_select_elec(cfgs, elec);
         
         % Mirror hemispheres
         if mirror
-            elec{sbj_ix}.chanpos(~strcmp(elec{sbj_ix}.hemi,hemi),1) = ...
-                -elec{sbj_ix}.chanpos(~strcmp(elec{sbj_ix}.hemi,hemi),1);
+            elec.chanpos(~strcmp(elec.hemi,hemi),1) = ...
+                -elec.chanpos(~strcmp(elec.hemi,hemi),1);
         end
         
-        all_roi_labels = [all_roi_labels; elec{sbj_ix}.(roi_field)];
-        all_roi_colors = [all_roi_colors; elec{sbj_ix}.color];
+        all_roi_labels = [all_roi_labels; elec.(roi_field)];
+        all_roi_colors = [all_roi_colors; elec.color];
     end
     clear SBJ SBJ_vars SBJ_vars_cmd
 end

@@ -140,16 +140,16 @@ if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
 % Create a figure for each channel
 for ch_ix = 1:numel(erp{1}.label)
     %% Create Plot and Parameters
-    fig_name = [SBJ '_' conditions '_stack_' erp{cond_ix}.label{ch_ix}];
+    fig_name = [SBJ '_' conditions '_stack_' erp{1}.label{ch_ix}];
     figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 0.7 1],'Visible',fig_vis);
     
     % Get color limits
     clims = NaN([1 2]);
-    clims(1) = prctile(reshape(erp{cond_ix}.trial(:,ch_ix,:),...
-        [1 sum(cond_idx==cond_ix)*numel(erp{cond_ix}.time)]),plt.clim_perc(1));
-    clims(2) = prctile(reshape(erp{cond_ix}.trial(:,ch_ix,:),...
-        [1 sum(cond_idx==cond_ix)*numel(erp{cond_ix}.time)]),plt.clim_perc(2));
+    clims(1) = prctile(reshape(erp_trl_mat(ch_ix,:,:),...
+        [1 size(erp_trl_mat,2)*size(erp_trl_mat,3)]),plt.clim_perc(1));
+    clims(2) = prctile(reshape(erp_trl_mat(ch_ix,:,:),...
+        [1 size(erp_trl_mat,2)*size(erp_trl_mat,3)]),plt.clim_perc(2));
     clims = [min(clims(1)) max(clims(2))];
     
     %% Plot Single Trial Stack
@@ -157,7 +157,7 @@ for ch_ix = 1:numel(erp{1}.label)
     ax = gca;
     
     % Plot Single Trials Per Condition
-    imagesc(erp{cond_ix}.time,1:size(cond_mat,1),squeeze(erp_trl_mat(ch_ix,cond_mat(:,3),:)));
+    imagesc(erp{1}.time,1:size(cond_mat,1),squeeze(erp_trl_mat(ch_ix,cond_mat(:,3),:)));
     set(gca,'YDir','normal');
     
     % Plot events: stim, target, feedback onset, feedback offset
@@ -168,7 +168,7 @@ for ch_ix = 1:numel(erp{1}.label)
     end
     
     % Scatter plot of RTs or feedback onset to mark conditions
-    trl_thin_factor = 3;    % for feedback plotting, thin out the RTs to see them
+    trl_thin_factor = floor(size(cond_mat,1)/100);    % for feedback plotting, thin out the RTs to see them
     scat = gobjects(size(cond_lab));
     for cond_ix = 1:numel(cond_lab)
         idx = cond_mat(:,1)==cond_ix;

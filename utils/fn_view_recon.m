@@ -77,7 +77,7 @@ end
 
 %% Load brain recon
 if strcmp(plot_type,'3d')
-    mesh = fn_load_recon_mesh(SBJ,view_space,reg_type,hemi);
+    mesh = fn_load_recon_mesh(SBJ,view_space,reg_type,'pial',hemi);
 elseif strcmp(plot_type,'ortho')
     mri = fn_load_recon_mri(SBJ,view_space,reg_type);
 else

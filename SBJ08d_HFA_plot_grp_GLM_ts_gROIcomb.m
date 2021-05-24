@@ -1,10 +1,12 @@
 function SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_id,stat_id,...
                                     roi_id,plt_id,save_fig,varargin)
 % Plots mGLM beta time series by ROI groupings
+%       COMMENTS NOT YET ADJUSTED
 %   gROI version: one plot; subplots per gROI (lines still colored by ROI)
 % INPUTS:
-%   SBJ [str] - subject ID to plot
+%   SBJ_id [str] - ID of subject list to load
 %   proc_id [str] - name of analysis pipeline, used to pick elec file
+%   model_id [str] - ID of the model to load
 %   stat_id [str] - ID of statistical analysis
 %   an_id [str] - analysis ID for S-locked preprocessing, filtering, etc.
 %   atlas_id [str] - {'DK','Dx','Yeo7','Yeo17'}
@@ -61,13 +63,8 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 [reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
 
 % Load all ROI info
-[roi_list, roi_colors] = fn_roi_label_styles(roi_id);
-if any(strcmp(roi_id,{'gROI','mgROI'}))
-    roi_field = 'gROI';
-else
-    error('not ready for non gROI');
-end
-
+[roi_list, roi_colors, roi_field] = fn_roi_label_styles(roi_id);
+if ~strcmp(roi_field,'gROI'); error('not ready for non gROI'); end
 
 %% Load Data
 % Load example to get timing info
@@ -144,7 +141,7 @@ end
 % end
 
 %% Plot Results
-fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP_GLM_ts/' model_id '/' stat_id '/' an_id '/gROIcomb/'];
+fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP/GLM_ts/' model_id '/' stat_id '/' an_id '/gROIcomb/'];
 if ~exist(fig_dir,'dir')
     [~] = mkdir(fig_dir);
 end

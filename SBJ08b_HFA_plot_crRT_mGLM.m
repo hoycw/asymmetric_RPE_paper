@@ -74,7 +74,7 @@ load(elec_fname);
 [evnt_times] = fn_get_evnt_times(an.evnt_lab,plt.evnt_lab,bhv);
 
 %% Plot Results
-fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' model_id '/' stat_id '/' an_id '/'];
+fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' model_id '/' stat_id '/' an_id '/' plt_id '/'];
 if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
 sig_ln_dir = [fig_dir 'sig_ch/'];
 if ~exist(sig_ln_dir,'dir'); [~] = mkdir(sig_ln_dir); end
@@ -93,91 +93,93 @@ ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
 
 % Create a figure for each channel
 for ch_ix = 1:numel(beta.label)
-    sig_flag = 0;
-    fig_name = [SBJ '_' model_id '_' stat_id '_' beta.label{ch_ix}];
-    figure('Name',fig_name,'units','normalized',...
-        'outerposition',[0 0 1 0.8],'Visible',fig_vis);
-    
-    ax = gca; hold on;
-    main_lines = gobjects(size(reg_lab));
-    % Plot var_exp
-    for reg_ix = 1:numel(reg_lab)
-        beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
-        main_lines(reg_ix) = plot(beta.time,squeeze(beta.trial(beta_reg_ix,ch_ix,:)),...
-            'Color',reg_colors{reg_ix},'LineStyle',reg_styles{reg_ix});
-    end
-    
-    % Plot events: stim, target, feedback onset, feedback offset
-    evnt_lines = gobjects(size(plt.evnt_lab));
-    for evnt_ix = 1:numel(evnt_times)
-        evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylims,...
-            'LineWidth',plt.evnt_width,'Color','k','LineStyle',plt.evnt_styles{evnt_ix});
-    end
-    
-    % Plot significant time periods
-    for reg_ix = 1:numel(reg_lab)
-        beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
-        if any(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha)
-            sig_flag = 1;
-            % Find significant periods
-            sig_chunks = fn_find_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha);
-            sig_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,sig_chunks(:,1)))>st.alpha,:) = [];
-            fprintf('%s %s -- %i SIGNIFICANT CLUSTERS FOUND...\n',...
-                beta.label{ch_ix},reg_lab{reg_ix},size(sig_chunks,1));
-            
-            % Plot Significance
-            for sig_ix = 1:size(sig_chunks,1)
-                if strcmp(plt.sig_type,'bold')
-                    if diff(sig_chunks(sig_ix,:))==0    % single windows
-                        scatter(beta.time(sig_chunks(sig_ix,1)),squeeze(beta.trial(beta_reg_ix,ch_ix,sig_chunks(sig_ix,1))),...
-                            plt.sig_scat_size,reg_colors{reg_ix},plt.sig_scat_mrkr,'filled');
-                    else
-                        line(beta.time(sig_chunks(sig_ix,1):sig_chunks(sig_ix,2)),...
-                            squeeze(beta.trial(beta_reg_ix,ch_ix,sig_chunks(sig_ix,1):sig_chunks(sig_ix,2))),...
-                            'Color',reg_colors{reg_ix},'LineStyle',plt.sig_style,...
-                            'LineWidth',plt.sig_width);
-                    end
-                elseif strcmp(plt.sig_type,'patch')
-                    error('sig_type = patch needs sig_times variable!');
-                    sig_times = win_lim(sig_chunks(sig_ix,:),:);
-                    patch([sig_times(1,1) sig_times(1,1) sig_times(2,2) sig_times(2,2)], ...
-                        [ylims(1) ylims(2) ylims(2) ylims(1)],...
-                        reg_colors{reg_ix},'FaceAlpha',plt.sig_alpha);
-                end
-            end
-        else
-%             fprintf('%s %s -- NO SIGNIFICANT CLUSTERS FOUND...\n',...
-%                 beta.label{ch_ix},reg_lab{reg_ix});
-        end
-    end
-    
-    % Plotting parameters
-    elec_ix = find(strcmp(beta.label{ch_ix},elec.label));
-    if ~isempty(elec_ix)
-        ax.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, ')');
-    else
-        ax.Title.String  = strcat(beta.label{ch_ix});
-    end
-    ax.Box           = 'off';
-    ax.YLim          = ylims;
-    ax.YLabel.String = 'Model Coefficient';
-    ax.XLim          = plt.plt_lim;
-    ax.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
-    ax.XLabel.String = 'Time (s)';
-    legend([main_lines evnt_lines],[reg_names plt.evnt_lab],'Location',plt.legend_loc);
-    set(ax,'FontSize',16);
-    
-    % Save figure
-    if save_fig
-        fig_fname = [fig_dir fig_name '.' fig_ftype];
-        fprintf('Saving %s\n',fig_fname);
-        saveas(gcf,fig_fname);
+    if exist('elec_lab','var') && any(strcmp(beta.label{ch_ix},elec_lab))
+        sig_flag = 0;
+        fig_name = [SBJ '_' model_id '_' stat_id '_' beta.label{ch_ix}];
+        figure('Name',fig_name,'units','normalized',...
+            'outerposition',[0 0 1 0.8],'Visible',fig_vis);
         
-        % Symbolic link for significant plots
-        if sig_flag
-            cd(sig_ln_dir);
-            link_cmd = ['ln -s ../' fig_name '.' fig_ftype ' .'];
-            system(link_cmd);
+        ax = gca; hold on;
+        main_lines = gobjects(size(reg_lab));
+        % Plot var_exp
+        for reg_ix = 1:numel(reg_lab)
+            beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
+            main_lines(reg_ix) = plot(beta.time,squeeze(beta.trial(beta_reg_ix,ch_ix,:)),...
+                'Color',reg_colors{reg_ix},'LineStyle',reg_styles{reg_ix});
+        end
+        
+        % Plot events: stim, target, feedback onset, feedback offset
+        evnt_lines = gobjects(size(plt.evnt_lab));
+        for evnt_ix = 1:numel(evnt_times)
+            evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylims,...
+                'LineWidth',plt.evnt_width,'Color','k','LineStyle',plt.evnt_styles{evnt_ix});
+        end
+        
+        % Plot significant time periods
+        for reg_ix = 1:numel(reg_lab)
+            beta_reg_ix = strcmp(beta.feature,reg_lab{reg_ix});
+            if any(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha)
+                sig_flag = 1;
+                % Find significant periods
+                sig_chunks = fn_find_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,:))<=st.alpha);
+                sig_chunks(squeeze(beta.qval(beta_reg_ix,ch_ix,sig_chunks(:,1)))>st.alpha,:) = [];
+                fprintf('%s %s -- %i SIGNIFICANT CLUSTERS FOUND...\n',...
+                    beta.label{ch_ix},reg_lab{reg_ix},size(sig_chunks,1));
+                
+                % Plot Significance
+                for sig_ix = 1:size(sig_chunks,1)
+                    if strcmp(plt.sig_type,'bold')
+                        if diff(sig_chunks(sig_ix,:))==0    % single windows
+                            scatter(beta.time(sig_chunks(sig_ix,1)),squeeze(beta.trial(beta_reg_ix,ch_ix,sig_chunks(sig_ix,1))),...
+                                plt.sig_scat_size,reg_colors{reg_ix},plt.sig_scat_mrkr,'filled');
+                        else
+                            line(beta.time(sig_chunks(sig_ix,1):sig_chunks(sig_ix,2)),...
+                                squeeze(beta.trial(beta_reg_ix,ch_ix,sig_chunks(sig_ix,1):sig_chunks(sig_ix,2))),...
+                                'Color',reg_colors{reg_ix},'LineStyle',plt.sig_style,...
+                                'LineWidth',plt.sig_width);
+                        end
+                    elseif strcmp(plt.sig_type,'patch')
+                        error('sig_type = patch needs sig_times variable!');
+                        sig_times = win_lim(sig_chunks(sig_ix,:),:);
+                        patch([sig_times(1,1) sig_times(1,1) sig_times(2,2) sig_times(2,2)], ...
+                            [ylims(1) ylims(2) ylims(2) ylims(1)],...
+                            reg_colors{reg_ix},'FaceAlpha',plt.sig_alpha);
+                    end
+                end
+            else
+                %             fprintf('%s %s -- NO SIGNIFICANT CLUSTERS FOUND...\n',...
+                %                 beta.label{ch_ix},reg_lab{reg_ix});
+            end
+        end
+        
+        % Plotting parameters
+        elec_ix = find(strcmp(beta.label{ch_ix},elec.label));
+        if ~isempty(elec_ix)
+            ax.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, ')');
+        else
+            ax.Title.String  = strcat(beta.label{ch_ix});
+        end
+        ax.Box           = 'off';
+        ax.YLim          = ylims;
+        ax.YLabel.String = 'Model Coefficient';
+        ax.XLim          = plt.plt_lim;
+        ax.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
+        ax.XLabel.String = 'Time (s)';
+        legend([main_lines evnt_lines],[reg_names plt.evnt_lab],'Location',plt.legend_loc);
+        set(ax,'FontSize',16);
+        
+        % Save figure
+        if save_fig
+            fig_fname = [fig_dir fig_name '.' fig_ftype];
+            fprintf('Saving %s\n',fig_fname);
+            saveas(gcf,fig_fname);
+            
+            % Symbolic link for significant plots
+            if sig_flag
+                cd(sig_ln_dir);
+                link_cmd = ['ln -s ../' fig_name '.' fig_ftype ' .'];
+                system(link_cmd);
+            end
         end
     end
 end

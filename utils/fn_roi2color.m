@@ -31,6 +31,8 @@ for r = 1:n_rois
             RGB(r,:) = [128 0 0]./256;
         case 'TMP'          % Yellow
             RGB(r,:) = [1 1 0];%[0.2 0.2 0.2];
+            % Turn the yellow to gold for visibility
+                % roi_colors{strcmp(roi_list,'TMP')}(2) = 0.8;
         case 'MTL'          % Cyan
             RGB(r,:) = [0 1 1];
         case 'OCC'          % Dark Gray

@@ -14,6 +14,7 @@ function fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model
 %   reg_type [str] - {'v', 's'} choose volume-based or surface-based registration
 %   show_labels [0/1] - plot the electrode labels
 %   hemi [str] - {'l', 'r', 'b'} hemisphere to plot
+%       skip_reg [str] - name of one regressor to zero out and skip (not plot)
 
 [root_dir, app_dir] = fn_get_root_dir(); ft_dir = [app_dir 'fieldtrip/'];
 
@@ -33,6 +34,8 @@ if ~isempty(varargin)
             view_angle = varargin{v+1};
         elseif strcmp(varargin{v},'mesh_alpha') && varargin{v+1}>0 && varargin{v+1}<=1
             mesh_alpha = varargin{v+1};
+        elseif strcmp(varargin{v},'skip_reg') && ischar(varargin{v+1})
+            skip_reg = varargin{v+1};
         elseif strcmp(varargin{v},'save_fig')
             save_fig = varargin{v+1};
         elseif strcmp(varargin{v},'fig_ftype')
@@ -87,12 +90,7 @@ if any(strcmp(plot_roi,{'deep','lat'}))
 else
     plot_roi_list = {plot_roi};
 end
-
-if any(strcmp(roi_id,{'mgROI','gROI','main3','lat','deep','gPFC'}))
-    roi_field = 'gROI';
-else
-    roi_field = 'ROI';
-end
+[~, ~, roi_field] = fn_roi_label_styles(roi_id);
 
 %% Load data
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
@@ -104,6 +102,15 @@ all_color   = [0.1 0.1 0.1];
 
 SBJs = fn_load_SBJ_list(SBJ_id);
 
+% Skip Regressor
+if exist('skip_reg','var')
+    if ~any(strcmp(reg_lab,skip_reg)); error([skip_reg 'not in reg_lab to skip']); end
+    skip_reg_str = ['_skip' skip_reg];
+else
+    skip_reg_str = '';
+end
+
+% Check ROI and significance matches
 elec_sbj    = cell([numel(SBJs) 1]);
 elec_sig    = cell([numel(SBJs) 1]);
 good_sbj    = true([numel(SBJs) 1]);
@@ -189,6 +196,11 @@ for sbj_ix = 1:numel(SBJs)
         end
         
         %% Compile Statistics (if any significance in plot_roi)
+        % Skip regressors if desired
+        if exist('skip_reg','var')
+            sig_mat(:,strcmp(reg_lab,skip_reg)) = zeros([size(sig_mat,1) 1]);
+        end
+        
         if any(any(sig_mat(roi_mat{sbj_ix}~=0,:),2))
             % Print # and % sig
             print_nums = zeros([2 numel(reg_lab)]);
@@ -297,12 +309,12 @@ end
 
 %% 3D Surface + Grids (3d, pat/mni, vol/srf, 0/1)
 if save_fig
-    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP_recon_venn/' model_id '/' stat_id '/' an_id '/'];
+    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP/recon_venn/' model_id '/' stat_id '/' an_id '/'];
     if ~exist(out_dir,'dir')
         [~] = mkdir(out_dir);
     end
 end
-plot_name = [SBJ_id '_' model_id '_' stat_id '_' an_id '_' plot_roi '_' hemi_str '_' view_str];
+plot_name = [SBJ_id '_' model_id '_' stat_id '_' an_id '_' plot_roi '_' hemi_str '_' view_str skip_reg_str];
 f = figure('Name',plot_name);
 
 % Plot 3D mesh

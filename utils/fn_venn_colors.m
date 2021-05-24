@@ -42,7 +42,7 @@ if exist('cond_id','var')
         end
     end
 elseif exist('model_lab','var')
-    [reg_lab, ~, reg_colors, ~] = fn_regressor_label_styles(model_lab);
+    [reg_lab, ~, ~, reg_colors, ~] = fn_regressor_label_styles(model_lab);
     colors = cell(numel(reg_colors));
     if any(strcmp(model_lab,{'pWinPEus','ERPEs'}))
         colors{1,1} = [189 65 45]./256;     % EV - tomato (red)

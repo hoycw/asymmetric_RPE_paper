@@ -19,16 +19,10 @@ if ~strcmp(hemi,'b')
     lab_match = all([lab_match strcmp(elec.hemi,hemi)],2);
 end
 
-if any(strcmp(roi_id,{'mgROI','gROI','main3','lat','deep','gPFC'}))
-    roi_field = 'gROI';
-else
-    roi_field = 'ROI';
-end
-
 % Match Atlas
 if ~isempty(atlas_id)
     if ~isempty(roi_id)
-        [roi_list, ~] = fn_roi_label_styles(roi_id);
+        [roi_list, ~, roi_field] = fn_roi_label_styles(roi_id);
         roi_match = zeros([numel(elec.label) numel(roi_list)]);
         for roi_ix = 1:numel(roi_list)
             roi_match(:,roi_ix) = strcmp(elec.(roi_field),roi_list(roi_ix));

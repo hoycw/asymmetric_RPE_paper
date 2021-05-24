@@ -3,13 +3,13 @@ if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[roo
 else root_dir='/Volumes/hoycw_clust/'; ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
 
 %%
-addpath(genpath([root_dir 'PRJ_Error/scripts/']));
+addpath([root_dir 'PRJ_Error/scripts/']);
 addpath(genpath([root_dir 'PRJ_Error/scripts/utils/']));
 addpath(ft_dir);
 ft_defaults
 
 %%
-SBJ_id = 'preproc';
+SBJ_id = 'exit';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
@@ -46,14 +46,14 @@ end
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t6_WL05_WS25','mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 atlas_id  = 'Dx';
 % stat_ids  = {'lme_st05t5'};%'ERPEsL_DifFB_lme_st05t5'};
 % stat_id = 'RL_DifOut_F0t1_WL01_WS25';%'ERPEs_DO_glm_F0t5_WL01_WS25';
 
-plt_id    = 'ts_F0t1_evnts_sigline';
+plt_id    = 'ts_F2t1_evnts_sigline';
 save_fig  = 1;
-fig_vis   = 'off';
+fig_vis   = 'on';
 fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
@@ -65,7 +65,7 @@ for m_ix = 1:numel(model_ids)
             % Plot Mass GLM Results
             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-            close all;
+%             close all;
         end
     end
 end
@@ -74,9 +74,10 @@ end
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
+% stat_ids  = {'mGLM_st05t6_WL05_WS25','mGLM_st05t10_WL1_WS25'};%};%
 atlas_id  = 'Dx';
-roi_id    = 'mgROI';
+roi_id    = 'MPFCINS';%'main3';%'mgROI';
 gm_thresh = 0;
 plot_out  = 0;
 plot_scat = 1;
@@ -84,24 +85,55 @@ save_fig  = 1;
 fig_vis   = 'on';
 fig_ftype = 'png';
 
+% tbin_id     = 'cnts';
+% z_thresh    = 0;
+% gm_thresh   = 0;
+% median_yn   = 0;
+
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         % Plot bar graph showing proprotion of effects by ROI
         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-        % Plot latency time series per ROI
-        plt_id    = 'ts_F0t1_evnts_sigline';
-        SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         % Plot latency time series per ROI
+%         plt_id    = 'ts_F0t1_evnts_sigline';
+%         SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         % Plot onset latencies per effect and ROI
+%         plt_id      = 'onsets_0t1_violin_all';
+%         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
+        % flip it and do within ROI regressor onsets!
     end
 end
 
+%% Plot Venn Diagram of GLM Regressor Effects by ROI
+proc_id   = 'main_ft';
+% stat_regs: {{'an_id','model_id','reg','stat_id'},...}
+stat_regs = {{'HGm_F25t121_zbtS_sm0_l1_wn100','ERPEs_DifFB','sRPE','mGLM_st0t6_WL05_WS25'},...
+             {'HGm_F25t121_zbtS_sm0_l1_wn100','ERPEs_DifFB','uRPE','mGLM_st0t6_WL05_WS25'}};
+
+hemi      = 'b';
+atlas_id  = 'Dx';
+roi_id    = 'mgROI';
+plot_out  = 0;
+plt_id    = 'venn';
+save_fig  = 1;
+fig_vis   = 'on';
+fig_ftype = 'png';
+
+SBJ08e_HFA_plot_grp_GLM_reg_venn_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,...
+                                       plot_out, plt_id, save_fig,'atlas_id',atlas_id,...
+                                       'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+                                   
 %% Plot Group Stat ROI Recon
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st05t6_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
+stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%'mGLM_st05t10_WL1_WS25'};
 hemi      = 'l';
 roi_id    = 'mgROI';
 atlas_id  = 'Dx';
@@ -109,6 +141,7 @@ reg_type  = 'v';
 show_lab  = 0;
 save_fig  = 1;
 fig_ftype = 'png';
+skip_reg  = 'EV';
 
 roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1},{'b','OFC',0}};
 for m_ix = 1:numel(model_ids)
@@ -119,7 +152,7 @@ for m_ix = 1:numel(model_ids)
             %         roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
+                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype, 'skip_reg', skip_reg);
         end
     end
 end

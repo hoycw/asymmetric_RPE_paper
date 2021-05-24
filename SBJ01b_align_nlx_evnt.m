@@ -1,9 +1,9 @@
 function SBJ01b_align_nlx_evnt(SBJ, proc_id, block_ix, save_it)
 % save_it == 0: don't save plots, compare to raw data
 %         == 1: save plots and data, compare to import
-if block_ix~=1
-    error('SBJ01b not ready for multi-block runs yet!');
-end
+% if block_ix~=1
+%     error('SBJ01b not ready for multi-block runs yet!');
+% end
 
 %% Load, preprocess, and save out photodiode
 if exist('/home/knight/','dir');root_dir='/home/knight/hoycw/';app_dir=[root_dir 'Apps/'];
@@ -22,9 +22,9 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 if ~isfield(SBJ_vars.dirs,'nlx')
     error([SBJ ' does not have NLX data, run only SBJ01a!']);
 end
-if numel(SBJ_vars.analysis_time{block_ix})>1
-    error('havent set up processing for multi block concat!');
-end
+% if numel(SBJ_vars.analysis_time{block_ix})>1
+%     error('havent set up processing for multi block concat!');
+% end
 
 eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
@@ -33,7 +33,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 check_neuralynx_validsamples([SBJ_vars.dirs.nlx 'photo/']);
 
 % Neuralynx photodiode
-evnt       = ft_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'photo/' ...
+evnt       = fn_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'photo/' ...
                             SBJ_vars.ch_lab.photod{1} SBJ_vars.ch_lab.nlx_suffix '.ncs']});
 evnt_orig  = evnt;
 
@@ -48,7 +48,7 @@ for m_ix = 1:numel(macro_fnames)
     macro_fnames{m_ix} = [SBJ_vars.dirs.nlx 'macro/' SBJ_vars.ch_lab.nlx_nk_align{m_ix}...
                             SBJ_vars.ch_lab.nlx_suffix '.ncs'];
 end
-macro = ft_read_neuralynx_interp(macro_fnames);
+macro = fn_read_neuralynx_interp(macro_fnames);
 macro.label = SBJ_vars.ch_lab.nlx_nk_align;
 macro_orig  = macro;
 

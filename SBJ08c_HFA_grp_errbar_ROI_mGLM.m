@@ -62,12 +62,7 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 [reg_lab, reg_names, reg_colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
 
 % Load all ROI info
-[roi_list, roi_colors] = fn_roi_label_styles(roi_id);
-if any(strcmp(roi_id,{'mgROI','gROI','main3','lat','deep','gPFC'}))
-    roi_field = 'gROI';
-else
-    roi_field = 'ROI';
-end
+[roi_list, roi_colors, roi_field] = fn_roi_label_styles(roi_id);
 
 % Set up electrode counts
 reg_cnt  = zeros([numel(SBJs) numel(roi_list) numel(reg_lab)]);
@@ -216,7 +211,7 @@ set(gca,'FontSize',16);
 
 %% Save figure
 if save_fig
-    fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP_errbar_ROI/'...
+    fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP/errbar_ROI/'...
         model_id '/' stat_id '/' an_id '/' atlas_id '_' roi_id '/'];
     if ~exist(fig_dir,'dir'); [~,~] = mkdir(fig_dir); end
     
