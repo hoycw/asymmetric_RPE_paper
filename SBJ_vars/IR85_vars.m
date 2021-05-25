@@ -12,7 +12,6 @@ SBJ_vars.low_srate  = [0];
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
-SBJ_vars.dirs.nlx     = [SBJ_vars.dirs.raw 'nlx_2019-01-09_10-53-34/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];
@@ -26,6 +25,7 @@ for field_ix = 1:numel(dirs_fields)
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
+SBJ_vars.dirs.nlx     = {[SBJ_vars.dirs.raw 'nlx_2019-01-09_10-53-34/']};
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);
 
@@ -66,9 +66,9 @@ SBJ_vars.ch_lab.wire_ROI   = {'all'};
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
 
-SBJ_vars.ch_lab.nlx_suffix   = '';
+SBJ_vars.ch_lab.nlx_suffix   = {''};
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
-SBJ_vars.nlx_macro_inverted  = 1;
+SBJ_vars.nlx_macro_inverted  = [1];
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
@@ -84,7 +84,7 @@ SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
 SBJ_vars.ch_lab.eog = {'LUC','LLC','RUC','RLC'};
 SBJ_vars.ch_lab.photod = {'photo1'};
-SBJ_vars.photo_inverted = 1;
+SBJ_vars.photo_inverted = [1];
 SBJ_vars.ch_lab.mic    = {'mic1'};
 
 %--------------------------------------

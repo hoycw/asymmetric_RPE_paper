@@ -12,7 +12,6 @@ SBJ_vars.low_srate  = [0];
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
-% SBJ_vars.dirs.nlx     = [SBJ_vars.dirs.raw 'nlx_2018-01-25_11-36-05/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];
@@ -26,6 +25,7 @@ for field_ix = 1:numel(dirs_fields)
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
+% SBJ_vars.dirs.nlx     = {[SBJ_vars.dirs.raw 'nlx_2018-01-25_11-36-05/']};
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);
 
@@ -61,9 +61,9 @@ SBJ_vars.ch_lab.wire_ROI   = {'all'}; % which microwires to use
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
 
-SBJ_vars.ch_lab.nlx_suffix   = ''; % session suffix for files, e.g., '_0007'
+SBJ_vars.ch_lab.nlx_suffix   = {''}; % session suffix for files, e.g., '_0007'
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % shared macros fro clinical-NLX alignment, 1 for unipolar or 2 for bipolar
-SBJ_vars.nlx_macro_inverted  = 1; % 0/1 is NLX recorded inverted? usually 1
+SBJ_vars.nlx_macro_inverted  = [1]; % 0/1 is NLX recorded inverted? usually 1
 %SBJ_vars.nlx_analysis_time   = {{[start end]}}; % cut to time in NLX photodiode (e.g., discontinuities)
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
@@ -77,7 +77,7 @@ SBJ_vars.ch_lab.eeg = {}; % scalp channel labels
 % SBJ_vars.ch_lab.CZ_lap_ref = {}; % reference channels for scalp laplacian
 SBJ_vars.ch_lab.eog = {}; % EOG channel labels
 SBJ_vars.ch_lab.photod = {}; % photodiode label
-SBJ_vars.photo_inverted = 1; % 0/1
+SBJ_vars.photo_inverted = [1]; % 0/1
 SBJ_vars.ch_lab.mic    = {}; % microphone label
 
 %--------------------------------------

@@ -1,9 +1,9 @@
 function SBJ01b_align_nlx_evnt(SBJ, proc_id, block_ix, save_it)
-% save_it == 0: don't save plots, compare to raw data
+% Load, resample, and align photodiode from neuralynx system to clinical data
+% INPUTS:
+%   save_it == 0: don't save plots, compare to raw data
 %         == 1: save plots and data, compare to import
-% if block_ix~=1
-%     error('SBJ01b not ready for multi-block runs yet!');
-% end
+% OUTPUTS:
 
 %% Load, preprocess, and save out photodiode
 if exist('/home/knight/','dir');root_dir='/home/knight/hoycw/';app_dir=[root_dir 'Apps/'];
@@ -22,19 +22,25 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 if ~isfield(SBJ_vars.dirs,'nlx')
     error([SBJ ' does not have NLX data, run only SBJ01a!']);
 end
-% if numel(SBJ_vars.analysis_time{block_ix})>1
-%     error('havent set up processing for multi block concat!');
-% end
+if numel(SBJ_vars.analysis_time{block_ix})>1
+    error('havent set up processing for multi block concat within a run!');
+end
+
+if numel(SBJ_vars.block_name)>1
+    block_suffix = ['_' SBJ_vars.block_name{block_ix}];
+else
+    block_suffix = SBJ_vars.block_name{block_ix};   % should just be ''
+end
 
 eval(['run ' root_dir 'PRJ_Error/scripts/proc_vars/' proc_id '_vars.m']);
 
 %% Read photodiode, NLX macro, clinical data
 % First check for invalid samples
-check_neuralynx_validsamples([SBJ_vars.dirs.nlx 'photo/']);
+check_neuralynx_validsamples([SBJ_vars.dirs.nlx{block_ix} 'photo/']);
 
 % Neuralynx photodiode
-evnt       = fn_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'photo/' ...
-                            SBJ_vars.ch_lab.photod{1} SBJ_vars.ch_lab.nlx_suffix '.ncs']});
+evnt       = fn_read_neuralynx_interp({[SBJ_vars.dirs.nlx{block_ix} 'photo/' ...
+                            SBJ_vars.ch_lab.photod{1} SBJ_vars.ch_lab.nlx_suffix{block_ix} '.ncs']});
 evnt_orig  = evnt;
 
 % Neuralynx mic
@@ -45,37 +51,35 @@ evnt_orig  = evnt;
 % Neuralynx macro channel
 macro_fnames = SBJ_vars.ch_lab.nlx_nk_align;
 for m_ix = 1:numel(macro_fnames)
-    macro_fnames{m_ix} = [SBJ_vars.dirs.nlx 'macro/' SBJ_vars.ch_lab.nlx_nk_align{m_ix}...
-                            SBJ_vars.ch_lab.nlx_suffix '.ncs'];
+    macro_fnames{m_ix} = [SBJ_vars.dirs.nlx{block_ix} 'macro/' SBJ_vars.ch_lab.nlx_nk_align{m_ix}...
+                            SBJ_vars.ch_lab.nlx_suffix{block_ix} '.ncs'];
 end
 macro = fn_read_neuralynx_interp(macro_fnames);
 macro.label = SBJ_vars.ch_lab.nlx_nk_align;
 macro_orig  = macro;
 
+% Deal with multi-block within a run (error for now...)
+% if numel(SBJ_vars.analysis_time{block_ix})>1
+%     data_blocks = {};
+%     for block_ix = 1:numel(SBJ_vars.block_name)
+%         load([SBJ_vars.dirs.import SBJ '_' srate_str 'hz_' SBJ_vars.block_name{block_ix} '.mat']);
+%         data_blocks{block_ix} = data;
+%     end
+%     data = fn_concat_blocks(data_blocks);
+% end
+
 % Nihon Kohden clinical channel
 if ~save_it
     clin_fname = SBJ_vars.dirs.raw_filename{block_ix};
-    load(clin_fname);
 else
     if any(SBJ_vars.low_srate)
         srate_str = num2str(SBJ_vars.low_srate(block_ix));
     else
         srate_str = num2str(proc.resample_freq);
     end
-    if numel(SBJ_vars.raw_file)>1
-        error('only ready for single block SBJ');
-%         data_blocks = {};
-%         for block_ix = 1:numel(SBJ_vars.block_name)
-%             load([SBJ_vars.dirs.import SBJ '_' srate_str 'hz_' SBJ_vars.block_name{block_ix} '.mat']);
-%             data_blocks{block_ix} = data;
-%         end
-%         data = fn_concat_blocks(data_blocks);
-    else
-        block_suffix = SBJ_vars.block_name{block_ix};   % should just be ''
-        clin_fname = [SBJ_vars.dirs.import SBJ '_' srate_str 'hz' block_suffix '.mat'];
-        load(clin_fname);
-    end
+    clin_fname = [SBJ_vars.dirs.import SBJ '_' srate_str 'hz' block_suffix '.mat'];
 end
+load(clin_fname);
 
 cfgs         = [];
 cfgs.channel = SBJ_vars.ch_lab.nlx_nk_align;
@@ -99,10 +103,10 @@ if any(isnan(evnt.trial{1}(:))) || any(isnan(macro.trial{1}(:))) %|| any(isnan(m
 end
 
 % Inversion on NLX data
-if SBJ_vars.nlx_macro_inverted
+if SBJ_vars.nlx_macro_inverted(block_ix)
     macro.trial{1} = macro.trial{1}*-1;
 end
-if SBJ_vars.photo_inverted
+if SBJ_vars.photo_inverted(block_ix)
     evnt.trial{1} = evnt.trial{1}*-1;
 %     mic.trial{1}  = mic.trial{1}*-1;
 end
@@ -161,7 +165,7 @@ end
 fn_plot_PSD_1by1_compare(clin.trial{1},macro.trial{1},clin.label,macro.label,...
     clin.fsample,'clinical','macro');
 if save_it
-    saveas(gcf,[SBJ_vars.dirs.import SBJ '_nlx_nk_PSD_compare_' macro.label{1} '.png']);
+    saveas(gcf,[SBJ_vars.dirs.import SBJ '_nlx_nk_PSD_compare_' macro.label{1} block_suffix '.png']);
 end
 
 %% Compute cross correlation at varying time lags
@@ -204,7 +208,7 @@ title(macro.label{1});
 
 %% Save figure and data
 if save_it
-    saveas(gcf,[SBJ_vars.dirs.import SBJ '_nlx_nk_macro_alignment_' macro.label{1} '.fig']);
+    saveas(gcf,[SBJ_vars.dirs.import SBJ '_nlx_nk_macro_alignment_' macro.label{1} block_suffix '.fig']);
     % print([subj(1).datadir 'datafiles/sync_nk-nl_' subjectm(9:end) '_' num2str(tcgver) '_' num2str(d)], '-dpdf');
     
     %% Create photodiode channel matched to clinical data
@@ -220,10 +224,11 @@ if save_it
 %     evnt.trial{1}(2,t3(t3>0 & t3<numel(evnt.trial{1}))) = mic_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
     
     %% Cut photodiode channel to clinical analysis time
+    % Eventually I may need to add block cuts within a run here...
     cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
     evnt = ft_selectdata(cfgs,evnt);
     evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
-
+    
     %% Save out mic.wav for listening
 %     % Rescale to prevent clipping, add 0.05 fudge factor
 %     warning('mic not cut to analysis_time!');

@@ -12,7 +12,6 @@ SBJ_vars.low_srate  = [500]; % 0 or actual sample rate e.g, [500, 500]
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
-SBJ_vars.dirs.nlx     = [SBJ_vars.dirs.raw 'nlx_2018-01-24_11-33-29/'];
 SBJ_vars.dirs.import  = [SBJ_vars.dirs.SBJ '01_import/'];
 SBJ_vars.dirs.preproc = [SBJ_vars.dirs.SBJ '02_preproc/'];
 SBJ_vars.dirs.events  = [SBJ_vars.dirs.SBJ '03_events/'];
@@ -26,6 +25,7 @@ for field_ix = 1:numel(dirs_fields)
         mkdir(SBJ_vars.dirs.(dirs_fields{field_ix}));
     end
 end
+SBJ_vars.dirs.nlx     = {[SBJ_vars.dirs.raw 'nlx_2018-01-24_11-33-29/']};
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);
 
@@ -64,10 +64,10 @@ SBJ_vars.ch_lab.wire_ROI   = {'all'};
 % SBJ_vars.ch_lab.suffix = '';    % after every channel except 'EDF Annotations'
 SBJ_vars.ch_lab.mislabel = {{'RPC','RPC3'}};
 
-SBJ_vars.ch_lab.nlx_suffix   = '';
+SBJ_vars.ch_lab.nlx_suffix   = {''};
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
 SBJ_vars.nlx_analysis_time   = {{[220 1435]}};
-SBJ_vars.nlx_macro_inverted  = 1;
+SBJ_vars.nlx_macro_inverted  = [1];
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 % Added back vs. stroop: RTH3, RTH4; LHH3, LTH3, LTH4, RHH1, RHH2, RHH3, RPC1, RPC2
@@ -101,7 +101,7 @@ SBJ_vars.ch_lab.eeg = {'C3','C4','CZ','FZ','OZ'};
 SBJ_vars.ch_lab.eog = {'RUE','RLE','LLE','LUE'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
 SBJ_vars.ch_lab.photod = {'PH_Diode'};
-SBJ_vars.photo_inverted = 1;
+SBJ_vars.photo_inverted = [1];
 SBJ_vars.ch_lab.mic = {'Mic'};
 
 %--------------------------------------
