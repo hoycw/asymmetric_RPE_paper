@@ -6,9 +6,9 @@ if isempty(strfind(path,'fieldtrip')); addpath(ft_dir); ft_defaults; end
 % Basics
 %--------------------------------------
 SBJ_vars.SBJ = 'IR87';
-SBJ_vars.raw_file = {'IR87_error_raw_R1.mat','','',''};
-SBJ_vars.block_name = {'R1','R2','R3','R4'};
-SBJ_vars.low_srate  = [0,0,0,0];
+SBJ_vars.raw_file = {'IR87_error_raw_R1.mat','IR87_error_raw_R2.mat','IR87_error_raw_R3.mat'};%,'IR87_error_raw_R4.mat'};
+SBJ_vars.block_name = {'R1','R2','R3'};%,'R4'};
+SBJ_vars.low_srate  = [0,0,0];%,0];
 
 SBJ_vars.dirs.SBJ     = [root_dir 'PRJ_Error/data/' SBJ_vars.SBJ '/'];
 SBJ_vars.dirs.raw     = [SBJ_vars.dirs.SBJ '00_raw/'];
@@ -26,9 +26,9 @@ for field_ix = 1:numel(dirs_fields)
     end
 end
 SBJ_vars.dirs.nlx     = {[SBJ_vars.dirs.raw 'nlx_run1_MonAM_2019-02-11_14-26-44/'], ...
-                         [SBJ_vars.dirs.raw 'nlx_run2_WedPM/'], ...
-                         [SBJ_vars.dirs.raw 'nlx_run3_ThuAM/'], ...
-                         [SBJ_vars.dirs.raw 'nlx_run4_FriAM_2019-02-15_10-24-50/']};
+                         [SBJ_vars.dirs.raw 'nlx_run2_WedPM_2019-02-13_15-05-45/'], ...
+                         [SBJ_vars.dirs.raw 'nlx_run3_ThuPM_2019-02-14_12-46-45/']};%, ...
+%                          [SBJ_vars.dirs.raw 'nlx_run4_FriAM_2019-02-15_10-24-50/']};
 
 SBJ_vars.dirs.raw_filename = strcat(SBJ_vars.dirs.raw,SBJ_vars.raw_file);
 
@@ -48,40 +48,45 @@ SBJ_vars.recon.fs_Dx      = [SBJ_vars.dirs.recon 'Scans/' SBJ_vars.SBJ '_fs_post
 %--------------------------------------
 % Channel Selection
 %--------------------------------------
-SBJ_vars.ch_lab.probes     = {};
-SBJ_vars.ch_lab.probe_type = {};
-SBJ_vars.ch_lab.ref_type   = {};
+SBJ_vars.ch_lab.probes     = {'LAM','LHH','LTH','LAC','LOF','LIN',...
+                              'RAM','RHH','RTH','RAC','ROF','RIN'};
+SBJ_vars.ch_lab.probe_type = {'seeg','seeg','seeg','seeg','seeg','seeg',...
+                              'seeg','seeg','seeg','seeg','seeg','seeg'};
+SBJ_vars.ch_lab.ref_type   = {'BP','BP','BP','BP','BP','BP','BP','BP','BP','BP','BP','BP'};
 if ~all(numel(SBJ_vars.ch_lab.probes)==[numel(SBJ_vars.ch_lab.probe_type) numel(SBJ_vars.ch_lab.ref_type)]); error('probes ~= type+ref');end;
-SBJ_vars.ch_lab.nlx        = [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0];
+SBJ_vars.ch_lab.nlx        = [1,1,0,1,1,0,1,1,0,1,1,0];
 SBJ_vars.ch_lab.ROI        = {'all'};
 SBJ_vars.ch_lab.eeg_ROI    = {};
-SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrth','mlam','mlhh','mlth'};
-SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su'};
-SBJ_vars.ch_lab.wire_ref   = {'','','','','','',''};
+SBJ_vars.ch_lab.wires      = {'mram','mrhh','mrac','mrof','mlam','mlhh','mlac','mlof'};
+SBJ_vars.ch_lab.wire_type  = {'su','su','su','su','su','su','su','su'};
+SBJ_vars.ch_lab.wire_ref   = {'','','','','','','',''};
 SBJ_vars.ch_lab.wire_ROI   = {'all'};
 
 %SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
 
-SBJ_vars.ch_lab.nlx_suffix   = {'','','',''};
+SBJ_vars.ch_lab.nlx_suffix   = {'','',''};%,''};
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF6','ROF7'};
-SBJ_vars.nlx_macro_inverted  = [1,1,1,1];
-SBJ_vars.nlx_analysis_time   = {{[1685 3325]}};
+SBJ_vars.nlx_macro_inverted  = [1,1,1];%,1];
+SBJ_vars.nlx_analysis_time   = {{[1685 3325]},{[4330 5866.9]},{[4070 5501.8]}};%,{[3692 5216]}};
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
+    'EKG',...% EKG channel
+    'DC01','DC02','DC03','DC04',... % empty analog channels
+    'E','Mark1','Mark2','REF','GROU','Events'...%junk channels
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [];
+SBJ_vars.ch_lab.bad_code = [0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
-SBJ_vars.ch_lab.eeg = {};
+SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
-SBJ_vars.ch_lab.eog = {};
-SBJ_vars.ch_lab.photod = {};
-SBJ_vars.photo_inverted = [1,1,1,1];
-SBJ_vars.ch_lab.mic    = {};
+SBJ_vars.ch_lab.eog = {'LUC','LLC','RUC','RLC'};
+SBJ_vars.ch_lab.photod = {'photo1'};
+SBJ_vars.photo_inverted = [1,1,1];%,1];
+SBJ_vars.ch_lab.mic    = {'mic1'};
 
 %--------------------------------------
 % Line Noise Parameters
@@ -92,8 +97,8 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % Time Parameters
 %--------------------------------------
-SBJ_vars.analysis_time = {{}};
-SBJ_vars.ignore_trials = {[]};
+SBJ_vars.analysis_time = {{},{},{}};%,{}};
+SBJ_vars.ignore_trials = {[],[],[]};%,[]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
         numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)

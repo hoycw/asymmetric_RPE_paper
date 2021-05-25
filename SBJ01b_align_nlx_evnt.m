@@ -41,7 +41,7 @@ check_neuralynx_validsamples([SBJ_vars.dirs.nlx{block_ix} 'photo/']);
 % Neuralynx photodiode
 evnt       = fn_read_neuralynx_interp({[SBJ_vars.dirs.nlx{block_ix} 'photo/' ...
                             SBJ_vars.ch_lab.photod{1} SBJ_vars.ch_lab.nlx_suffix{block_ix} '.ncs']});
-evnt_orig  = evnt;
+% evnt_orig  = evnt;
 
 % Neuralynx mic
 % mic       = ft_read_neuralynx_interp({[SBJ_vars.dirs.nlx 'mic/' ...
@@ -56,7 +56,7 @@ for m_ix = 1:numel(macro_fnames)
 end
 macro = fn_read_neuralynx_interp(macro_fnames);
 macro.label = SBJ_vars.ch_lab.nlx_nk_align;
-macro_orig  = macro;
+% macro_orig  = macro;
 
 % Deal with multi-block within a run (error for now...)
 % if numel(SBJ_vars.analysis_time{block_ix})>1
@@ -84,7 +84,7 @@ load(clin_fname);
 cfgs         = [];
 cfgs.channel = SBJ_vars.ch_lab.nlx_nk_align;
 clin         = ft_selectdata(cfgs,data);
-clin_orig    = clin;
+% clin_orig    = clin;
 
 %% Preprocess
 % Cut NLX to nlx_analysis_time
@@ -93,7 +93,7 @@ if isfield(SBJ_vars,'nlx_analysis_time')
         error('not built to handle multiple cuts within a single nlx run!');
     end
     cfgs = [];
-    cfgs.latency = SBJ_vars.nlx_analysis_time{1}{1};
+    cfgs.latency = SBJ_vars.nlx_analysis_time{block_ix}{1};
     evnt  = ft_selectdata(cfgs, evnt);
 %     mic   = ft_selectdata(cfgs, mic);
     macro = ft_selectdata(cfgs, macro);
