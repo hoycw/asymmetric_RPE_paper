@@ -28,20 +28,26 @@ eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 %% ========================================================================
 %   Step 2- Initial Viewing of Raw Data (colored by QA)
 %  ========================================================================
-block_ix    = 1;
-keep_db_out = 1;
-reorder     = {};   % {} for alphabetical
-browser_out = SBJ00b_view_preclean(SBJ,block_ix,keep_db_out,'reorder',reorder);
-
-% Save out the bad_epochs from the preprocessed data
-bad_epochs = browser_out.artfctdef.visual.artifact;
-tiny_bad = find(diff(bad_epochs,1,2)<10);
-if ~isempty(tiny_bad)
-    warning([num2str(numel(tiny_bad)) ' tiny bad epochs detected:\n']);
-    disp(bad_epochs(tiny_bad,:));
-    bad_epochs(tiny_bad,:) = [];
+for block_ix = 1:numel(SBJ_vars.block_name)
+    keep_db_out = 1;
+    reorder     = {};   % {} for alphabetical
+    browser_out = SBJ00b_view_preclean(SBJ,block_ix,keep_db_out,'reorder',reorder);
+    
+    % Save out the bad_epochs from the preprocessed data
+    bad_epochs = browser_out.artfctdef.visual.artifact;
+    tiny_bad = find(diff(bad_epochs,1,2)<10);
+    if ~isempty(tiny_bad)
+        warning([num2str(numel(tiny_bad)) ' tiny bad epochs detected:\n']);
+        disp(bad_epochs(tiny_bad,:));
+        bad_epochs(tiny_bad,:) = [];
+    end
+    if numel(SBJ_vars.block_name)>1
+        block_suffix = ['_' SBJ_vars.block_name{block_ix}];
+    else
+        block_suffix = SBJ_vars.block_name{block_ix};   % should just be ''
+    end
+    save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preclean',block_suffix,'.mat'),'-v7.3','bad_epochs');
 end
-save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preclean.mat'),'-v7.3','bad_epochs');
 
 %% ========================================================================
 %   Step 3- Import Data, Resample, and Save Individual Data Types
@@ -53,7 +59,9 @@ SBJ01a_import_data(SBJ,proc_id);
 
 nlx_align_save_it = 1;
 if isfield(SBJ_vars.dirs,'nlx')
-    SBJ01b_align_nlx_evnt(SBJ,proc_id,block_ix,nlx_align_save_it);
+    for block_ix = 1:numel(SBJ_vars.block_name)
+        SBJ01b_align_nlx_evnt(SBJ,proc_id,block_ix,nlx_align_save_it);
+    end
 end
 
 %% ========================================================================

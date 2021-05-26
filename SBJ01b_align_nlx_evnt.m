@@ -225,9 +225,11 @@ if save_it
     
     %% Cut photodiode channel to clinical analysis time
     % Eventually I may need to add block cuts within a run here...
-    cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
-    evnt = ft_selectdata(cfgs,evnt);
-    evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
+    if ~isempty(SBJ_vars.analysis_time{block_ix})
+        cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
+        evnt = ft_selectdata(cfgs,evnt);
+        evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
+    end
     
     %% Save out mic.wav for listening
 %     % Rescale to prevent clipping, add 0.05 fudge factor

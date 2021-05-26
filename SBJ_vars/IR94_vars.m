@@ -71,15 +71,18 @@ SBJ_vars.nlx_analysis_time   = {{[0 1640]},{[0 1371.5]}}; % cut to time in NLX p
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
-    'RHH8','RTH8','RAI9','RAI10','RPI10','RBT10'... % out of brain- maybe RHH7, RTH7, RAI8, RPI9?
+    'RHH8','RTH8','RAI9','RAI10','RPI10','RBT10',... % out of brain- maybe RHH7, RTH7, RAI8, RPI9?
+    'EKG',... % EKG channel
+    'DC01','DC02','DC03','DC04',... % empty analog channels
+    'Events','GND','XREF','Mark1','Mark2','E'... % junk channels
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [3,3,3,3,3,3];
+SBJ_vars.ch_lab.bad_code = [3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
-SBJ_vars.ch_lab.eeg = {}; % scalp channel labels
+SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'}; % scalp channel labels
 % SBJ_vars.ch_lab.CZ_lap_ref = {}; % reference channels for scalp laplacian
-SBJ_vars.ch_lab.eog = {}; % EOG channel labels
+SBJ_vars.ch_lab.eog = {'LUC','LLC','RLC','RUC'}; % EOG channel labels
 SBJ_vars.ch_lab.photod = {'photo1'}; % photodiode label
 SBJ_vars.photo_inverted = [1,1]; % 0/1
 SBJ_vars.ch_lab.mic    = {'mic1'}; % microphone label

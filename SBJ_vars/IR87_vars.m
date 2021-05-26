@@ -73,13 +73,16 @@ SBJ_vars.nlx_analysis_time   = {{[1685 3325]},{[4330 5866.9]},{[4070 5501.8]}};%
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
+    'RHH1','LTH1',... % epileptic
+    'RHH2','RTH1','RTH2','RAM1','RAM2','LHH1','LTH2',... % epileptic spread
+    'LTH9','LTH10','RTH10',... % out of brain
     'EKG',...% EKG channel
     'DC01','DC02','DC03','DC04',... % empty analog channels
     'E','Mark1','Mark2','REF','GROU','Events'...%junk channels
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [0,0,0,0,0,0,0,0,0,0,0];
+SBJ_vars.ch_lab.bad_code = [1,1,2,2,2,2,2,2,2,3,3,3,0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
