@@ -118,7 +118,7 @@ for block_ix = 1:numel(SBJ_vars.block_name)
     load(evnt_fname);
     
     % Plot event channels
-    figure; subplot(2,1,1); ax1 = gca;
+    figure; subplot(2,1,1);
     plot(evnt.time{1}, evnt.trial{1});
     
 %     % Save .edf for pd-parser
@@ -127,7 +127,7 @@ for block_ix = 1:numel(SBJ_vars.block_name)
 %     ft_write_data(evnt_edf_fname,evnt.trial{1},'header',evnt_hdr);
     
     %% ========================================================================
-    %   Step 5b- Manually Clean Photodiode Trace: Mark Sections and Apply Corrections
+    %   Step 5b- Manually Clean Photodiode Trace: Mark Sections to Correct
     %  ========================================================================
     % Create correction times and values in a separate file in ~/PRJ_Stroop/scripts/SBJ_evnt_clean/
     SBJ_evnt_clean_cmd = ['run ' root_dir 'PRJ_Error/scripts/SBJ_evnt_clean/' SBJ '_evnt_clean_params',block_suffix,'.m'];
@@ -136,34 +136,25 @@ for block_ix = 1:numel(SBJ_vars.block_name)
     %% ========================================================================
     %   Step 5c- Manually Clean Photodiode Trace: Apply Corrections
     %  ========================================================================
-    %   Now doing this inside the SBJ_evnt_clean_params.m, which gives more
-    %   control to adjust the order of the steps
-    if ~(strcmp(SBJ,'IR94') && block_ix==1)
-        % Correct baseline shift
-        for shift_ix = 1:length(bsln_shift_times)
-            epoch_idx = floor(bsln_shift_times{shift_ix}(1)*evnt.fsample):floor(bsln_shift_times{shift_ix}(2)*evnt.fsample);
-            epoch_idx(epoch_idx<1) = [];
-            evnt.trial{1}(epoch_idx) = evnt.trial{1}(epoch_idx) - bsln_shift_val(shift_ix);
-        end
-        % zero out drifts
-        for zero_ix = 1:length(bsln_times)
-            epoch_idx = floor(bsln_times{zero_ix}(1)*evnt.fsample):floor(bsln_times{zero_ix}(2)*evnt.fsample);
-            epoch_idx(epoch_idx<1) = [];
-            evnt.trial{1}(epoch_idx) = bsln_val;
-        end
-        
-        % level out stimulus periods
-        for stim_ix = 1:length(stim_times)
-            epoch_idx = floor(stim_times{stim_ix}(1)*evnt.fsample):floor(stim_times{stim_ix}(2)*evnt.fsample);
-            epoch_idx(epoch_idx<1) = [];
-            evnt.trial{1}(epoch_idx) = stim_yval(stim_ix);
-        end
+    % Correct baseline shift
+    for shift_ix = 1:length(bsln_shift_times)
+        epoch_idx = floor(bsln_shift_times{shift_ix}(1)*evnt.fsample):floor(bsln_shift_times{shift_ix}(2)*evnt.fsample);
+        epoch_idx(epoch_idx<1) = [];
+        evnt.trial{1}(epoch_idx) = evnt.trial{1}(epoch_idx) - bsln_shift_val(shift_ix);
+    end
+    % zero out drifts
+    for zero_ix = 1:length(bsln_times)
+        epoch_idx = floor(bsln_times{zero_ix}(1)*evnt.fsample):floor(bsln_times{zero_ix}(2)*evnt.fsample);
+        epoch_idx(epoch_idx<1) = [];
+        evnt.trial{1}(epoch_idx) = bsln_val;
     end
     
-    %% Plot corrected data
-    subplot(2,1,2); ax2 = gca;
-    plot(evnt.time{1}, evnt.trial{1});
-    linkaxes([ax1 ax2],'x');
+    % level out stimulus periods
+    for stim_ix = 1:length(stim_times)
+        epoch_idx = floor(stim_times{stim_ix}(1)*evnt.fsample):floor(stim_times{stim_ix}(2)*evnt.fsample);
+        epoch_idx(epoch_idx<1) = [];
+        evnt.trial{1}(epoch_idx) = stim_yval(stim_ix);
+    end
     
     %% Save corrected data
     out_fname = [SBJ_vars.dirs.preproc SBJ '_evnt_clean',block_suffix,'.mat'];

@@ -36,7 +36,7 @@ SBJ_vars.recon.wm_l       = [SBJ_vars.dirs.recon 'Surfaces/' SBJ_vars.SBJ '_wm_l
 SBJ_vars.recon.wm_r       = [SBJ_vars.dirs.recon 'Surfaces/' SBJ_vars.SBJ '_wm_rh.mat'];
 SBJ_vars.recon.infl_l     = [SBJ_vars.dirs.recon 'Surfaces/' SBJ_vars.SBJ '_infl_lh.mat'];
 SBJ_vars.recon.infl_r     = [SBJ_vars.dirs.recon 'Surfaces/' SBJ_vars.SBJ '_infl_rh.mat'];
-SBJ_vars.recon.elec_pat   = [SBJ_vars.dirs.recon 'Electrodes/' SBJ_vars.SBJ '_elec_acpc_....mat'];
+SBJ_vars.recon.elec_pat   = [SBJ_vars.dirs.recon 'Electrodes/' SBJ_vars.SBJ '_elec_acpc_f.mat'];
 SBJ_vars.recon.elec_mni_v = [SBJ_vars.dirs.recon 'Electrodes/' SBJ_vars.SBJ '_elec_mni_frv.mat'];
 SBJ_vars.recon.elec_mni_s = [];%[SBJ_vars.dirs.recon 'Electrodes/' SBJ_vars.SBJ '_elec_mni_s.mat'];
 SBJ_vars.recon.fs_T1      = [SBJ_vars.dirs.recon 'Scans/' SBJ_vars.SBJ '_fs_preop_T1.mgz'];
@@ -99,7 +99,7 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 SBJ_vars.analysis_time = {{[0 1700]},{[0 1440]}};
-SBJ_vars.ignore_trials = {[],[]};
+SBJ_vars.ignore_trials = {[1:35],[]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
         numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
