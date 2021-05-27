@@ -102,15 +102,15 @@ save(strcat(SBJ_vars.dirs.events,SBJ,'_bad_epochs_preproc.mat'),'-v7.3','bad_epo
 % Load data
 bhv     = cell(size(SBJ_vars.block_name));
 bhv_cln = cell(size(SBJ_vars.block_name));
-for b_ix = 1:numel(SBJ_vars.block_name)
+for block_ix = 1:numel(SBJ_vars.block_name)
     % Create a block suffix in cases with more than one recording block
     if numel(SBJ_vars.raw_file)==1
-        block_suffix = SBJ_vars.block_name{b_ix};   % should just be ''
+        block_suffix = SBJ_vars.block_name{block_ix};   % should just be ''
     else
-        block_suffix = strcat('_',SBJ_vars.block_name{b_ix});
+        block_suffix = strcat('_',SBJ_vars.block_name{block_ix});
     end
-    if SBJ_vars.low_srate(b_ix)~=0
-        evnt_srate = SBJ_vars.low_srate(b_ix);
+    if SBJ_vars.low_srate(block_ix)~=0
+        evnt_srate = SBJ_vars.low_srate(block_ix);
     else
         evnt_srate = proc.resample_freq;
     end
@@ -162,7 +162,7 @@ for b_ix = 1:numel(SBJ_vars.block_name)
     %% ========================================================================
     %   Step 6- Parse Event Traces into Behavioral Data
     %  ========================================================================
-    [~] = SBJ03_behav_parse(SBJ,b_ix,proc_id,1,1);
+    [~] = SBJ03_behav_parse(SBJ,block_ix,proc_id,1,1);
 end
 
 %% ========================================================================

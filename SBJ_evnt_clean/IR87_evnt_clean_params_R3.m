@@ -1,4 +1,4 @@
-%% Photodiode Trace Cleaning Parameters: IR87 Run1
+%% Photodiode Trace Cleaning Parameters: IR87 Run3
 % Large drift in the shift over time:
 %   plot(evnt(1,:)); Tools --> Basic Fitting --> linear, show equations:
 % lin_fits   = {[-0.02*evnt.time{1} - 15]};%, ...
