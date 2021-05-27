@@ -224,12 +224,14 @@ if save_it
 %     evnt.trial{1}(2,t3(t3>0 & t3<numel(evnt.trial{1}))) = mic_nlx.trial{1}(t3>0 & t3<numel(evnt.trial{1}));
     
     %% Cut photodiode channel to clinical analysis time
+    %   NO! If save_it==1, I'm already loading from the clinical data cut
+    %   to analysis_time, so recutting will chop off real data
     % Eventually I may need to add block cuts within a run here...
-    if ~isempty(SBJ_vars.analysis_time{block_ix})
-        cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
-        evnt = ft_selectdata(cfgs,evnt);
-        evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
-    end
+%     if ~isempty(SBJ_vars.analysis_time{block_ix})
+%         cfgs = []; cfgs.latency = SBJ_vars.analysis_time{block_ix}{1};
+%         evnt = ft_selectdata(cfgs,evnt);
+%         evnt.time{1} = evnt.time{1}-SBJ_vars.analysis_time{block_ix}{1}(1);
+%     end
     
     %% Save out mic.wav for listening
 %     % Rescale to prevent clipping, add 0.05 fudge factor

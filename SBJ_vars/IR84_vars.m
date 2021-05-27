@@ -72,13 +72,13 @@ SBJ_vars.nlx_analysis_time   = {{[110 1728]}};
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
     'LHH1','LHH2','RTH1','RTH2',... % occassional spikes
-    'LTH1',... % spread
+    'LTH1','LTH2','LHH3',... % spread
     'EKG',... % EKG
     'Mark1','Mark2','DC01','DC02','DC03','DC04','E','GND','xREF','Events'... % not real data
     };
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0];
+SBJ_vars.ch_lab.bad_code = [1,1,1,1,1,2,2,0,0,0,0,0,0,0,0,0,0,0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
@@ -97,8 +97,7 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 SBJ_vars.analysis_time = {{[172 1800]}};
-%   first 5 full vis must've been cut off in clinical extraction
-SBJ_vars.ignore_trials = {[1:5]};
+SBJ_vars.ignore_trials = {[]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
         numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)

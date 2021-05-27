@@ -80,6 +80,7 @@ preclean_ep_at = fn_compile_epochs_full2at(SBJ,proc_id);
 load(strcat(root_dir,'PRJ_Error/scripts/utils/cfg_plot.mat'));
 % If you want to see preclean bad_epochs:
 cfg_plot.artfctdef.visual.artifact = preclean_ep_at;
+cfg_plot.ylim = [-0.0001 0.0001];
 if isfield(data,'sampleinfo')
     data = rmfield(data,'sampleinfo');
 end
@@ -103,7 +104,7 @@ bhv     = cell(size(SBJ_vars.block_name));
 bhv_cln = cell(size(SBJ_vars.block_name));
 for b_ix = 1:numel(SBJ_vars.block_name)
     % Create a block suffix in cases with more than one recording block
-    if numel(SBJ_vars.raw_file)==1 || isfield(SBJ_vars.dirs,'nlx')
+    if numel(SBJ_vars.raw_file)==1
         block_suffix = SBJ_vars.block_name{b_ix};   % should just be ''
     else
         block_suffix = strcat('_',SBJ_vars.block_name{b_ix});

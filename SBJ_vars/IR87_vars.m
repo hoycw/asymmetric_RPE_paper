@@ -100,7 +100,7 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % Time Parameters
 %--------------------------------------
-SBJ_vars.analysis_time = {{},{},{}};%,{}};
+SBJ_vars.analysis_time = {{[50 1683.8]},{[170 1704]},{[45 1469]}};%,{}};
 SBJ_vars.ignore_trials = {[],[],[]};%,[]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...

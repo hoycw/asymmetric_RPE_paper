@@ -68,6 +68,7 @@ SBJ_vars.ch_lab.wire_ROI   = {'all'};
 
 SBJ_vars.ch_lab.nlx_suffix   = {''};
 SBJ_vars.ch_lab.nlx_nk_align = {'ROF3','ROF4'}; % tried RPC8,9 I think, maybe emodim: {'RIN4','RIN5'};
+SBJ_vars.nlx_analysis_time   = {{[80 1332.7]}};
 SBJ_vars.nlx_macro_inverted  = [1];
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
@@ -97,7 +98,7 @@ SBJ_vars.bs_width    = 2;
 % Time Parameters
 %--------------------------------------
 SBJ_vars.analysis_time = {{}};
-SBJ_vars.ignore_trials = {[]};
+SBJ_vars.ignore_trials = {[1:35]}; % no photodiode for training trials
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
         numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
