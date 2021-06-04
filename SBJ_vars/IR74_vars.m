@@ -59,8 +59,9 @@ SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
     'LTH1','LTH2','LHH1','LHH2','LHH3','LHH4','LAM1','LAM2','LAM3','LHH5',...% epileptic
     'RTH2','RTH3','RHH2','RHH3','RHH4','RHH5','RAM1','RAM2','RAM3',...% epileptic
-    'LTH3','RHH1','RTH1',...% spread (added to stroop after 3/2/19 viewing)
+    'LAM4','LTH3','RHH1','RTH1',...% spread 
     'RTH7','RTH8',...% spiking artifact
+    'LAC1','LAC2','LAC3','RAC1',... % theta frquency slowing with HFA PAC locked to spiking
     'RAM10','LIN10','RIN10',... % out of brain
     'RAM9',... % mini pops when RAM10 does
     'DC02',... % microphone
@@ -71,7 +72,7 @@ SBJ_vars.ch_lab.bad = {...
 
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0 0];
+SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0 0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FPZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
@@ -88,8 +89,8 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % Time Parameters
 %--------------------------------------
-SBJ_vars.analysis_time = {{}};
-SBJ_vars.ignore_trials = {[]};
+SBJ_vars.analysis_time = {{[0 1539]}};
+SBJ_vars.ignore_trials = {[1 2]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...
         numel(SBJ_vars.ignore_trials) ~= numel(SBJ_vars.raw_file)
