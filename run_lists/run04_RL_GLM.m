@@ -9,7 +9,7 @@ addpath(ft_dir);
 ft_defaults
 
 %%
-SBJ_id = 'exit';
+SBJ_id = 'preproc';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
@@ -30,11 +30,11 @@ for mdl_ix = 1:numel(model_ids)
 %             'fig_vis',fig_vis,'fig_ftype',fig_ftype);
     end
 %     
-%     % Fig. 1D inset: Plot group model fits (overlapping sigmoids without tolerance)
+%     % Plot group model fits (overlapping sigmoids without tolerance)
 %     BHV02c_RL_model_plot_grp(SBJ_id,proc_id,model_ids{mdl_ix},...
 %         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
 %     
-%     % Sup. Fig. 1: Plot model predicitons by condition across group
+%     % Plot model predicitons by condition across group
 %     plt_id    = 'line_cond';
 %     BHV02d_RL_model_plot_grp_predictions(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
 %         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
@@ -51,20 +51,20 @@ atlas_id  = 'Dx';
 % stat_ids  = {'lme_st05t5'};%'ERPEsL_DifFB_lme_st05t5'};
 % stat_id = 'RL_DifOut_F0t1_WL01_WS25';%'ERPEs_DO_glm_F0t5_WL01_WS25';
 
-plt_id    = 'ts_F2t1_evnts_sigline';
+plt_id    = 'ts_F0t6_evnts_sigline';
 save_fig  = 1;
-fig_vis   = 'on';
+fig_vis   = 'off';
 fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 1:numel(SBJs)
+        for s = 2:numel(SBJs)
             % Run Mass GLM Stats
 %             SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
-            SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
-                plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
 %             close all;
         end
     end
@@ -77,7 +77,7 @@ model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 % stat_ids  = {'mGLM_st05t6_WL05_WS25','mGLM_st05t10_WL1_WS25'};%};%
 atlas_id  = 'Dx';
-roi_id    = 'MPFCINS';%'main3';%'mgROI';
+roi_id    = 'main3';%'MPFCINS';%'mgROI';
 gm_thresh = 0;
 plot_out  = 0;
 plot_scat = 1;
@@ -96,15 +96,15 @@ for m_ix = 1:numel(model_ids)
         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-%         % Plot latency time series per ROI
-%         plt_id    = 'ts_F0t1_evnts_sigline';
-%         SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-%         
-%         % Plot onset latencies per effect and ROI
-%         plt_id      = 'onsets_0t1_violin_all';
-%         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        % Plot latency time series per ROI
+        plt_id    = 'ts_F0t6_evnts_sigline';
+        SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
+        % Plot onset latencies per effect and ROI
+        plt_id      = 'onsets_0t6_violin_all';
+        SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % flip it and do within ROI regressor onsets!
     end
@@ -152,7 +152,12 @@ for m_ix = 1:numel(model_ids)
             %         roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype, 'skip_reg', skip_reg);
+                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);%, 'skip_reg', skip_reg);
+            
+            % Skip EV
+%             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+%                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype, 'skip_reg', skip_reg);
         end
     end
 end

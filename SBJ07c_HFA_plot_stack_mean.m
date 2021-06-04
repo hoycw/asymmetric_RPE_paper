@@ -85,7 +85,7 @@ elec_fname = [SBJ_vars.dirs.recon SBJ '_elec_' proc_id '_pat_' atlas_id '_final.
 try
     load(elec_fname);
 catch
-    fprintf(['Final elec file not available, no ROI info in title: ' elec_fname]);
+    fprintf('Final elec file not available, no ROI info in title: %s\n',elec_fname);
 end
 
 %% Select Data
@@ -231,7 +231,7 @@ for ch_ix = 1:numel(hfa.label)
     end
     
     % Plot Significance for Activation vs. Baseline
-    ylims = [-0.3 1.3];%ylim;
+    ylims = ylim;%[-0.3 1.3];
     if actv.actv_ch(ch_ix)
         sig_flag = 1;
         for sig_ix = 1:size(actv.actv_epochs{ch_ix},1)

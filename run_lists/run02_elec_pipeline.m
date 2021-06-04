@@ -17,9 +17,9 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 
 for s = 1:numel(SBJs)
     % Convert raw pipeline elec files to my SBJ_vars
-%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
-%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
-%     fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
+    fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
+    fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
+    fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
     
     % Match elec to atlas labels + tissue (ONLY orig!)
     % run in SGE: fn_elec_match_atlas(SBJs{s},'main_ft','pat','','Dx');

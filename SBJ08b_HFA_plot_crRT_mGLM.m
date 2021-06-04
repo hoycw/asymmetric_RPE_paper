@@ -93,7 +93,7 @@ ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
 
 % Create a figure for each channel
 for ch_ix = 1:numel(beta.label)
-    if exist('elec_lab','var') && any(strcmp(beta.label{ch_ix},elec_lab))
+    if ~exist('elec_lab','var') || (exist('elec_lab','var') && any(strcmp(beta.label{ch_ix},elec_lab)))
         sig_flag = 0;
         fig_name = [SBJ '_' model_id '_' stat_id '_' beta.label{ch_ix}];
         figure('Name',fig_name,'units','normalized',...

@@ -59,19 +59,24 @@ SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
     'LTH1','LTH2','LHH1','LHH2','LHH3','LHH4','LAM1','LAM2','LAM3','LHH5',...% epileptic
     'RTH2','RTH3','RHH2','RHH3','RHH4','RHH5','RAM1','RAM2','RAM3',...% epileptic
-    'LTH3','LHH6','LAM4','RAM4','RHH1','RTH1',...% spread (addeed 3/2/19 viewing)
+    'LTH3','RHH1','RTH1',...% spread (added to stroop after 3/2/19 viewing)
     'RTH7','RTH8',...% spiking artifact
-    'RTH10','RIN9','RIN10','RPRE10',...% out of brain (based on my eye, maybe add RAC10 and LIN10 since they're edge)
+    'RAM10','LIN10','RIN10',... % out of brain
+    'RAM9',... % mini pops when RAM10 does
     'DC03','DC04','G','EKG','REF','E'...% not real data
     };
+% previosu bad from stroop I'm not sure I agree with:
+%   'RTH10','RIN9','RIN10','RPRE10',...% out of brain (based on my eye, maybe add RAC10 and LIN10 since they're edge)
+
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0];
+SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FPZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
 SBJ_vars.ch_lab.eog = {'LUC','LLC','RUC','RLC'};
 SBJ_vars.ch_lab.photod = {'DC01'};
+SBJ_vars.ch_lab.mic    = {'DC02'};
 
 %--------------------------------------
 % Line Noise Parameters
@@ -82,7 +87,7 @@ SBJ_vars.bs_width    = 2;
 %--------------------------------------
 % Time Parameters
 %--------------------------------------
-SBJ_vars.analysis_time = {};
+SBJ_vars.analysis_time = {{}};
 SBJ_vars.ignore_trials = {[]};
 if numel(SBJ_vars.analysis_time) ~= numel(SBJ_vars.raw_file) || ...
         numel(SBJ_vars.raw_file) ~= numel(SBJ_vars.block_name) || ...

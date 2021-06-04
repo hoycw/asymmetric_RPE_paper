@@ -62,7 +62,7 @@ SBJ_vars.ch_lab.wire_ROI   = {'all'}; % which microwires to use
 
 %SBJ_vars.ch_lab.prefix = 'POL ';    % before every channel except 'EDF Annotations'
 %SBJ_vars.ch_lab.suffix = '-Ref';    % after every channel except 'EDF Annotations'
-%SBJ_vars.ch_lab.mislabel = {{'RLT12','FPG12'},{'IH;L8','IHL8'}};
+SBJ_vars.ch_lab.mislabel = {{'PCN5','PCU5'}};
 
 SBJ_vars.ch_lab.nlx_suffix   = {'_0006',''}; % session suffix for files, e.g., '_0007'
 SBJ_vars.ch_lab.nlx_nk_align = {'RAM4','RAM5'}; % shared macros fro clinical-NLX alignment, 1 for unipolar or 2 for bipolar
