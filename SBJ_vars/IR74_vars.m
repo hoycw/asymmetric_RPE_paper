@@ -57,11 +57,13 @@ SBJ_vars.ch_lab.eeg_ROI    = {'CZ'};
 
 SBJ_vars.ch_lab.ref_exclude = {}; %exclude from the CAR
 SBJ_vars.ch_lab.bad = {...
-    'LTH1','LTH2','LHH1','LHH2','LHH3','LHH4','LAM1','LAM2','LAM3','LHH5',...% epileptic
+    'LTH1','LTH2','LHH1','LHH2','LHH3','LHH4','LAM1','LAM2','LAM3',...% epileptic
     'RTH2','RTH3','RHH2','RHH3','RHH4','RHH5','RAM1','RAM2','RAM3',...% epileptic
-    'LAM4','LTH3','RHH1','RTH1',...% spread 
+    'LAM4','LAM9','LAM10','LHH5','LHH6','LHH7',... % spread
+    'LTH3','LTH4','LTH5','LTH6','LTH9','LTH10','LOF1','LOF2','LOF3',... % spread
+    'RHH1','RHH8','RHH9','RHH10','RAM7','RAM8','RTH1',...% spread 
     'RTH7','RTH8',...% spiking artifact
-    'LAC1','LAC2','LAC3','RAC1',... % theta frquency slowing with HFA PAC locked to spiking
+    'LAC1','LAC2','LAC3','LAC4','LAC5','RAC1',... % theta frquency slowing with HFA PAC locked to spiking
     'RAM10','LIN10','RIN10',... % out of brain
     'RAM9',... % mini pops when RAM10 does
     'DC02',... % microphone
@@ -72,7 +74,8 @@ SBJ_vars.ch_lab.bad = {...
 
 % bad_codes: 1 = toss (epileptic or bad); 2 = suspicious; 3 = out of brain; 0 = junk
 SBJ_vars.ch_lab.bad_type = {'bad','sus','out'};
-SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0 0];
+SBJ_vars.ch_lab.bad_code = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 ...
+                            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 0 0 0 0 0 0 0];
 if numel(SBJ_vars.ch_lab.bad)~=numel(SBJ_vars.ch_lab.bad_code);error('bad ~= bad_code');end
 SBJ_vars.ch_lab.eeg = {'FPZ','CZ','OZ','C3','C4'};
 % SBJ_vars.ch_lab.CZ_lap_ref = {};
