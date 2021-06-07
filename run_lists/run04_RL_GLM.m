@@ -58,7 +58,7 @@ fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 2:numel(SBJs)
+        for s = 1:numel(SBJs)
             % Run Mass GLM Stats
 %             SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
