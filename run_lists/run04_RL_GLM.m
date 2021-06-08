@@ -9,12 +9,12 @@ addpath(ft_dir);
 ft_defaults
 
 %%
-SBJ_id = 'preproc';
+SBJ_id = 'preproc_nu';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
 proc_id   = 'main_ft';
-model_ids = {'ERPEs_DifFB'};
+model_ids = {'ERPEs_DifFB'};%'ERBuRPE_DifFB'};%
 
 fig_vis   = 'on';
 save_fig  = 1;
@@ -23,8 +23,8 @@ fig_ftype = 'png';
 for mdl_ix = 1:numel(model_ids)
     for s = 1:numel(SBJs)
         % Run model
-%         BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
-% 
+        BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
+
 %         % Fig. 1D: Plot model fit to tolerance and outcomes/accuracy
 %         BHV02b_RL_model_plot(SBJs{s},proc_id,model_ids{mdl_ix},...
 %             'fig_vis',fig_vis,'fig_ftype',fig_ftype);
@@ -42,7 +42,7 @@ for mdl_ix = 1:numel(model_ids)
 end
 
 
-%% Run Model (SGE...)
+%% Run Model on HFA (SGE...)
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
@@ -60,7 +60,7 @@ for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         for s = 1:numel(SBJs)
             % Run Mass GLM Stats
-%             SBJ08a_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+            SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
 %             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
@@ -77,7 +77,7 @@ model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 % stat_ids  = {'mGLM_st05t6_WL05_WS25','mGLM_st05t10_WL1_WS25'};%};%
 atlas_id  = 'Dx';
-roi_id    = 'main3';%'MPFCINS';%'mgROI';
+roi_id    = 'gROI';%'main3';%'MPFCINS';%'mgROI';
 gm_thresh = 0;
 plot_out  = 0;
 plot_scat = 1;
@@ -180,16 +180,94 @@ end
 % fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'r', atlas_id, roi_id, plot_out);
 % fn_view_recon_atlas_grp_stat(SBJs, proc_id, stat_id, an_id, 'v', show_lab, 'l', atlas_id, roi_id, plot_out);    
 
-%% Print MPFC electrodes
-for s = 1:numel(SBJs)
-%     SBJ = SBJs{s};
-%     fprintf('%s\n',SBJ);
-%     load([root_dir 'PRJ_Error/data/' SBJ '/05_recon/' SBJ '_elec_main_ft_pat_Dx_full.mat']);
-%     if any(strcmp(SBJ,{'CP24','IR57','IR68'}))
-%         elec.roi = fn_atlas2roi_labels(elec.atlas_lab,'Dx','gROI');
-%     end
-%     mpfc_ix = find(strcmp(elec.roi,'MPFC'));
-%     disp(elec.label(mpfc_ix));
+%% Run Model on ERPs
+proc_id   = 'main_ft';
+an_id     = 'ERP_F25t1';
+model_ids = {'ERPEs_DifFB'};
+stat_ids  = {'mGLM_st0t10_ds200'};
+atlas_id  = 'Dx';
+
+plt_id    = 'ts_F2t1_evnts_sigline';
+save_fig  = 1;
+fig_vis   = 'off';
+fig_ftype = 'png';
+
+for m_ix = 1:numel(model_ids)
+    for st_ix = 1:numel(stat_ids)
+        for s = 8:numel(SBJs)
+            % Run Mass GLM Stats
+            SBJ06c_ERP_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+            
+            % Plot Mass GLM Results
+            SBJ06d_ERP_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+                plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+            close all;
+        end
+    end
+end
+
+%% ERP Plot Group GLM Proportion of Effects by ROI
+proc_id   = 'main_ft';
+an_id     = 'ERP_F25t1';
+model_ids = {'ERPEs_DifFB'};
+stat_ids  = {'mGLM_st0t10_ds200'};
+atlas_id  = 'Dx';
+roi_id    = 'mgROI';%'main3';%'MPFCINS';%
+gm_thresh = 0;
+plot_out  = 0;
+plot_scat = 1;
+
+save_fig  = 1;
+fig_vis   = 'on';
+fig_ftype = 'png';
+
+% tbin_id     = 'cnts';
+% z_thresh    = 0;
+% gm_thresh   = 0;
+% median_yn   = 0;
+
+hemi      = 'l';
+reg_type  = 'v';
+show_lab  = 0;
+skip_reg  = 'EV';
+roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1},{'b','OFC',0}};
+
+for m_ix = 1:numel(model_ids)
+    for st_ix = 1:numel(stat_ids)
+        % Plot bar graph showing proprotion of effects by ROI
+        SBJ06e_ERP_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
+        % Plot latency time series per ROI
+        plt_id    = 'ts_F0t1_evnts_sigline';
+        SBJ06f_ERP_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
+        % Plot onset latencies per effect and ROI
+        plt_id      = 'onsets_0t1_violin_all';
+        SBJ06g_ERP_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
+        % flip it and do within ROI regressor onsets!
+        
+        % Stat Recons
+        for roi_ix = 1:numel(roi_opts)
+            % Plot significant electrodes
+%             fn_view_recon_atlas_grp_stat_ROI(SBJs, proc_id, stat_id, an_id, ...
+%                 reg_type, show_labels, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+%                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
+            
+            % Plot venn recons
+            fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+                reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);%, 'skip_reg', skip_reg);
+            
+            % Skip EV
+%             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+%                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype, 'skip_reg', skip_reg);
+        end
+    end
 end
 
 %% OLDER ANOVA:

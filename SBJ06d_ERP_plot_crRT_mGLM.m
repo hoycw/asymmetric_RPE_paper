@@ -1,5 +1,5 @@
-function SBJ08b_HFA_plot_crRT_mGLM(SBJ, proc_id, an_id, model_id, stat_id, plt_id, save_fig, varargin)
-%% Plots mass GLM beta time series per electrode
+function SBJ06d_ERP_plot_crRT_mGLM(SBJ, proc_id, an_id, model_id, stat_id, plt_id, save_fig, varargin)
+%% Plots mass GLM beta time series for ERPs per electrode
 % INPUTS:
 %   SBJ [str] - ID of subject
 %   proc_id [str] - ID of preprocessing pipeline
@@ -57,13 +57,14 @@ if ischar(save_fig); save_fig = str2num(save_fig); end
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
-eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
+% eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m']);
 
 [reg_lab, reg_names, reg_colors, reg_styles, ~] = fn_regressor_label_styles(mdl.model_lab);
 
-% Load RTs
+% Load behavior, data, and stats
 load([SBJ_vars.dirs.events SBJ '_bhv_' proc_id '_final.mat'],'bhv');
+load([SBJ_vars.dirs.proc,SBJ,'_ROI_',proc_id,'_',an_id,'.mat'],'erp_trl');
 load([SBJ_vars.dirs.stats SBJ '_mGLM_ROI_' model_id '_' stat_id '_' an_id '.mat']);
 
 % Load ROI and GM/WM info
@@ -73,17 +74,59 @@ load(elec_fname);
 % Get event times for plotting
 [evnt_times] = fn_get_evnt_times(an.evnt_lab,plt.evnt_lab,bhv);
 
+%% Prepare ERP data for plotting
+% Select conditions
+[cond_lab, cond_names, cond_colors, cond_styles, ~] = fn_condition_label_styles(st.stat_cond);
+full_cond_idx = fn_condition_index(cond_lab,bhv);
+bhv = fn_select_bhv(bhv, full_cond_idx);
+cond_idx = fn_condition_index(cond_lab, bhv);
+good_cond_ix = unique(cond_idx);
+
+% Select channels in elec file
+cfg_trim = [];
+if exist('elec_lab','var')
+    cfg_trim.channel = elec_lab;
+    if exist('elec','var')
+        elec = fn_select_elec(cfg_trim,elec);
+    end
+end
+
+% Select channels, trials, and epochs in data
+cfg_trim.trials  = find(full_cond_idx);
+cfg_trim.latency = plt.plt_lim;
+erp_trl = ft_selectdata(cfg_trim,erp_trl);
+
+% Extract Trials into Matrix
+erp_trl_mat = nan([numel(erp_trl.label) numel(erp_trl.trial) numel(erp_trl.time{1})]);
+for trl_ix = 1:numel(erp_trl.trial)
+    erp_trl_mat(:,trl_ix,:) = erp_trl.trial{trl_ix};
+end
+
+% Average ERPs
+erp = cell(size(cond_lab));
+sem = NaN([numel(erp_trl.label) numel(cond_lab) numel(erp_trl.time{1})]);
+cfgavg = [];
+cfgavg.keeptrials = 'yes';
+for cond_ix = 1:numel(cond_lab)
+    if any(good_cond_ix==cond_ix)
+        cfgavg.trials = find(cond_idx==cond_ix);
+        erp{cond_ix}  = ft_timelockanalysis(cfgavg,erp_trl);
+        sem(:,cond_ix,:) = squeeze(std(erp{cond_ix}.trial,[],1))./sqrt(sum(cond_idx==cond_ix))';
+    end
+end
+
 %% Plot Results
-fig_dir = [root_dir 'PRJ_Error/results/HFA/' SBJ '/' model_id '/' stat_id '/' an_id '/' plt_id '/'];
+fig_dir = [root_dir 'PRJ_Error/results/ERP/' SBJ '/' model_id '/' stat_id '/' an_id '/' plt_id '/'];
 if ~exist(fig_dir,'dir'); [~] = mkdir(fig_dir); end
 sig_ln_dir = [fig_dir 'sig_ch/'];
 if ~exist(sig_ln_dir,'dir'); [~] = mkdir(sig_ln_dir); end
 
 % Find plot limits
-max_beta = max(max(max(beta.trial)));
-min_beta = min(min(min(beta.trial)));
+if ~strcmp(beta.feature{1},'offset'); error('beta offset not inital value!'); end
+max_beta = max(max(max(beta.trial(2:end,:,:))));
+min_beta = min(min(min(beta.trial(2:end,:,:))));
 ylim_fudge = (max_beta-min_beta)*plt.ylim_fudge;
-ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
+beta_ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
 
 % y_sig = zeros([1 numel(grp_lab)+1]);
 % y_sig(1) = mean([min_beta,max_beta]);
@@ -95,11 +138,60 @@ ylims  = [min_beta-ylim_fudge max_beta+ylim_fudge];
 for ch_ix = 1:numel(beta.label)
     if ~exist('elec_lab','var') || (exist('elec_lab','var') && any(strcmp(beta.label{ch_ix},elec_lab)))
         sig_flag = 0;
+        elec_ix = find(strcmp(beta.label{ch_ix},elec.label));
         fig_name = [SBJ '_' model_id '_' stat_id '_' beta.label{ch_ix}];
         figure('Name',fig_name,'units','normalized',...
             'outerposition',[0 0 1 0.8],'Visible',fig_vis);
         
-        ax = gca; hold on;
+        %% Plot ERPs
+        subplot(2,1,1);
+        ax1 = gca;  hold on;
+        
+        % Plot HFA Means (and variance)
+        cond_lines = cell(size(cond_lab));
+        main_lines = gobjects([numel(good_cond_ix)+numel(plt.evnt_lab) 1]);
+        main_line_ix = 0;
+        for cond_ix = 1:numel(cond_lab)
+            if any(good_cond_ix==cond_ix)
+                main_line_ix = main_line_ix + 1;
+                cond_lines{cond_ix} = shadedErrorBar(erp{cond_ix}.time, ...
+                    mean(erp{cond_ix}.trial(:,ch_ix,:),1), sem(ch_ix,cond_ix,:),...
+                    'lineProps',{'Color',cond_colors{cond_ix},'LineWidth',2,...
+                    'LineStyle',cond_styles{cond_ix}},'patchSaturation',plt.errbar_alpha);
+                main_lines(main_line_ix) = cond_lines{cond_ix}.mainLine;
+            end
+        end
+        
+        % Plot Significance for Activation vs. Baseline
+        ylims = ylim;
+        % Plot Events
+        for evnt_ix = 1:numel(plt.evnt_lab)
+            main_line_ix = main_line_ix + 1;
+            main_lines(main_line_ix) = line(...
+                [evnt_times(evnt_ix) evnt_times(evnt_ix)],ylims,...
+                'LineWidth',plt.evnt_width,'Color',plt.evnt_color,...
+                'LineStyle',plt.evnt_styles{evnt_ix});
+        end
+        
+        % Axes and Labels
+        ax1.YLabel.String = 'ERP (uV)';
+        ax1.XLim          = [plt.plt_lim(1) plt.plt_lim(2)];
+        ax1.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
+        ax1.XLabel.String = 'Time (s)';
+        if ~isempty(elec_ix)
+            ax1.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, '): ERPs');
+        else
+            ax1.Title.String  = strcat(beta.label{ch_ix},': ERPs');
+        end
+        if plt.legend
+            legend(main_lines,[cond_names(good_cond_ix) plt.evnt_lab],'Location',plt.legend_loc);
+        end
+        set(gca,'FontSize',16);
+        ax1.YLim = ylims;
+        
+        %% Plot GLM Betas
+        subplot(2,1,2);
+        ax2 = gca; hold on;
         main_lines = gobjects(size(reg_lab));
         % Plot var_exp
         for reg_ix = 1:numel(reg_lab)
@@ -111,7 +203,7 @@ for ch_ix = 1:numel(beta.label)
         % Plot events: stim, target, feedback onset, feedback offset
         evnt_lines = gobjects(size(plt.evnt_lab));
         for evnt_ix = 1:numel(evnt_times)
-            evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],ylims,...
+            evnt_lines(evnt_ix) = line([evnt_times(evnt_ix) evnt_times(evnt_ix)],beta_ylims,...
                 'LineWidth',plt.evnt_width,'Color','k','LineStyle',plt.evnt_styles{evnt_ix});
         end
         
@@ -140,10 +232,10 @@ for ch_ix = 1:numel(beta.label)
                         end
                     elseif strcmp(plt.sig_type,'patch')
                         error('sig_type = patch needs sig_times variable!');
-                        sig_times = win_lim(sig_chunks(sig_ix,:),:);
-                        patch([sig_times(1,1) sig_times(1,1) sig_times(2,2) sig_times(2,2)], ...
-                            [ylims(1) ylims(2) ylims(2) ylims(1)],...
-                            reg_colors{reg_ix},'FaceAlpha',plt.sig_alpha);
+%                         sig_times = win_lim(sig_chunks(sig_ix,:),:);
+%                         patch([sig_times(1,1) sig_times(1,1) sig_times(2,2) sig_times(2,2)], ...
+%                             [beta_ylims(1) beta_ylims(2) beta_ylims(2) beta_ylims(1)],...
+%                             reg_colors{reg_ix},'FaceAlpha',plt.sig_alpha);
                     end
                 end
             else
@@ -153,22 +245,21 @@ for ch_ix = 1:numel(beta.label)
         end
         
         % Plotting parameters
-        elec_ix = find(strcmp(beta.label{ch_ix},elec.label));
         if ~isempty(elec_ix)
-            ax.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, ')');
+            ax2.Title.String  = strcat(beta.label{ch_ix}, ' (', elec.ROI{elec_ix}, '): Betas');
         else
-            ax.Title.String  = strcat(beta.label{ch_ix});
+            ax2.Title.String  = strcat(beta.label{ch_ix},': Betas');
         end
-        ax.Box           = 'off';
-        ax.YLim          = ylims;
-        ax.YLabel.String = 'Model Coefficient';
-        ax.XLim          = plt.plt_lim;
-        ax.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
-        ax.XLabel.String = 'Time (s)';
+        ax2.Box           = 'off';
+        ax2.YLim          = beta_ylims;
+        ax2.YLabel.String = 'Model Coefficient';
+        ax2.XLim          = plt.plt_lim;
+        ax2.XTick         = plt.plt_lim(1):plt.x_step_sz:plt.plt_lim(2);
+        ax2.XLabel.String = 'Time (s)';
         legend([main_lines evnt_lines],[reg_names plt.evnt_lab],'Location',plt.legend_loc);
-        set(ax,'FontSize',16);
+        set(ax2,'FontSize',16);
         
-        % Save figure
+        %% Save figure
         if save_fig
             fig_fname = [fig_dir fig_name '.' fig_ftype];
             fprintf('Saving %s\n',fig_fname);

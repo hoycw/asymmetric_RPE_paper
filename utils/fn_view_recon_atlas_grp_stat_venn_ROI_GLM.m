@@ -102,6 +102,17 @@ all_color   = [0.1 0.1 0.1];
 
 SBJs = fn_load_SBJ_list(SBJ_id);
 
+% Identify analysis type
+if contains(an_id,'ERP')
+    an_dir = 'ERP';
+elseif contains(an_id,'HG')
+    an_dir = 'HFA';
+elseif  contains(an_id,'TFR')
+    an_dir = 'TFR';
+else
+    error('unknown an_id');
+end
+
 % Skip Regressor
 if exist('skip_reg','var')
     if ~any(strcmp(reg_lab,skip_reg)); error([skip_reg 'not in reg_lab to skip']); end
@@ -309,7 +320,7 @@ end
 
 %% 3D Surface + Grids (3d, pat/mni, vol/srf, 0/1)
 if save_fig
-    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP/recon_venn/' model_id '/' stat_id '/' an_id '/'];
+    out_dir = [root_dir 'PRJ_Error/results/' an_dir '/GRP/recon_venn/' model_id '/' stat_id '/' an_id '/'];
     if ~exist(out_dir,'dir')
         [~] = mkdir(out_dir);
     end

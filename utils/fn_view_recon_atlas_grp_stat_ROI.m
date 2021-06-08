@@ -100,6 +100,17 @@ fprintf('Using atlas: %s\n',atlas_id);
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 [grp_lab, ~, ~] = fn_group_label_styles(model_lab);
 
+% Identify analysis type
+if contains(an_id,'ERP')
+    an_dir = 'ERP';
+elseif contains(an_id,'HG')
+    an_dir = 'HFA';
+elseif  contains(an_id,'TFR')
+    an_dir = 'TFR';
+else
+    error('unknown an_id');
+end
+
 elec_sbj = cell([numel(SBJs) numel(grp_lab)]);
 good_sbj = true([numel(SBJs) numel(grp_lab)]);
 all_roi_labels = cell([numel(grp_lab) 1]);
@@ -247,7 +258,7 @@ end
 
 %% 3D Surface + Grids (3d, pat/mni, vol/srf, 0/1)
 if save_fig
-    out_dir = [root_dir 'PRJ_Error/results/HFA/GRP/' stat_id '_recon/' an_id '/'];
+    out_dir = [root_dir 'PRJ_Error/results/' an_dir '/GRP/recon_stat/' model_id '/' stat_id '/' an_id '/'];
     if ~exist(out_dir,'dir')
         [~] = mkdir(out_dir);
     end

@@ -24,7 +24,7 @@ fig_ftype  = 'png';
 fig_vis    = 'off';
 
 for s = 1:numel(SBJs)
-%     SBJ06a_ERP_save(SBJs{s},proc_id,an_id);
+    SBJ06a_ERP_save(SBJs{s},proc_id,an_id);
     
     SBJ06b_ERP_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, plt_id, save_fig,...
         'atlas_id', atlas_id, 'fig_vis', fig_vis, 'fig_ftype', fig_ftype);

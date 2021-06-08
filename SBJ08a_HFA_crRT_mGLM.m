@@ -1,4 +1,4 @@
-function SBJ08a_crRT_mGLM(SBJ, proc_id, an_id, model_id, stat_id)
+function SBJ08a_HFA_crRT_mGLM(SBJ, proc_id, an_id, model_id, stat_id)
 %% function SBJ08a_crRT_mGLM(SBJ,an_id,stat_id)
 %   Run GLM with sliding windows for given time-frequency analysis
 %   Correlation with RT and regression of RT as confound supported
@@ -49,13 +49,14 @@ end
 if ~all(contains(cond_lab,mdl_cond_lab))
     error([model_id ' does not cover all conditions in ' stat_id '!']);
 end
-cond_idx = fn_condition_index(cond_lab, bhv);
-bhv = fn_select_bhv(bhv, cond_idx);
+full_cond_idx = fn_condition_index(cond_lab, bhv);
+bhv = fn_select_bhv(bhv, full_cond_idx);
+model = model(full_cond_idx~=0,:);
 
 % Select data in stat window
 cfg_trim = [];
 cfg_trim.latency = st.stat_lim;
-cfg_trim.trials  = cond_idx~=0;
+cfg_trim.trials  = full_cond_idx~=0;
 hfa = ft_selectdata(cfg_trim,hfa);
 
 % Log combined bad trial types
@@ -65,6 +66,8 @@ hfa = ft_selectdata(cfg_trim,hfa);
 % st.bad_trials.cond = bhv.trial_n(~good_cond_idx);
 
 %% Compute max z score per condition (for later exclusions)
+cond_idx = fn_condition_index(cond_lab, bhv);
+
 max_z = zeros(size(hfa.label));
 cfg_avg = [];
 cfg_avg.avgoverrpt = 'yes';

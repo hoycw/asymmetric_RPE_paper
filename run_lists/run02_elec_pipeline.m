@@ -144,6 +144,18 @@ for e = 1:numel(plot_elecs)
     l = camlight;
 end
 
+%% Print MPFC electrodes
+for s = 1:numel(SBJs)
+%     SBJ = SBJs{s};
+%     fprintf('%s\n',SBJ);
+%     load([root_dir 'PRJ_Error/data/' SBJ '/05_recon/' SBJ '_elec_main_ft_pat_Dx_full.mat']);
+%     if any(strcmp(SBJ,{'CP24','IR57','IR68'}))
+%         elec.roi = fn_atlas2roi_labels(elec.atlas_lab,'Dx','gROI');
+%     end
+%     mpfc_ix = find(strcmp(elec.roi,'MPFC'));
+%     disp(elec.label(mpfc_ix));
+end
+
 %% Manual vs. Automatic ROI comparison
 roi_id = 'ROI';
 atlas_id = 'Dx';

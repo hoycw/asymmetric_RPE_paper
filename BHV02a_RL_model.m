@@ -357,34 +357,40 @@ if ~isempty(intersect(reg_lab,{'ERB','rough','mxS','mnS','mxdS','mndS'}))
     end
     
     for trl_ix = 1:numel(bhv.trl_n)
+        if strcmp(bhv.fb{trl_ix},'N')
+            sound_name = [bhv.sound{trl_ix}(strfind(bhv.sound{trl_ix},'/')+1:end) '.wav'];
+        else
+            sound_name = [bhv.sound{trl_ix} '.wav'];
+        end
+        
         % ERB "loudness"
         if any(strcmp(reg_lab,'ERB'))
-            ERB(trl_ix) = aud_sal.ERB(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            ERB(trl_ix) = aud_sal.ERB(strcmp(aud_sal.sound,sound_name));
         end
         
         % Roughness
         if any(strcmp(reg_lab,'rough'))
-            rough(trl_ix) = aud_sal.rough(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            rough(trl_ix) = aud_sal.rough(strcmp(aud_sal.sound,sound_name));
         end
         
         % Max Salience
         if any(strcmp(reg_lab,'mxS'))
-            mxS(trl_ix) = aud_sal.mxS(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            mxS(trl_ix) = aud_sal.mxS(strcmp(aud_sal.sound,sound_name));
         end
         
         % Mean Salience
         if any(strcmp(reg_lab,'mnS'))
-            mnS(trl_ix) = aud_sal.mnS(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            mnS(trl_ix) = aud_sal.mnS(strcmp(aud_sal.sound,sound_name));
         end
         
         % Max Gradient (delta salience)
         if any(strcmp(reg_lab,'mxdS'))
-            mxdS(trl_ix) = aud_sal.mxdS(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            mxdS(trl_ix) = aud_sal.mxdS(strcmp(aud_sal.sound,sound_name));
         end
         
         % Mean Gradient (delta salience)
         if any(strcmp(reg_lab,'mndS'))
-            mndS(trl_ix) = aud_sal.mndS(strcmp(aud_sal.sound,[bhv.sound{trl_ix} '.wav']));
+            mndS(trl_ix) = aud_sal.mndS(strcmp(aud_sal.sound,sound_name));
         end
     end
 end
