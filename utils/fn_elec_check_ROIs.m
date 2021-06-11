@@ -1,9 +1,36 @@
-function fn_elec_check_ROIs(SBJ, reref)%, proc_id, view_space, reg_type, atlas_id)
+function fn_elec_check_ROIs(SBJ, reref, varargin)
 %% Plot recons for each probe with pial, white matter, and inflated to check ROI assignments
-proc_id = 'main_ft';
-view_space  = 'pat';
-reg_type    = '';
-atlas_id    = 'Dx';
+
+%% Handle Variable Inputs & Defaults
+if ~isempty(varargin)
+    for v = 1:2:numel(varargin)
+        if strcmp(varargin{v},'proc_id') && ischar(varargin{v+1})
+            proc_id = varargin{v+1};
+        elseif strcmp(varargin{v},'view_space') && ischar(varargin{v+1})
+            view_space = varargin{v+1};
+        elseif strcmp(varargin{v},'reg_type') && ischar(varargin{v+1})
+            reg_type = varargin{v+1};
+        elseif strcmp(varargin{v},'atlas_id') && ischar(varargin{v+1})
+            atlas_id = varargin{v+1};
+        elseif strcmp(varargin{v},'plot_inflated')
+            plot_inflated = varargin{v+1};
+        elseif strcmp(varargin{v},'plot_ortho')
+            plot_ortho = varargin{v+1};
+        elseif strcmp(varargin{v},'probes') && iscell(varargin{v+1})
+            probes = varargin{v+1};
+        else
+            error(['Unknown varargin ' num2str(v) ': ' varargin{v}]);
+        end
+    end
+end
+
+% Define default options
+if ~exist('proc_id','var');       proc_id = 'main_ft'; end
+if ~exist('view_space','var');    view_space = 'pat'; end
+if ~exist('reg_type','var');      reg_type = ''; end
+if ~exist('atlas_id','var');      atlas_id = 'Dx'; end
+if ~exist('plot_inflated','var'); plot_inflated = 0; end
+if ~exist('plot_ortho','var');    plot_ortho = 1; end
 
 %% Load elec and get ROI labels
 % Check which root directory
@@ -35,27 +62,44 @@ elec.color = fn_roi2color(elec.ROI);
 %% Load meshes
 pial_l = fn_load_recon_mesh(SBJ,view_space,reg_type,'pial','l');
 pial_r = fn_load_recon_mesh(SBJ,view_space,reg_type,'pial','r');
-wm_l   = fn_load_recon_mesh(SBJ,view_space,reg_type,'wm','l');
-wm_r   = fn_load_recon_mesh(SBJ,view_space,reg_type,'wm','r');
-infl_l = fn_load_recon_mesh(SBJ,view_space,reg_type,'inflated','l');
-infl_r = fn_load_recon_mesh(SBJ,view_space,reg_type,'inflated','r');
+if exist([SBJ_vars.dirs.recon 'Surfaces/' SBJ '_wm_lh.mat'],'file')
+    wm_l   = fn_load_recon_mesh(SBJ,view_space,reg_type,'wm','l');
+    wm_r   = fn_load_recon_mesh(SBJ,view_space,reg_type,'wm','r');
+end
 
 %% Plot inflated (no elecs)
-i_l = figure('Name',[SBJ ' inflated L']);
-ft_plot_mesh(infl_l, 'vertexcolor', 'curv');
-material dull; lighting gouraud;
-l = camlight;
-set(i_l, 'windowkeypressfcn',   @cb_keyboard);
-
-i_r = figure('Name',[SBJ ' inflated L']);
-ft_plot_mesh(infl_r, 'vertexcolor', 'curv');
-material dull; lighting gouraud;
-l = camlight;
-set(i_r, 'windowkeypressfcn',   @cb_keyboard);
+if plot_inflated
+    % Load inflated surfaces
+    infl_l = fn_load_recon_mesh(SBJ,view_space,reg_type,'inflated','l');
+    infl_r = fn_load_recon_mesh(SBJ,view_space,reg_type,'inflated','r');
+    
+    % Plot inflated surfaces
+    i_l = figure('Name',[SBJ ' inflated L']);
+    ft_plot_mesh(infl_l, 'vertexcolor', 'curv');
+    material dull; lighting gouraud;
+    l = camlight;
+    set(i_l, 'windowkeypressfcn',   @cb_keyboard);
+    
+    i_r = figure('Name',[SBJ ' inflated L']);
+    ft_plot_mesh(infl_r, 'vertexcolor', 'curv');
+    material dull; lighting gouraud;
+    l = camlight;
+    set(i_r, 'windowkeypressfcn',   @cb_keyboard);
+end
 
 %% Plot elecs + meshes
-p = 2;
-% for p = 1:numel(SBJ_vars.ch_lab.probes)
+% Select probes to plot
+if exist('probes','var')
+    probe_ix = zeros(size(probes));
+    for p = 1:numel(probe_ix)
+        probe_ix(p) = find(strcmp(SBJ_vars.ch_lab.probes,probes{p}));
+    end
+else
+    probe_ix = 1:numel(SBJ_vars.ch_lab.probes);
+end
+
+% Plot each probe
+for p = probe_ix
     cfgs.channel = ft_channelselection([SBJ_vars.ch_lab.probes{p} '*'], elec.label);
     probe = fn_select_elec(cfgs, elec);
     
@@ -76,7 +120,7 @@ p = 2;
     set(pial, 'windowkeypressfcn',   @cb_keyboard);
     
     % Plot WM
-    if strcmp(SBJ_vars.ch_lab.probe_type,'seeg')
+    if strcmp(SBJ_vars.ch_lab.probe_type{p},'seeg') && exist('wm_l','var')
         wm = figure('Name',[SBJ ' white ' probe.label{1} ' : ' probe.label{end}],...
                     'Units','normalized');
         set(wm, 'OuterPosition', [0.5 0 0.5 1]);
@@ -93,12 +137,12 @@ p = 2;
 end
 
 %% Plot Elecs
-% if any(strcmp(SBJ_vars.ch_lab.probe_type,'seeg'))
-if ~reref
-    fn_view_recon(SBJ, '', 'ortho', view_space, reg_type, 1, 'b', 1);
-else
-    fn_view_recon(SBJ, 'main_ft', 'ortho', view_space, reg_type, 1, 'b', 1);
+if plot_ortho %any(strcmp(SBJ_vars.ch_lab.probe_type,'seeg'))
+    if ~reref
+        fn_view_recon(SBJ, '', 'ortho', view_space, reg_type, 1, 'b', 1);
+    else
+        fn_view_recon(SBJ, 'main_ft', 'ortho', view_space, reg_type, 1, 'b', 1);
+    end
 end
-% end
 
 end

@@ -9,17 +9,17 @@ addpath(ft_dir);
 ft_defaults
 
 %% Load SBJ list
-SBJ_id = 'CP24.IR57.66.68';
+SBJ_id = 'preproc';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Prepare for inspections
 % Requires SBJ_vars to be set up
 
-for s = 2:numel(SBJs)
+for s = 1:numel(SBJs)
     % Convert raw pipeline elec files to my SBJ_vars
-    fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
-    fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
-    fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
+%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
+%     fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
+%     fn_elec_import_orig(SBJs{s},'main_ft','mni','v',1);
     
     % Match elec to atlas labels + tissue (ONLY orig!)
     % run in SGE: fn_elec_match_atlas(SBJs{s},'main_ft','pat','','Dx');
@@ -82,16 +82,16 @@ end
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'l','Dx','mgROI',0);
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'r','Dx','mgROI',0);
 
-roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1},{'b','OFC',0}};
+roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};
 proc_id   = 'main_ft';
 roi_id    = 'main3';%'mgROI';
 atlas_id  = 'Dx';
 reg_type  = 'v';
-show_lab  = 1;
+show_lab  = 0;
 save_fig  = 1;
 fig_ftype = 'png';
 
-for roi_ix = 2%1:numel(roi_opts)
+for roi_ix = 1:numel(roi_opts)
     fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, reg_type, show_lab,...
                                 roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
                                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);

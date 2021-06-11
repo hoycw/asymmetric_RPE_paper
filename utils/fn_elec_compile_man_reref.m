@@ -37,10 +37,11 @@ load(elec_fname);
 if ~any(strcmp(SBJ_vars.ch_lab.ref_type,'BP'))
     % Add functions to fill "bipolar" adjustments
     for e = 1:numel(elec.label)
-        elec.inputs{e}.par_vol = [elec.par_vol(e) elec.par_vol(e)];
+        elec.inputs{e}.par_vol   = [elec.par_vol(e) elec.par_vol(e)];
         elec.inputs{e}.gm_weight = [elec.gm_weight(e) elec.gm_weight(e)];
-        elec.inputs{e}.gROI = [elec.gROI(e) elec.gROI(e)];
-        elec.inputs{e}.ROI = [elec.ROI(e) elec.ROI(e)];
+        elec.inputs{e}.gROI      = [elec.gROI(e) elec.gROI(e)];
+        elec.inputs{e}.ROI       = [elec.ROI(e) elec.ROI(e)];
+        elec.inputs{e}.tissue    = [elec.tissue(e) elec.tissue(e)];
         if ~strcmp(elec.tissue{e},'GM') || elec.par_vol(e)
             elec.roi_flag(e) = 1;
         else
