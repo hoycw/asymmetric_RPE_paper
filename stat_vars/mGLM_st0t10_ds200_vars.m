@@ -11,6 +11,7 @@ st.measure     = 'ts';             % {'ts', 'p2p', 'mean'}
 st.n_boots     = 1000;             % Repetitions for non-parametric stats
 st.alpha       = 0.05;
 st.mcp_method  = 'FDR';
+st.test_tail   = 2;                 % one-sided (1) or two-sided (2) tests
 
 % RT correlation and regression
 st.rt_corr     = 0;

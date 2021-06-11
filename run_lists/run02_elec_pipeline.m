@@ -9,13 +9,13 @@ addpath(ft_dir);
 ft_defaults
 
 %% Load SBJ list
-SBJ_id = 'ins_rep4';
+SBJ_id = 'CP24.IR57.66.68';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Prepare for inspections
 % Requires SBJ_vars to be set up
 
-for s = 1:numel(SBJs)
+for s = 2:numel(SBJs)
     % Convert raw pipeline elec files to my SBJ_vars
     fn_elec_import_orig(SBJs{s},'main_ft','pat','',0);
     fn_elec_import_orig(SBJs{s},'main_ft','pat','',1);
@@ -25,7 +25,7 @@ for s = 1:numel(SBJs)
     % run in SGE: fn_elec_match_atlas(SBJs{s},'main_ft','pat','','Dx');
     
     % Export reref atlas info to CSV for manual adjustments
-    fn_elec_export_csv(SBJs{s},'main_ft','pat','','Dx', 0);
+%     fn_elec_export_csv(SBJs{s},'main_ft','pat','','Dx', 0);
     
 end
 

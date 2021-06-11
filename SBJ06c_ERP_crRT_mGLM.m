@@ -140,14 +140,13 @@ end
 beta.trial = fn_mass_GLM(beta.model,erp_data,0);
 
 % Compute ANOVA for permuted data
-rand_model = beta.model;
 % b = '';
 fprintf('boot #: ');
 for boot_ix = 1:st.n_boots
 %     m = sprintf(' permutation %d/%d', boot_ix, n_boots);
 %     fprintf([b m]); b = repmat('\b',[1 length(m)]);
     fprintf('%i..',boot_ix);
-    rand_model = rand_model(randperm(size(rand_model,1)),:);
+    rand_model = model(randperm(size(model,1)),:);
     beta.boot(:,:,:,boot_ix) = fn_mass_GLM(rand_model,erp_data,0);
     if mod(boot_ix,20)==0
         fprintf('\n');
@@ -155,18 +154,25 @@ for boot_ix = 1:st.n_boots
 end
 
 % Compute statistics
-beta.pval = sum(bsxfun(@ge,beta.boot,beta.trial),4)./st.n_boots; % sum(boots>real)/n_boots
-beta.zscore   = norminv(1-beta.pval,0,1);
-beta.bootmean = mean(beta.boot,4);
-beta.bootstd  = std(beta.boot,[],4);
-% w2 = rmfield(w2,'boot');
-beta.zscore(isinf(beta.zscore)) = norminv(1-1/st.n_boots/2,0,1);
+% Original one-sided logic (e.g., ANOVA variance explained): % sum(boots>real)/n_boots
+%   one-sided code: beta.pval = sum(bsxfun(@ge,beta.boot,beta.trial),4)./st.n_boots;
+% Here, using two-sided logic: sum(abs(boots-boot_median)>abs(real-boot_median))/n_boots
+%   Note the bootstrapped distribution and real beta are median-centered to
+%   correct for bias before mirroring the distribution to allow one-sided
+%   FDR correction and testing
+beta.pval = sum(bsxfun(@ge,abs(beta.boot-median(beta.boot,4)),abs(beta.trial-median(beta.boot,4))),4)./st.n_boots;
 
 % Multiple Comparisons Correction within Channel
 beta.qval = nan(size(beta.pval));
 for ch_ix = 1:numel(beta.label)
     [~, ~, ~, beta.qval(:,ch_ix,:)] = fdr_bh(squeeze(beta.pval(:,ch_ix,:)));
 end
+
+% Z-score beta statistics for later group use
+beta.zscore   = norminv(1-beta.pval,0,1);
+beta.bootmean = mean(beta.boot,4);
+beta.bootstd  = std(beta.boot,[],4);
+beta.zscore(isinf(beta.zscore)) = norminv(1-1/st.n_boots/2,0,1);
 
 %% Print results
 % Prep report
@@ -215,9 +221,9 @@ fclose(sig_report);
 %% Save Results
 out_fname = [SBJ_vars.dirs.stats SBJ '_mGLM_ROI_' model_id '_' stat_id '_' an_id '.mat'];
 if st.rt_corr
-    save(out_fname,'-v7.3','beta','rt','st');
+    save(out_fname,'-v7.3','beta','rt');
 else
-    save(out_fname,'-v7.3','beta','st');
+    save(out_fname,'-v7.3','beta');
 end
 
 end

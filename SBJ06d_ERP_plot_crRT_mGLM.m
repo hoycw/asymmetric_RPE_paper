@@ -57,7 +57,7 @@ if ischar(save_fig); save_fig = str2num(save_fig); end
 eval(['run ' root_dir 'PRJ_Error/scripts/SBJ_vars/' SBJ '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/an_vars/' an_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
-% eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
+eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m']);
 
 [reg_lab, reg_names, reg_colors, reg_styles, ~] = fn_regressor_label_styles(mdl.model_lab);
@@ -147,7 +147,7 @@ for ch_ix = 1:numel(beta.label)
         subplot(2,1,1);
         ax1 = gca;  hold on;
         
-        % Plot HFA Means (and variance)
+        % Plot ERP Means (and variance)
         cond_lines = cell(size(cond_lab));
         main_lines = gobjects([numel(good_cond_ix)+numel(plt.evnt_lab) 1]);
         main_line_ix = 0;
