@@ -1,7 +1,7 @@
-function SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_id,stat_id,roi_id,...
+function SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_id,stat_id,roi_id,...
                                             plt_id,save_fig,varargin)%gm_thresh,z_thresh,
-% Load HFA mGLM results to plot onsets of signifcant effects per ROI
-%   Also shows t-test for onset differences between ROIs
+% Load HFA mGLM results to plot onsets of signifcant effects within ROI
+%   Also shows t-test for onset differences between regressors (within ROI)
 % INPUTS:
 %   SBJ_id [str] - ID of subject list to load
 %   plt.grp_metric [str] - {'avg','mdn','all'}
@@ -46,7 +46,7 @@ eval(['run ' root_dir 'PRJ_Error/scripts/plt_vars/' plt_id '_vars.m']);
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 % Get condition info
-[reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+[reg_lab, reg_names, reg_colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
 
 % Load all ROI info
 [roi_list, roi_colors, roi_field] = fn_roi_label_styles(roi_id);
@@ -94,98 +94,98 @@ end
 
 %% Aggregate/Process onsets per gROI
 % Format as struct to fit violinplot
-plot_onsets    = cell([numel(reg_lab) 1]);
-plot_onset_sbj = cell([numel(reg_lab) 1]);
-good_roi_ix    = cell([numel(reg_lab) 1]);
-for reg_ix = 1:numel(reg_lab)
-    for roi_ix = 1:numel(roi_list)
+plot_onsets    = cell([numel(roi_list) 1]);
+plot_onset_sbj = cell([numel(roi_list) 1]);
+good_reg_ix    = cell([numel(roi_list) 1]);
+for roi_ix = 1:numel(roi_list)
+    for reg_ix = 1:numel(reg_lab)
         if ~isempty([onsets{reg_ix,roi_ix,:}])
             if strcmp(plt.grp_metric,'all')
-                plot_onsets{reg_ix}.(roi_list{roi_ix}) = [onsets{reg_ix,roi_ix,:}]';
-                plot_onset_sbj{reg_ix}.(roi_list{roi_ix}) = [];
+                plot_onsets{roi_ix}.(reg_lab{reg_ix}) = [onsets{reg_ix,roi_ix,:}]';
+                plot_onset_sbj{roi_ix}.(reg_lab{reg_ix}) = [];
             end
             for s = 1:numel(SBJs)
                 % Aggregate onsets per ROI within each SBJ
                 if strcmp(plt.grp_metric,'all')
-                    plot_onset_sbj{reg_ix}.(roi_list{roi_ix}) = ...
-                        [plot_onset_sbj{reg_ix}.(roi_list{roi_ix}); repmat(s,size(onsets{reg_ix,roi_ix,s}))'];
+                    plot_onset_sbj{roi_ix}.(reg_lab{reg_ix}) = ...
+                        [plot_onset_sbj{roi_ix}.(reg_lab{reg_ix}); repmat(s,size(onsets{reg_ix,roi_ix,s}))'];
                 elseif strcmp(plt.grp_metric,'mdn')
-                    plot_onsets{reg_ix}.(roi_list{roi_ix}) = ...
-                        [plot_onsets{reg_ix}.(roi_list{roi_ix}); nanmedian(onsets{reg_ix,roi_ix,s})];
+                    plot_onsets{roi_ix}.(reg_lab{reg_ix}) = ...
+                        [plot_onsets{roi_ix}.(reg_lab{reg_ix}); nanmedian(onsets{reg_ix,roi_ix,s})];
                 elseif strcmp(plt.grp_metric,'avg')
-                    plot_onsets{reg_ix}.(roi_list{roi_ix}) = ...
-                        [plot_onsets{reg_ix}.(roi_list{roi_ix}); nanmean(onsets{reg_ix,roi_ix,s})];
+                    plot_onsets{roi_ix}.(reg_lab{reg_ix}) = ...
+                        [plot_onsets{roi_ix}.(reg_lab{reg_ix}); nanmean(onsets{reg_ix,roi_ix,s})];
                 else
                     error(['Unknown plt.grp_metric: ' plt.grp_metric]);
                 end
             end
         else
-            plot_onsets{reg_ix} = struct();
-            fprintf(2,'\tNo significant elecs for %s in %s\n',reg_names{reg_ix},roi_list{roi_ix});
+            plot_onsets{roi_ix} = struct();
+            fprintf(2,'\tNo significant elecs for %s in %s\n',roi_list{roi_ix},reg_names{reg_ix});
         end
     end
-    good_roi_ix{reg_ix} = find(contains(roi_list,fieldnames(plot_onsets{reg_ix})));
+    good_reg_ix{roi_ix} = find(contains(reg_lab,fieldnames(plot_onsets{roi_ix})));
 end
 
 %% Pair-Wise Statistics
-pairs = nchoosek(1:numel(roi_list),2);
-pvals = nan([numel(reg_lab) size(pairs,1)]);
-onset_diffs = nan([numel(reg_lab) numel(roi_list) numel(roi_list)]);
-for reg_ix = 1:numel(reg_lab)
+pairs = nchoosek(1:numel(reg_lab),2);
+pvals = nan([numel(roi_list) size(pairs,1)]);
+onset_diffs = nan([numel(roi_list) numel(reg_lab) numel(reg_lab)]);
+for roi_ix = 1:numel(roi_list)
     for p_ix = 1:size(pairs,1)
-        if isfield(plot_onsets{reg_ix},roi_list{pairs(p_ix,1)}) && isfield(plot_onsets{reg_ix},roi_list{pairs(p_ix,1)})
-            [~, pvals(reg_ix,p_ix)] = ttest2(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,1)}),...
-                plot_onsets{reg_ix}.(roi_list{pairs(p_ix,2)}));
-            onset_diffs(reg_ix,pairs(p_ix,1),pairs(p_ix,2)) = mean(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,1)}))-...
-                                       mean(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,2)}));
-            if pvals(reg_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
+        if isfield(plot_onsets{roi_ix},reg_lab{pairs(p_ix,1)}) && isfield(plot_onsets{roi_ix},reg_lab{pairs(p_ix,1)})
+            [~, pvals(roi_ix,p_ix)] = ttest2(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,1)}),...
+                plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,2)}));
+            onset_diffs(roi_ix,pairs(p_ix,1),pairs(p_ix,2)) = mean(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,1)}))-...
+                                       mean(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,2)}));
+            if pvals(roi_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
             fprintf('\t%s%s: %s (nE=%d; nSBJ=%d; %.3f +/- %.4f) vs. %s (nE=%d; nSBJ=%d; %.3f +/- %.4f) p = %.5f\n',...
-                sig_str,reg_names{reg_ix},roi_list{pairs(p_ix,1)},...
-                numel(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,1)})),...
-                numel(unique(plot_onset_sbj{reg_ix}.(roi_list{pairs(p_ix,1)}))),...
-                mean(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,1)})),...
-                std(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,1)})), roi_list{pairs(p_ix,2)}, ...
-                numel(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,2)})),...
-                numel(unique(plot_onset_sbj{reg_ix}.(roi_list{pairs(p_ix,2)}))),...
-                mean(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,2)})), std(plot_onsets{reg_ix}.(roi_list{pairs(p_ix,2)})),...
-                pvals(reg_ix,p_ix));
+                sig_str,roi_list{roi_ix},reg_lab{pairs(p_ix,1)},...
+                numel(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,1)})),...
+                numel(unique(plot_onset_sbj{roi_ix}.(reg_lab{pairs(p_ix,1)}))),...
+                mean(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,1)})),...
+                std(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,1)})), reg_lab{pairs(p_ix,2)}, ...
+                numel(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,2)})),...
+                numel(unique(plot_onset_sbj{roi_ix}.(reg_lab{pairs(p_ix,2)}))),...
+                mean(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,2)})), std(plot_onsets{roi_ix}.(reg_lab{pairs(p_ix,2)})),...
+                pvals(roi_ix,p_ix));
         else
-            fprintf('\t%s: pair %s vs. %s not possible\n',reg_names{reg_ix},...
-                roi_list{pairs(p_ix,1)},roi_list{pairs(p_ix,2)});
+            fprintf('\t%s: pair %s vs. %s not possible\n',reg_names{roi_ix},...
+                reg_lab{pairs(p_ix,1)},reg_lab{pairs(p_ix,2)});
         end
     end
 end
 
 %% Plot gROI Results
-for reg_ix = 1:numel(reg_lab)
+for roi_ix = 1:numel(roi_list)
     % Create and format the plot
-    fig_name = [SBJ_id '_HFA_onsets_' model_id '_' stat_id '_' roi_id '_' reg_lab{reg_ix}];
-%         '_GM' num2str(gm_thresh) '_z' num2str(z_thresh) '_normRTout'];
+    fig_name = [SBJ_id '_HFA_onsets_' model_id '_' stat_id '_' roi_list{roi_ix} '_violin'];
+    %         '_GM' num2str(gm_thresh) '_z' num2str(z_thresh) '_normRTout'];
     figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 0.5 0.6],'Visible',fig_vis);
     
-    violins = violinplot(plot_onsets{reg_ix});%,'ViolinAlpha',0.3);
-                        
+    violins = violinplot(plot_onsets{roi_ix});%,'ViolinAlpha',0.3);
+    
     % Adjust plot propeties
-    for roi_ix = good_roi_ix{reg_ix}
-        violin_ix = find(good_roi_ix{reg_ix}==roi_ix);
+    for reg_ix = good_reg_ix{reg_ix}
+        violin_ix = find(good_reg_ix{roi_ix}==reg_ix);
         if isfield(plt,'violin_scat_colors') && strcmp(plt.violin_scat_colors,'SBJ')
             violins(violin_ix).ViolinColor = [0.8 0.8 0.8];
-            violins(violin_ix).BoxPlot.FaceColor = roi_colors{roi_ix};
-            violins(violin_ix).EdgeColor = roi_colors{roi_ix};
+            violins(violin_ix).BoxPlot.FaceColor = reg_colors{reg_ix};
+            violins(violin_ix).EdgeColor = reg_colors{reg_ix};
             
             % Change scatter colors wihtin violin to mark SBJ
             scat_colors = zeros([numel(violins(violin_ix).ScatterPlot.XData) 3]);
             for s = 1:numel(SBJs)
-                scat_colors(plot_onset_sbj{reg_ix}.(roi_list{roi_ix})==s,:) = repmat(SBJ_colors(s,:),...
-                    sum(plot_onset_sbj{reg_ix}.(roi_list{roi_ix})==s),1);
+                scat_colors(plot_onset_sbj{roi_ix}.(reg_lab{reg_ix})==s,:) = repmat(SBJ_colors(s,:),...
+                    sum(plot_onset_sbj{roi_ix}.(reg_lab{reg_ix})==s),1);
             end
             violins(violin_ix).ScatterPlot.MarkerFaceColor = 'flat';   % Necessary for CData to work
             violins(violin_ix).ScatterPlot.MarkerEdgeColor = 'flat';   % Necessary for CData to work
             violins(violin_ix).ScatterPlot.CData = scat_colors;
         else
             % Change violin color to match ROI
-            violins(violin_ix).ViolinColor = roi_colors{roi_ix};
+            violins(violin_ix).ViolinColor = reg_colors{reg_ix};
         end
     end
     
@@ -193,13 +193,13 @@ for reg_ix = 1:numel(reg_lab)
     ax = gca;
     ax.YLim = st.stat_lim;
     ax.YLabel.String = 'Time (s)';
-    ax.Title.String = reg_names{reg_ix};
+    ax.Title.String = roi_list{roi_ix};
     set(gca,'FontSize',16);
     view([90 -90]);
     
     %% Save figure
     if save_fig
-        fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP/onsets_ROI/'...
+        fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP/onsets_reg/'...
             model_id '/' stat_id '/' an_id '/' plt_id '/'];
         if ~exist(fig_dir,'dir')
             [~] = mkdir(fig_dir);
@@ -221,14 +221,14 @@ onset_clim = [-max(abs(onset_diffs(:))) max(abs(onset_diffs(:)))];
 rb_cmap = redblue();
 scat_sizes = [50 150 300];
 p_thresh   = [0.05 0.01 0.001];
-for reg_ix = 1:numel(reg_lab)
-    subplot(1,numel(reg_lab),reg_ix); hold on;
+for roi_ix = 1:numel(roi_list)
+    subplot(1,numel(roi_list),roi_ix); hold on;
     % Plot differences as color matrix
-    pcolor(numel(roi_list):-1:0,numel(roi_list):-1:0,[squeeze(onset_diffs(reg_ix,:,:)) nan(numel(roi_list),1); nan(1,numel(roi_list)+1)]);
+    pcolor(numel(reg_lab):-1:0,numel(reg_lab):-1:0,[squeeze(onset_diffs(roi_ix,:,:)) nan(numel(reg_lab),1); nan(1,numel(reg_lab)+1)]);
     
     % Plot stats as scatter overlay
     for p_ix = 1:size(pairs,1)
-        thresh_idx = p_thresh>=pvals(reg_ix,p_ix);
+        thresh_idx = p_thresh>=pvals(roi_ix,p_ix);
         if any(thresh_idx)
             scatter(pairs(p_ix,1)-0.5,pairs(p_ix,2)-0.5,scat_sizes(find(thresh_idx,1,'last')),...
                 'Marker','*','MarkerEdgeColor','k');
@@ -236,17 +236,17 @@ for reg_ix = 1:numel(reg_lab)
     end
     
     % Formatting
-    set(gca,'XLim',[0 numel(roi_list)]);
-    set(gca,'XTick',[1:numel(roi_list)]-0.5);
-    set(gca,'XTickLabel',roi_list);
-    set(gca,'YLim',[0 numel(roi_list)]);
-    set(gca,'YTick',[1:numel(roi_list)]-0.5);
-    set(gca,'YTickLabel',roi_list);
+    set(gca,'XLim',[0 numel(reg_lab)]);
+    set(gca,'XTick',[1:numel(reg_lab)]-0.5);
+    set(gca,'XTickLabel',reg_lab);
+    set(gca,'YLim',[0 numel(reg_lab)]);
+    set(gca,'YTick',[1:numel(reg_lab)]-0.5);
+    set(gca,'YTickLabel',reg_lab);
     %set(gca,'YDir','normal');
     colorbar;
     colormap(rb_cmap);
     set(gca,'CLim',onset_clim);
-    title([reg_names{reg_ix} ': ROI Y - X']);
+    title([roi_list{roi_ix} ': ROI Y - X']);
     set(gca,'FontSize',16);
     
     % Save figure

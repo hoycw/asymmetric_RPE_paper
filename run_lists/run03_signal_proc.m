@@ -54,7 +54,7 @@ end
 conditions = 'DifFB';
 proc_id    = 'main_ft';
 % an_id      = 'HGh_F25t121_zbtS_sm0_l0';%'HGh_S25t301_zbtS_sm0_l1';%'HGh_F25t121_zbtS_sm0_l1';%
-an_id      = 'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_S25t301_zbtS_sm0_l1_wn100';%
+an_id      = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGm_S25t301_zbtS_sm0_l1_wn100';%
 actv_win   = 100;
 atlas_id   = 'Dx';
 

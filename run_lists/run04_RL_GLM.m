@@ -44,7 +44,7 @@ end
 
 %% Run Model on HFA (SGE...)
 proc_id   = 'main_ft';
-an_id     = 'HGh_F25t121_zbtS_sm0_l1';%'HGm_F25t121_zbtS_sm0_l1_wn100';%
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 atlas_id  = 'Dx';
@@ -72,7 +72,7 @@ for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         for s = 1:numel(SBJs)
             % Run Mass GLM Stats
-            SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+%             SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
 %             plt_id    = 'ts_F0t6_evnts_sigline';
@@ -82,23 +82,29 @@ for m_ix = 1:numel(model_ids)
         end
         
         % Plot bar graph showing proprotion of effects by ROI
-        SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-        % Plot latency time series per ROI
-        plt_id    = 'ts_F0t6_evnts_sigline';
-        SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        % Plot histograms of betas by ROI
+        SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-        SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
-        % Plot onset latencies per effect and ROI
-        plt_id      = 'onsets_0t6_violin_all';
-        SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
-        % flip it and do within ROI regressor onsets!
+%         % Plot latency time series per ROI
+%         plt_id    = 'ts_F0t6_evnts_sigline';
+%         SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         % Plot onset latencies per effect and ROI
+%         plt_id      = 'onsets_0t6_violin_all';
+%         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         % flip it and do within ROI regressor onsets!
+%         SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Recon plots
         % Group Stat Recon Viewing
