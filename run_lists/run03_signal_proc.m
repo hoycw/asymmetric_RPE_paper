@@ -61,7 +61,7 @@ atlas_id   = 'Dx';
 plt_id     = 'stack_F2t1_evnt_c5';%'stack_S2t3_evnt_c5';%
 save_fig   = 1;
 fig_ftype  = 'png';
-fig_vis    = 'off';
+fig_vis    = 'on';
 
 for s = 1:numel(SBJs)
     % Compute and Save Active Channels with High Frequency Activity
@@ -69,8 +69,7 @@ for s = 1:numel(SBJs)
     
     % Plot Single Trial HFA Stacks
     SBJ07c_HFA_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, actv_win, plt_id, save_fig,...
-        'atlas_id', atlas_id, 'fig_vis', fig_vis, 'fig_ftype', fig_ftype);
-           %, 'elec_lab', {'LMT2'});
-    close all;
+        'atlas_id', atlas_id, 'fig_vis', fig_vis, 'fig_ftype', fig_ftype, 'elec_lab', {'LIN3-4'});
+    %close all;
 end
 

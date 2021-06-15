@@ -153,6 +153,8 @@ for roi_ix = 1:numel(roi_list)
         bar_data(reg_ix,roi_ix) = sum(reg_cnt(:,roi_ix,reg_ix))/sum(elec_cnt(:,roi_ix));
         sem_data(reg_ix,roi_ix) = nanstd(reg_cnt(:,roi_ix,reg_ix)./elec_cnt(:,roi_ix))/sqrt(numel(SBJs));
         scat_vars{reg_ix} = squeeze(reg_cnt(:,:,reg_ix));
+        % Remove SBJs with no data in that ROI (make NaN)
+        scat_vars{reg_ix}(elec_cnt==0) = nan;
     end
 end
 
@@ -218,6 +220,21 @@ if save_fig
     fig_fname = [fig_dir fig_name '.' fig_ftype];
     fprintf('Saving %s\n',fig_fname);
     saveas(gcf,fig_fname);
+end
+
+%% Compute stats for differences
+fprintf(2,'WARNING: t-test is likely not the right stat for this!\n');
+pairs = nchoosek(1:numel(roi_list),2);
+pvals = nan([numel(reg_lab) size(pairs,1)]);
+for reg_ix = 1:numel(reg_lab)
+    for p_ix = 1:size(pairs,1)
+        [~, pvals(reg_ix,p_ix)] = ttest2(scat_vars{reg_ix}(:,pairs(p_ix,1)),...
+                scat_vars{reg_ix}(:,pairs(p_ix,2)));
+        if pvals(reg_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
+        fprintf('%s%s: %s (%.2f) vs. %s (%.2f) p = %.5f\n',sig_str,...
+            reg_lab{reg_ix},roi_list{pairs(p_ix,1)},bar_data(reg_ix,pairs(p_ix,1)),...
+            roi_list{pairs(p_ix,2)},bar_data(reg_ix,pairs(p_ix,2)),pvals(reg_ix,p_ix));
+    end
 end
 
 end

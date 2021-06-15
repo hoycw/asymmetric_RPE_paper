@@ -82,7 +82,7 @@ end
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'l','Dx','mgROI',0);
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'r','Dx','mgROI',0);
 
-roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};
+roi_opts  = {{'l','INS',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};,{'l','deep',1}};
 proc_id   = 'main_ft';
 roi_id    = 'main3';%'mgROI';
 atlas_id  = 'Dx';

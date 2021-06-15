@@ -25,9 +25,13 @@ switch roi_id
             roi_map{1}(strcmp(roi_map{3},'IPL'))];
     case 'deep'
         roi_lab = [...
-            roi_map{1}(strcmp(roi_map{2},'INS'))];
-            %roi_map{1}(strcmp(roi_map{3},'AMG'));
-            %roi_map{1}(strcmp(roi_map{3},'HPC'))];
+            roi_map{1}(strcmp(roi_map{2},'INS'));
+            roi_map{1}(strcmp(roi_map{3},'AMG'));
+            roi_map{1}(strcmp(roi_map{3},'HPC'))];
+    case 'MTL'
+        roi_lab = [...
+            roi_map{1}(strcmp(roi_map{3},'AMG'));
+            roi_map{1}(strcmp(roi_map{3},'HPC'))];
     case 'LPFC'
         roi_lab = [...
             roi_map{1}(strcmp(roi_map{2},'LPFC'));
