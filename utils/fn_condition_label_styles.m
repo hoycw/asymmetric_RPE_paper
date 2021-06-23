@@ -43,12 +43,17 @@ condition_names = {...
 condition_colors = {...
     [168 180 165]./256, [56 108 176]./256, [197,27,138]./256, ...
     [228,26,28]./256, [55,126,184]./256, [51 160 44]./256, [227 26 28]./256, [31 120 180]./256, ...
-    [51 160 44]./256, [227 26 28]./256, [31 120 180]./256, ... %lighter colors: [178 223 138]./256, [251 154 153]./256, [166 206 227]./256, ...
-    [51 160 44]./256, [227 26 28]./256, [31 120 180]./256, ...
+    [51 160 44]./256, [227 26 28]./256, [31 120 180]./256, ... % darker colors for easy 
+    [51 160 44]./256, [227 26 28]./256, [31 120 180]./256, ... % darker colors for hard too 
     [0 0 0], [31 120 180]./256, [227 26 28]./256,...
     [166 97 26]./256, [1 133 113]./256, ... % brown, aqua
     [166 97 26]./256, [223 194 125]./256, [0.4 0.4 0.4], [128 205 193]./256, [1 133 113]./256 ...    % [brown, tan, gray, teal, aqua]
     };
+% lighter RGB for loss/win/neutral:
+%     [178 223 138]./256, [251 154 153]./256, [166 206 227]./256, ... % lighter colors for easy
+% Colorblind friendly:
+%     [0, 158, 115]./256, [213, 94, 0]./256, [0, 114, 178]./256, ... % easy: Vermillion, blue, bluish green
+%     [240, 228, 66]./256, [204, 121, 167]./256, [86, 180, 233]./256, ... % hard: reddish purple, sky blue, yellow
 % OLD Oddballs:
 %   Target = [144 205 229]./256 light blue
 %   Novel/Odd = [142 82 126]./256 purple
@@ -142,7 +147,7 @@ for cond_ix = 1:numel(labels)
     if isempty(strfind(labels{cond_ix},'Hd'))
         line_styles{cond_ix} = '-';     % Easy
     else
-        line_styles{cond_ix} = '--';%'-.';%    % Hard
+        line_styles{cond_ix} = '--';%'-.';    % Hard
     end
     
     % Define Marker Styles

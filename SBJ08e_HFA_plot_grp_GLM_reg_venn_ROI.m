@@ -311,7 +311,7 @@ f = figure('Name',fig_name,'units','normalized','outerposition',pos);
 % f = venn(Z), where:
 %   n=2: [z1 z2 z12]
 %   n=3: [z1 z2 z3 z12 z13 z23 z123]
-[v, v_stats] = venn(sig_cnt,'FaceColor',venn_colors);
+[v, v_stats] = venn(sig_cnt,'FaceColor',venn_colors);%,'FaceAlpha',{1,1});
 for z_ix = 1:numel(sig_cnt)
     text(v_stats.ZoneCentroid(z_ix,1),v_stats.ZoneCentroid(z_ix,2),...
          num2str(sig_cnt(z_ix)),'FontSize',plt.text_sz,'HorizontalAlignment','center');
@@ -339,7 +339,7 @@ for roi_ix = 1:numel(roi_list)
         % f = venn(Z), where:
         %   n=2: [z1 z2 z12]
         %   n=3: [z1 z2 z3 z12 z13 z23 z123]
-        [v, v_stats] = venn(sig_cnt_roi(:,roi_ix),'FaceColor',venn_colors);
+        [v, v_stats] = venn(sig_cnt_roi(:,roi_ix),'FaceColor',venn_colors);%,'FaceAlpha',{1,1});
         text_spacers = zeros(size(v_stats.ZoneCentroid));
     else
         % Not all circles overlap, venn fails

@@ -24,4 +24,4 @@ plt.mean_width = 2.5;
 plt.evnt_width = 2;
 plt.evnt_color = 'k';
 plt.evnt_style = '--';
-plt.evnt_mrkr_sz = 50;
+plt.evnt_mrkr_sz = 150;

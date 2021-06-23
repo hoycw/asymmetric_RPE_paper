@@ -1,4 +1,4 @@
-%% Run scripts for SfN 2019 abstract
+%% Run scripts for RL GLM analyses
 if exist('/home/knight/hoycw/','dir');root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/'; ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
 
@@ -46,7 +46,7 @@ end
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'ERPEs_DifFB'};
-stat_ids  = {'mGLM_st0t10_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
+stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 atlas_id  = 'Dx';
 
 roi_id    = 'main3';%'gROI';%'mgROI';%'MPFCINS';%
@@ -72,7 +72,7 @@ for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         for s = 1:numel(SBJs)
             % Run Mass GLM Stats
-            SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
+%             SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
 %             plt_id    = 'ts_F0t6_evnts_sigline';
@@ -82,29 +82,29 @@ for m_ix = 1:numel(model_ids)
         end
         
         % Plot bar graph showing proprotion of effects by ROI
-        SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot histograms of betas by ROI
-        SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot latency time series per ROI
-        plt_id    = 'ts_F0t1_evnts_sigline';
-        SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        plt_id    = 'ts_F0t6_evnts_sigline';
+%         SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-        SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot onset latencies per effect and ROI
-        plt_id      = 'onsets_0t1_violin_all';
+        plt_id      = 'onsets_0t6_violin_all';
         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % flip it and do within ROI regressor onsets!
-        SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Recon plots
         % Group Stat Recon Viewing
@@ -137,17 +137,17 @@ end
 %% Plot Venn Diagram of GLM Regressor Effects by ROI
 proc_id   = 'main_ft';
 % stat_regs: {{'an_id','model_id','reg','stat_id'},...}
-stat_regs = {{'HGm_F25t121_zbtS_sm0_l1_wn100','ERPEs_DifFB','sRPE','mGLM_st0t6_WL05_WS25'},...
-             {'HGm_F25t121_zbtS_sm0_l1_wn100','ERPEs_DifFB','uRPE','mGLM_st0t6_WL05_WS25'}};
+stat_regs = {{'HGm_F25t121_zbtS_sm0_l1_wn50','ERPEs_DifFB','sRPE','mGLM_st0t6_WL05_WS25'},...
+             {'HGm_F25t121_zbtS_sm0_l1_wn50','ERPEs_DifFB','uRPE','mGLM_st0t6_WL05_WS25'}};
 
 hemi      = 'b';
 atlas_id  = 'Dx';
-roi_id    = 'gROI';
+roi_id    = 'main3';%'gROI';
 plot_out  = 0;
 plt_id    = 'venn';
 save_fig  = 1;
 fig_vis   = 'on';
-fig_ftype = 'png';
+fig_ftype = 'svg';
 
 SBJ08e_HFA_plot_grp_GLM_reg_venn_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,...
                                        plot_out, plt_id, save_fig,'atlas_id',atlas_id,...

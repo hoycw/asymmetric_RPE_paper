@@ -164,11 +164,19 @@ for roi_ix = 1:numel(roi_list)
     figure('Name',fig_name,'units','normalized',...
         'outerposition',[0 0 0.5 0.6],'Visible',fig_vis);
     
-    violins = violinplot(plot_onsets{roi_ix});%,'ViolinAlpha',0.3);
+    violins = violinplot(plot_onsets{roi_ix});%, [], 'ShowMean', true);%,'ViolinAlpha',0.3);
     
     % Adjust plot propeties
     for reg_ix = good_reg_ix{reg_ix}
         violin_ix = find(good_reg_ix{roi_ix}==reg_ix);
+        % Fix mean line
+        violins(violin_ix).MeanPlot.LineWidth = 3;
+        % Violin mean line is off since ksdensity is tossing some of the
+        % values for some reason, so manually set it and adjust width
+        violins(violin_ix).MeanPlot.YData = repmat(mean(plot_onsets{reg_ix}.(roi_list{roi_ix})),1,2);
+        mean_ix = nearest(violins(violin_ix).ViolinPlot.YData,mean(plot_onsets{reg_ix}.(roi_list{roi_ix})));
+        violins(violin_ix).MeanPlot.XData = [violin_ix-(violins(violin_ix).ViolinPlot.XData(mean_ix)-violin_ix), ...
+                                             violins(violin_ix).ViolinPlot.XData(mean_ix)];
         if isfield(plt,'violin_scat_colors') && strcmp(plt.violin_scat_colors,'SBJ')
             violins(violin_ix).ViolinColor = [0.8 0.8 0.8];
             violins(violin_ix).BoxPlot.FaceColor = reg_colors{reg_ix};
@@ -212,49 +220,49 @@ for roi_ix = 1:numel(roi_list)
 end
 
 %% Plot statistics results as scatter matrix
-fig_name = [SBJ_id '_HFA_onsets_' model_id '_' stat_id '_' roi_id '_diff_stats'];
-%         '_GM' num2str(gm_thresh) '_z' num2str(z_thresh) '_normRTout'];
-figure('Name',fig_name,'units','normalized',...
-    'outerposition',[0 0 0.7 0.5],'Visible',fig_vis);
-
-onset_clim = [-max(abs(onset_diffs(:))) max(abs(onset_diffs(:)))];
-rb_cmap = redblue();
-scat_sizes = [50 150 300];
-p_thresh   = [0.05 0.01 0.001];
-for roi_ix = 1:numel(roi_list)
-    subplot(1,numel(roi_list),roi_ix); hold on;
-    % Plot differences as color matrix
-    pcolor(numel(reg_lab):-1:0,numel(reg_lab):-1:0,[squeeze(onset_diffs(roi_ix,:,:)) nan(numel(reg_lab),1); nan(1,numel(reg_lab)+1)]);
-    
-    % Plot stats as scatter overlay
-    for p_ix = 1:size(pairs,1)
-        thresh_idx = p_thresh>=pvals(roi_ix,p_ix);
-        if any(thresh_idx)
-            scatter(pairs(p_ix,1)-0.5,pairs(p_ix,2)-0.5,scat_sizes(find(thresh_idx,1,'last')),...
-                'Marker','*','MarkerEdgeColor','k');
-        end
-    end
-    
-    % Formatting
-    set(gca,'XLim',[0 numel(reg_lab)]);
-    set(gca,'XTick',[1:numel(reg_lab)]-0.5);
-    set(gca,'XTickLabel',reg_lab);
-    set(gca,'YLim',[0 numel(reg_lab)]);
-    set(gca,'YTick',[1:numel(reg_lab)]-0.5);
-    set(gca,'YTickLabel',reg_lab);
-    %set(gca,'YDir','normal');
-    colorbar;
-    colormap(rb_cmap);
-    set(gca,'CLim',onset_clim);
-    title([roi_list{roi_ix} ': ROI Y - X']);
-    set(gca,'FontSize',16);
-    
-    % Save figure
-    if save_fig
-        fig_filename = [fig_dir fig_name '.' fig_ftype];
-        fprintf('Saving %s\n',fig_filename);
-        saveas(gcf,fig_filename);
-    end
-end
+% fig_name = [SBJ_id '_HFA_onsets_' model_id '_' stat_id '_' roi_id '_diff_stats'];
+% %         '_GM' num2str(gm_thresh) '_z' num2str(z_thresh) '_normRTout'];
+% figure('Name',fig_name,'units','normalized',...
+%     'outerposition',[0 0 0.7 0.5],'Visible',fig_vis);
+% 
+% onset_clim = [-max(abs(onset_diffs(:))) max(abs(onset_diffs(:)))];
+% rb_cmap = redblue();
+% scat_sizes = [50 150 300];
+% p_thresh   = [0.05 0.01 0.001];
+% for roi_ix = 1:numel(roi_list)
+%     subplot(1,numel(roi_list),roi_ix); hold on;
+%     % Plot differences as color matrix
+%     pcolor(numel(reg_lab):-1:0,numel(reg_lab):-1:0,[squeeze(onset_diffs(roi_ix,:,:)) nan(numel(reg_lab),1); nan(1,numel(reg_lab)+1)]);
+%     
+%     % Plot stats as scatter overlay
+%     for p_ix = 1:size(pairs,1)
+%         thresh_idx = p_thresh>=pvals(roi_ix,p_ix);
+%         if any(thresh_idx)
+%             scatter(pairs(p_ix,1)-0.5,pairs(p_ix,2)-0.5,scat_sizes(find(thresh_idx,1,'last')),...
+%                 'Marker','*','MarkerEdgeColor','k');
+%         end
+%     end
+%     
+%     % Formatting
+%     set(gca,'XLim',[0 numel(reg_lab)]);
+%     set(gca,'XTick',[1:numel(reg_lab)]-0.5);
+%     set(gca,'XTickLabel',reg_lab);
+%     set(gca,'YLim',[0 numel(reg_lab)]);
+%     set(gca,'YTick',[1:numel(reg_lab)]-0.5);
+%     set(gca,'YTickLabel',reg_lab);
+%     %set(gca,'YDir','normal');
+%     colorbar;
+%     colormap(rb_cmap);
+%     set(gca,'CLim',onset_clim);
+%     title([roi_list{roi_ix} ': ROI Y - X']);
+%     set(gca,'FontSize',16);
+%     
+%     % Save figure
+%     if save_fig
+%         fig_filename = [fig_dir fig_name '.' fig_ftype];
+%         fprintf('Saving %s\n',fig_filename);
+%         saveas(gcf,fig_filename);
+%     end
+% end
 
 end

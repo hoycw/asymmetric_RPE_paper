@@ -9,7 +9,7 @@ addpath(ft_dir);
 ft_defaults
 
 %% Load SBJ list
-SBJ_id = 'ins_rep4';%'preproc';
+SBJ_id = 'preproc';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% ERP Analysis and Plotting
@@ -63,9 +63,9 @@ save_fig   = 1;
 fig_ftype  = 'png';
 fig_vis    = 'on';
 
-for s = 1:numel(SBJs)
+for s = 9%1:numel(SBJs)
     % Compute and Save Active Channels with High Frequency Activity
-    SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
+%     SBJ07b_HFA_actv(SBJs{s},proc_id,an_id,actv_win);
     
     % Plot Single Trial HFA Stacks
     SBJ07c_HFA_plot_stack_mean(SBJs{s}, conditions, proc_id, an_id, actv_win, plt_id, save_fig,...
