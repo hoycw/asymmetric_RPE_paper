@@ -19,6 +19,7 @@ atlas_id = 'Dx';
 [cond_lab, cond_names, cond_colors, ~, ~] = fn_condition_label_styles('DifFB');
 
 %% Get Behavioral and Electrode Information
+acc_eh  = zeros([numel(SBJs) 2]);
 roi_cnt = zeros([numel(roi_list) numel(SBJs)]);
 for s = 1:numel(SBJs)
     SBJ = SBJs{s};
@@ -36,6 +37,7 @@ for s = 1:numel(SBJs)
 %     end
 %     
 %     ez_idx_orig = fn_condition_index({'Ez'}, bhv_orig);
+%     s_idx_orig = fn_condition_index({'Su'},bhv_orig);
     
     % ITIs
     fprintf('\tITIs: '); fprintf('%.2f, ',unique(bhv.ITI_type)); fprintf('\n');
@@ -44,11 +46,12 @@ for s = 1:numel(SBJs)
     fprintf('\tn_ez = %d; n_hd = %d\n',sum(ez_idx),sum(~ez_idx));
     
     % Accuracy (exclude surprise and training trials)
-%     s_idx_orig = fn_condition_index({'Su'},bhv_orig);
     
-    fprintf('\tez_acc = %.3f\n',mean(bhv.hit(ez_idx & ~s_idx & ~training_idx)));
-    fprintf('\thd_acc = %.3f\n',mean(bhv.hit(~ez_idx & ~s_idx & ~training_idx)));
-
+    acc_eh(s,1) = mean(bhv.hit(ez_idx & ~s_idx & ~training_idx));
+    acc_eh(s,2) = mean(bhv.hit(~ez_idx & ~s_idx & ~training_idx));
+    fprintf('\tez_acc = %.3f\n',acc_eh(s,1));
+    fprintf('\thd_acc = %.3f\n',acc_eh(s,2));
+    
     % Electrodes
     elec_fname = [root_dir 'PRJ_Error/data/' SBJ '/05_recon/' SBJ '_elec_' proc_id '_pat_' atlas_id '_final.mat'];
     load(elec_fname);
@@ -59,3 +62,6 @@ for s = 1:numel(SBJs)
     
     clear SBJ SBJ_vars bhv
 end
+
+fprintf('Group easy acc = %.3f +/- %.3f\n',mean(acc_eh(:,1)),std(acc_eh(:,1)));
+fprintf('Group hard acc = %.3f +/- %.3f\n',mean(acc_eh(:,2)),std(acc_eh(:,2)));
