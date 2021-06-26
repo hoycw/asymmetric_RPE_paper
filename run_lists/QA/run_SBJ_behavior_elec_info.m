@@ -21,6 +21,7 @@ atlas_id = 'Dx';
 %% Get Behavioral and Electrode Information
 acc_eh  = zeros([numel(SBJs) 2]);
 roi_cnt = zeros([numel(roi_list) numel(SBJs)]);
+n_trials = zeros(size(SBJs));
 for s = 1:numel(SBJs)
     SBJ = SBJs{s};
     fprintf('%s:\n',SBJ);
@@ -43,6 +44,7 @@ for s = 1:numel(SBJs)
     fprintf('\tITIs: '); fprintf('%.2f, ',unique(bhv.ITI_type)); fprintf('\n');
     
     % Number of trials
+    n_trials(s) = numel(bhv.trl_n);
     fprintf('\tn_ez = %d; n_hd = %d\n',sum(ez_idx),sum(~ez_idx));
     
     % Accuracy (exclude surprise and training trials)
@@ -65,3 +67,6 @@ end
 
 fprintf('Group easy acc = %.3f +/- %.3f\n',mean(acc_eh(:,1)),std(acc_eh(:,1)));
 fprintf('Group hard acc = %.3f +/- %.3f\n',mean(acc_eh(:,2)),std(acc_eh(:,2)));
+
+fprintf('n_trials mean +/- SD = %.1f +/- %.1f\n',mean(n_trials),std(n_trials));
+fprintf('n_trials min = %d; max = %d\n',min(n_trials),max(n_trials));
