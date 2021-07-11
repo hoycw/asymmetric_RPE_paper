@@ -62,7 +62,7 @@ if ischar(view_angle)
     end
 end
 if ~exist('mesh_alpha','var')
-    mesh_alpha = 0.3;   % assume SEEG
+    mesh_alpha = 0.25;   % assume SEEG
 end
 if mirror && strcmp(hemi,'b')
     error('why mirror if hemi b?');

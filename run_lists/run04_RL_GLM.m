@@ -9,7 +9,7 @@ addpath(ft_dir);
 ft_defaults
 
 %%
-SBJ_id = 'preproc';
+SBJ_id = 'preproc';%'preproc_nu';
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
@@ -45,7 +45,7 @@ end
 %% Run Model on HFA (SGE...)
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
-model_ids = {'ERPEs_DifFB'};
+model_ids = {'ERPEs_DifFB'};%'ERBuRPE_DifFB'};%
 stat_ids  = {'mGLM_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 atlas_id  = 'Dx';
 
@@ -70,15 +70,15 @@ roi_opts  = {{'l','INS',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 1:numel(SBJs)
+        for s = 9%1:numel(SBJs)
             % Run Mass GLM Stats
 %             SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
-%             plt_id    = 'ts_F0t6_evnts_sigline';
-%             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
-%                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-%             close all;
+            plt_id    = 'ts_F2t1_evnts_sigline';
+            SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+                plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype, 'elec_lab', {'LIN3-4'});
+            close all;
         end
         
         % Plot bar graph showing proprotion of effects by ROI
@@ -90,7 +90,7 @@ for m_ix = 1:numel(model_ids)
 %             roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot latency time series per ROI
-        plt_id    = 'ts_F0t6_evnts_sigline';
+%         plt_id    = 'ts_F0t6_evnts_sigline';
 %         SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
 %             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
@@ -98,9 +98,9 @@ for m_ix = 1:numel(model_ids)
 %             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot onset latencies per effect and ROI
-        plt_id      = 'onsets_0t6_violin_all';
-        SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         plt_id      = 'onsets_0t6_violin_all';
+%         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % flip it and do within ROI regressor onsets!
 %         SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
@@ -137,6 +137,8 @@ end
 %% Plot Venn Diagram of GLM Regressor Effects by ROI
 proc_id   = 'main_ft';
 % stat_regs: {{'an_id','model_id','reg','stat_id'},...}
+% stat_regs = {{'HGm_F25t121_zbtS_sm0_l1_wn100','ERBuRPE_DifFB','uRPE','mGLM_st0t6_WL05_WS25'},...
+%              {'HGm_F25t121_zbtS_sm0_l1_wn100','ERBuRPE_DifFB','ERB','mGLM_st0t6_WL05_WS25'}};
 stat_regs = {{'HGm_F25t121_zbtS_sm0_l1_wn50','ERPEs_DifFB','sRPE','mGLM_st0t6_WL05_WS25'},...
              {'HGm_F25t121_zbtS_sm0_l1_wn50','ERPEs_DifFB','uRPE','mGLM_st0t6_WL05_WS25'}};
 
@@ -149,9 +151,13 @@ save_fig  = 1;
 fig_vis   = 'on';
 fig_ftype = 'svg';
 
-SBJ08e_HFA_plot_grp_GLM_reg_venn_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,...
+SBJ08e_HFA_plot_grp_GLM_reg_pie_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,...
                                        plot_out, plt_id, save_fig,'atlas_id',atlas_id,...
                                        'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+
+% SBJ08e_HFA_plot_grp_GLM_reg_venn_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,...
+%                                        plot_out, plt_id, save_fig,'atlas_id',atlas_id,...
+%                                        'fig_vis',fig_vis,'fig_ftype',fig_ftype);
                                    
 %% ERPs: Run models and Plot Group GLM Proportion of Effects by ROI
 proc_id   = 'main_ft';
