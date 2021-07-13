@@ -223,18 +223,46 @@ if save_fig
 end
 
 %% Compute stats for differences
-fprintf(2,'WARNING: t-test is likely not the right stat for this!\n');
+% Uses Wilcoxon sign-rank test for non-parametric paired samples test since
+% proprotions don't meet normal distribution assumptions of t-test
 pairs = nchoosek(1:numel(roi_list),2);
 pvals = nan([numel(reg_lab) size(pairs,1)]);
+qvals = nan([numel(reg_lab) size(pairs,1)]);
+for reg_ix = 1:numel(reg_lab)
+    % Run pair-wise stats
+    for p_ix = 1:size(pairs,1)
+        [pvals(reg_ix,p_ix), ~] = signrank(scat_vars{reg_ix}(:,pairs(p_ix,1)),...
+                scat_vars{reg_ix}(:,pairs(p_ix,2)));
+    end
+    
+    % Correct for number of regions
+    [~, ~, ~, qvals(reg_ix,:)] = fdr_bh(squeeze(pvals(reg_ix,:)));
+end
+
+% Print results
 for reg_ix = 1:numel(reg_lab)
     for p_ix = 1:size(pairs,1)
-        [~, pvals(reg_ix,p_ix)] = ttest2(scat_vars{reg_ix}(:,pairs(p_ix,1)),...
-                scat_vars{reg_ix}(:,pairs(p_ix,2)));
-        if pvals(reg_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
-        fprintf('%s%s: %s (%.3f +/- %.4f) vs. %s (%.3f +/- %.4f) p = %.5f\n',sig_str,...
+        if qvals(reg_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
+        fprintf('%s%s: %s (%.3f +/- %.4f) vs. %s (%.3f +/- %.4f) q = %.4f, p = %.4f\n',sig_str,...
             reg_lab{reg_ix},roi_list{pairs(p_ix,1)},bar_data(reg_ix,pairs(p_ix,1)),sem_data(reg_ix,pairs(p_ix,1)),...
-            roi_list{pairs(p_ix,2)},bar_data(reg_ix,pairs(p_ix,2)),sem_data(reg_ix,pairs(p_ix,2)),pvals(reg_ix,p_ix));
+            roi_list{pairs(p_ix,2)},bar_data(reg_ix,pairs(p_ix,2)),sem_data(reg_ix,pairs(p_ix,2)),...
+            qvals(reg_ix,p_ix),pvals(reg_ix,p_ix));
     end
 end
+
+% % Plot results
+% figure;
+% n_bins = 0:1:20;
+% for p_ix = 1:size(pairs,1)
+%     subplot(3,1,p_ix);
+%     hold on; 
+%     histogram(scat_vars{reg_ix}(:,pairs(p_ix,1)),n_bins,'FaceColor',roi_colors{pairs(p_ix,1)});
+%     histogram(scat_vars{reg_ix}(:,pairs(p_ix,2)),n_bins,'FaceColor',roi_colors{pairs(p_ix,2)}); 
+%     line([nanmedian(scat_vars{reg_ix}(:,pairs(p_ix,1))) nanmedian(scat_vars{reg_ix}(:,pairs(p_ix,1)))],ylim,...
+%         'LineWidth',7,'Color',roi_colors{pairs(p_ix,1)});
+%     line([nanmedian(scat_vars{reg_ix}(:,pairs(p_ix,2))) nanmedian(scat_vars{reg_ix}(:,pairs(p_ix,2)))],ylim,...
+%         'LineWidth',7,'Color',roi_colors{pairs(p_ix,2)});
+%     title(['p=' num2str(pvals(reg_ix,p_ix))]); 
+% end
 
 end

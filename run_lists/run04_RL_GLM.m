@@ -52,7 +52,7 @@ atlas_id  = 'Dx';
 roi_id    = 'main3';%'gROI';%'mgROI';%'MPFCINS';%
 plot_out  = 0;
 plot_scat = 1;
-save_fig  = 1;
+save_fig  = 0;
 fig_vis   = 'on';
 fig_ftype = 'svg';
 
@@ -70,20 +70,20 @@ roi_opts  = {{'l','INS',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 9%1:numel(SBJs)
+        for s = 1:numel(SBJs)
             % Run Mass GLM Stats
 %             SBJ08a_HFA_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
             % Plot Mass GLM Results
-            plt_id    = 'ts_F2t1_evnts_sigline';
-            SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
-                plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype, 'elec_lab', {'LIN3-4'});
-            close all;
+%             plt_id    = 'ts_F2t1_evnts_sigline';
+%             SBJ08b_HFA_plot_crRT_mGLM(SBJs{s}, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);%, 'elec_lab', {'LIN3-4'});
+%             close all;
         end
         
         % Plot bar graph showing proprotion of effects by ROI
-%         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot histograms of betas by ROI
 %         SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...

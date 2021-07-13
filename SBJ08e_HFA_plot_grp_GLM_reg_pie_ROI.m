@@ -264,6 +264,7 @@ sig_grps    = cell([n_groups 1]);                   % effect assignments per gro
 sig_cnt_roi = zeros([n_groups numel(roi_list)]);    % count per ROI per group
 pie_legend  = cell(size(stat_regs));
 roi_legends = cell([numel(stat_regs) numel(roi_list)]);
+sig_cnt_roi_sbj = nan([n_groups numel(roi_list) numel(SBJs)]);    % count per ROI per group keeping SBJ level data
 % Add main effects
 grp_ix = 0;
 for main_ix = 1:numel(stat_regs)
@@ -276,6 +277,9 @@ for main_ix = 1:numel(stat_regs)
     for roi_ix = 1:numel(roi_list)
         sig_cnt_roi(grp_ix,roi_ix) = sum(sig_roi_all(:,main_ix)==roi_ix & sig_roi_all(:,non_main_ix)~=roi_ix);
         roi_legends{grp_ix,roi_ix} = [reg_labs{main_ix} ' = ' num2str(sig_cnt_roi(grp_ix,roi_ix))];
+        for s = 1:numel(SBJs)
+            sig_cnt_roi_sbj(grp_ix,roi_ix,s) = sum(sig_roi_mat{s}(:,main_ix)==roi_ix & sig_roi_mat{s}(:,non_main_ix)~=roi_ix);
+        end
     end
 end
 
@@ -292,6 +296,10 @@ for p_ix = 1:size(pairs,1)
                                   sig_roi_all(:,pairs(p_ix,2))==roi_ix);
         roi_legends{grp_ix,roi_ix} = [reg_labs{pairs(p_ix,1)} '(#' num2str(pairs(p_ix,1)) ') + '...
                             reg_labs{pairs(p_ix,2)} '(#' num2str(pairs(p_ix,2)) ') = ' num2str(sig_cnt_roi(grp_ix,roi_ix))];
+        for s = 1:numel(SBJs)
+            sig_cnt_roi_sbj(grp_ix,roi_ix,s) = sum(sig_roi_mat{s}(:,pairs(p_ix,1))==roi_ix & ...
+                                               sig_roi_mat{s}(:,pairs(p_ix,2))==roi_ix);
+        end
     end
 end
 
@@ -361,5 +369,66 @@ for roi_ix = 1:numel(roi_list)
         saveas(gcf,fig_fname);
     end
 end
+
+%% Compute stats for differences
+% Uses Wilcoxon sign-rank test for non-parametric paired samples test since
+% proprotions don't meet normal distribution assumptions of t-test
+roi_pairs = nchoosek(1:numel(roi_list),2);
+sig_cnt_roi_sbj_norm = nan(size(sig_cnt_roi_sbj));
+pvals = nan([n_groups size(roi_pairs,1)]);
+qvals = nan([n_groups size(roi_pairs,1)]);
+grp_lab = cell([n_groups 1]);
+for grp_ix = 1:n_groups
+    if sig_type(grp_ix)==1
+        grp_lab{grp_ix} = [stat_regs{sig_grps{grp_ix}}{3} '(#' num2str(grp_ix) ')'];
+    else
+        grp_lab{grp_ix} = [stat_regs{sig_grps{grp_ix}(1)}{3} '(#' num2str(grp_ix) ')+'...
+            stat_regs{sig_grps{grp_ix}(2)}{3} '(#' num2str(grp_ix) ')'];
+    end
+    
+    % normalize within SBJ: # sites showing effect / # sites showing any effect
+    for roi_ix = 1:numel(roi_list)
+        sig_cnt_roi_sbj_norm(grp_ix,roi_ix,:) = ...
+            squeeze(sig_cnt_roi_sbj(grp_ix,roi_ix,:))./squeeze(sum(sig_cnt_roi_sbj(:,roi_ix,:),1));
+    end
+    
+    % Run pair-wise stats across ROIs
+    for p_ix = 1:size(roi_pairs,1)
+        [pvals(grp_ix,p_ix), ~] = signrank(squeeze(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:)),...
+                                           squeeze(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:)));
+    end
+    
+    % Correct for number of regions
+    [~, ~, ~, qvals(grp_ix,:)] = fdr_bh(squeeze(pvals(grp_ix,:)));
+end
+
+% Print results
+for grp_ix = 1:numel(grp_lab)
+    for p_ix = 1:size(roi_pairs,1)
+        if qvals(grp_ix,p_ix)<=0.05; sig_str = '*'; else sig_str = ''; end
+        fprintf('%s%s: %s (%.3f +/- %.4f) vs. %s (%.3f +/- %.4f) q = %.4f, p = %.4f\n',sig_str,...
+            grp_lab{grp_ix},roi_list{roi_pairs(p_ix,1)},...
+            nanmean(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:)),nanstd(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:)),...
+            roi_list{roi_pairs(p_ix,2)},...
+            nanmean(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:)),nanstd(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:)),...
+            qvals(grp_ix,p_ix),pvals(grp_ix,p_ix));
+    end
+end
+
+% % Plot results
+% figure;
+% n_bins = 0:0.05:1;
+% grp_ix = 1;
+% for p_ix = 1:size(roi_pairs,1)
+%     subplot(3,1,p_ix);
+%     hold on; 
+%     histogram(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:),n_bins,'FaceColor',roi_colors{roi_pairs(p_ix,1)});
+%     histogram(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:),n_bins,'FaceColor',roi_colors{roi_pairs(p_ix,2)});
+%     line([nanmedian(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:)) nanmedian(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,1),:))],ylim,...
+%         'LineWidth',7,'Color',roi_colors{roi_pairs(p_ix,1)});
+%     line([nanmedian(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:)) nanmedian(sig_cnt_roi_sbj_norm(grp_ix,roi_pairs(p_ix,2),:))],ylim,...
+%         'LineWidth',7,'Color',roi_colors{roi_pairs(p_ix,2)});
+%     title([grp_lab{grp_ix} ' p=' num2str(pvals(grp_ix,p_ix))]); 
+% end
 
 end
