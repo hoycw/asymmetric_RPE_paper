@@ -81,9 +81,9 @@ for m_ix = 1:numel(model_ids)
 %             close all;
         end
         
-        % Plot bar graph showing proprotion of effects by ROI
-        SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         % Plot bar graph showing proprotion of effects by ROI
+%         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot histograms of betas by ROI
 %         SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
@@ -98,9 +98,9 @@ for m_ix = 1:numel(model_ids)
 %             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot onset latencies per effect and ROI
-%         plt_id      = 'onsets_0t6_violin_all';
-%         SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        plt_id      = 'onsets_0t6_violin_all';
+        SBJ08f_HFA_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % flip it and do within ROI regressor onsets!
 %         SBJ08f_HFA_plot_grp_GLM_onsets_wiROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
