@@ -168,7 +168,7 @@ for ch_ix = 1:numel(hfa.label)
     end
     
     % Scatter plot of RTs or feedback onset to mark conditions
-    trl_thin_factor = floor(size(cond_mat,1)/100);    % for feedback plotting, thin out the RTs to see them
+    trl_thin_factor = 15;%floor(size(cond_mat,1)/100);    % for feedback plotting, thin out the RTs to see them
     scat = gobjects(size(cond_lab));
     for cond_ix = 1:numel(cond_lab)
         idx = cond_mat(:,1)==cond_ix;

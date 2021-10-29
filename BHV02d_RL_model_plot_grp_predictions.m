@@ -112,8 +112,15 @@ xlim([0 numel(cond_lab)+1]);
 if any(strcmp(mdl.model_lab,{'VML','SML','VSML'}))
 %     ylim([-1.1 1.1]);
     plt.leg_loc = 'southwest';
+elseif any(strcmp(reg_lab,{'ERB'}))
+    if any(strcmp(reg_lab,{'sRPE'}))
+        ylim([-2 3.5]);
+    else
+        ylim([0 3.5]);
+    end
+else
+    ylim([-2 2]);
 end
-ylim([-2 2]);
 % yticks([0 1]);
 % set(gca,'YTickLabels',{'Low','High'})
 
