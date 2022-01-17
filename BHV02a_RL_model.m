@@ -82,7 +82,11 @@ model_vars_cmd = ['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_var
 eval(model_vars_cmd);
 
 % Determine model parameteres and conditions
-[reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, reg_names, ~, ~] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+end
 [cond_lab, cond_names, cond_colors, ~, ~] = fn_condition_label_styles(mdl.model_cond);
 
 % Check bias parameters
@@ -312,6 +316,17 @@ if any(strcmp(reg_lab,'sRPE'))
 end
 if any(strcmp(reg_lab,'uRPE'))
     uRPE = abs(double(bhv.score)/100 - EV);
+end
+
+if any(strcmp(reg_lab,'pRPE'))
+    sRPE = double(bhv.score)/100 - EV;
+    pRPE = zeros(size(sRPE));
+    pRPE(sign(sRPE)==1) = sRPE(sign(sRPE)==1);
+end
+if any(strcmp(reg_lab,'nRPE'))
+    sRPE = double(bhv.score)/100 - EV;
+    nRPE = zeros(size(sRPE));
+    nRPE(sign(sRPE)==-1) = sRPE(sign(sRPE)==-1);
 end
 
 %% Compute total, cumulative score

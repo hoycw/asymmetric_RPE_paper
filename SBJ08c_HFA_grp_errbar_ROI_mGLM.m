@@ -59,7 +59,12 @@ eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 % Get condition info
-[reg_lab, reg_names, reg_colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+% [reg_lab, reg_names, reg_colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, reg_names, reg_colors, reg_styles] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+end
 
 % Load all ROI info
 [roi_list, roi_colors, roi_field] = fn_roi_label_styles(roi_id);

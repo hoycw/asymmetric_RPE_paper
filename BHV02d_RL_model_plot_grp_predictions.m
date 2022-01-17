@@ -51,7 +51,12 @@ eval(plt_vars_cmd);
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 % Get model and condition parameters
-[reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+% [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, reg_names, reg_colors, reg_styles] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+end
 [cond_lab, cond_names, ~, ~, ~] = fn_condition_label_styles(mdl.model_cond);
 ez_idx = ~cellfun(@isempty,strfind(cond_lab,'Ez'));
 
