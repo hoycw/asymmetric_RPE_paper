@@ -43,7 +43,11 @@ if numel(hfa.freq)>1
 end
 
 %% Select conditions of interest
-[reg_lab, ~, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, ~, ~, ~] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, ~, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+end
 [cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(st.stat_cond);
 [mdl_cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(mdl.model_cond);
 if ~all(contains(cond_lab,mdl_cond_lab))

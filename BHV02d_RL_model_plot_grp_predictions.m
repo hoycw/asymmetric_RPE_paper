@@ -51,7 +51,12 @@ eval(plt_vars_cmd);
 SBJs = fn_load_SBJ_list(SBJ_id);
 
 % Get model and condition parameters
-[reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+% [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, reg_names, reg_colors, reg_styles] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+end
 [cond_lab, cond_names, ~, ~, ~] = fn_condition_label_styles(mdl.model_cond);
 ez_idx = ~cellfun(@isempty,strfind(cond_lab,'Ez'));
 
@@ -112,8 +117,15 @@ xlim([0 numel(cond_lab)+1]);
 if any(strcmp(mdl.model_lab,{'VML','SML','VSML'}))
 %     ylim([-1.1 1.1]);
     plt.leg_loc = 'southwest';
+elseif any(strcmp(reg_lab,{'ERB'}))
+    if any(strcmp(reg_lab,{'sRPE'}))
+        ylim([-2 3.5]);
+    else
+        ylim([0 3.5]);
+    end
+else
+    ylim([-2 2]);
 end
-ylim([-2 2]);
 % yticks([0 1]);
 % set(gca,'YTickLabels',{'Low','High'})
 

@@ -42,16 +42,32 @@ if exist('cond_id','var')
         end
     end
 elseif exist('model_lab','var')
-    [reg_lab, ~, ~, reg_colors, ~] = fn_regressor_label_styles(model_lab);
+    [reg_lab, ~, reg_colors, ~, ~] = fn_regressor_label_styles(model_lab);
     colors = cell(numel(reg_colors));
     if any(strcmp(model_lab,{'pWinPEus','ERPEs'}))
-        colors{1,1} = [189 65 45]./256;     % EV - tomato (red)
-        colors{2,2} = [209 151 105]./256;   % sRPE - tan
-        colors{3,3} = [118 160 156]./256;   % uRPE - aqua
-        colors{1,2} = [97 61 46]./256;      % EV + sRPE - brown
-        colors{1,3} = [240 224 163]./256;   % EV + uRPE - creamy yellow
-        colors{2,3} = [188 147 196]./256;   % sRPE + uRPE - dark purple
+        colors{1,1} = [0 114 178]./256;     % EV - CB blue
+        colors{2,2} = [204 121 167]./256;   % sRPE - CB reddish purple
+        colors{3,3} = [0 158 115]./256;   % uRPE - CB bluish green
+        colors{1,2} = [230 159 0]./256;      % EV + sRPE - CB orange
+        colors{1,3} = [97 61 46]./256;   % EV + uRPE - brown
+        colors{2,3} = [240 228 66]./256;   % sRPE + uRPE - CB yellow
         colors{3,1} = [0 0 0];              % all - black
+        % EEG Communications Biology Colors:
+%         colors{1,1} = [189 65 45]./256;     % EV - tomato (red)
+%         colors{2,2} = [209 151 105]./256;   % sRPE - tan
+%         colors{3,3} = [118 160 156]./256;   % uRPE - aqua
+%         colors{1,2} = [97 61 46]./256;      % EV + sRPE - brown
+%         colors{1,3} = [240 224 163]./256;   % EV + uRPE - creamy yellow
+%         colors{2,3} = [188 147 196]./256;   % sRPE + uRPE - dark purple
+%         colors{3,1} = [0 0 0];              % all - black
+    elseif any(strcmp(model_lab,{'suRPE'}))
+        colors{1,1} = [204 121 167]./256;   % sRPE - CB reddish purple
+        colors{2,2} = [0 158 115]./256;     % uRPE - CB bluish green
+        colors{1,2} = [240 228 66]./256;    % sRPE + uRPE - CB yellow
+    elseif any(strcmp(model_lab,{'ERBuRPE'}))
+        colors{1,1} = [0 158 115]./256;     % uRPE - CB bluish green
+        colors{2,2} = [0 114 178]./256;   % ERB - CB blue
+        colors{1,2} = [230 159 0]./256;    % uRPE + ERB - CB orange
     else
         for r1 = 1:numel(reg_colors)
             for r2 = 1:numel(reg_colors)

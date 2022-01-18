@@ -62,7 +62,7 @@ if ischar(view_angle)
     end
 end
 if ~exist('mesh_alpha','var')
-    mesh_alpha = 0.3;   % assume SEEG
+    mesh_alpha = 0.25;   % assume SEEG
 end
 if mirror && strcmp(hemi,'b')
     error('why mirror if hemi b?');
@@ -95,7 +95,11 @@ end
 %% Load data
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
-[reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+if strcmp(mdl.model_lab,'RL3D')
+    [reg_lab, reg_names, reg_colors, reg_styles] = fn_performanceRL_regressor_label_styles(mdl.model_lab);
+else
+    [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
+end
 if numel(reg_lab) < 2 || numel(reg_lab) > 3; error('why venn?'); end
 venn_colors = fn_venn_colors(0,'model_lab',mdl.model_lab);
 all_color   = [0.1 0.1 0.1];

@@ -98,7 +98,7 @@ fprintf('Using atlas: %s\n',atlas_id);
 
 %% Load data
 eval(['run ' root_dir 'PRJ_Error/scripts/stat_vars/' stat_id '_vars.m']);
-[grp_lab, ~, ~] = fn_group_label_styles(model_lab);
+[grp_lab, ~, ~] = fn_group_label_styles(mdl.model_lab);
 
 % Identify analysis type
 if contains(an_id,'ERP')
