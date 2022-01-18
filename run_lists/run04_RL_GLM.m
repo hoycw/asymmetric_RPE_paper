@@ -228,6 +228,22 @@ for m_ix = 1:numel(model_ids)
     end
 end
 
+%% Linear mixed-effects model per region
+proc_id   = 'main_ft';
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
+model_ids = {'ERPEs_DifFB'};
+stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
+atlas_id  = 'Dx';
+roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
+
+for m_ix = 1:numel(model_ids)
+    for st_ix = 1:numel(stat_ids)
+        model_id = model_ids{m_ix};
+        stat_id = stat_ids{st_ix};
+        SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id)
+        SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id)
+    end
+end
 %% OLDER ANOVA:
 % stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
 % SBJ08a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id);
