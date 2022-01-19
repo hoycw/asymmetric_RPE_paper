@@ -38,8 +38,8 @@ for r = 1:ncols
     ccoef = beta.coefs{r};
     subplot(1,ncols,r)
     yline(0); hold on; xline(0); hold on;
-    lgnds = NaN(numel(reg_lab),1);
-    for rg = 1:numel(reg_lab)
+    lgnds = NaN(numel(beta.feature),1);
+    for rg = 1:numel(beta.feature)
         coef_error=[beta.lower{r}(rg + 1,:),fliplr(beta.upper{r}(rg + 1,:))];
         qmask = double(beta.qvals{r}(rg + 1,:) < .05);
         qmask(qmask == 0) = Inf;

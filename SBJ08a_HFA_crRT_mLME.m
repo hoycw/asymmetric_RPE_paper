@@ -64,6 +64,11 @@ for s = 1:numel(SBJs)
     bhv = fn_select_bhv(bhv, full_cond_idx);
     model = model(full_cond_idx~=0,:);
     
+    % select regressors (provisional)
+    model = model(:,1:end-1);
+    reg_lab = reg_lab(1:end-1);
+    disp(reg_lab)
+    
     % Select data in stat window
     cfg_trim = [];
     cfg_trim.latency = st.stat_lim;
@@ -133,7 +138,7 @@ for s = 1:numel(SBJs)
                     dcount = dcount + 1;
                     hfa_data{r}{s,ct}{dcount,1} = cdata(cdp);
                     hfa_data{r}{s,ct}{dcount,2} = SBJ;
-                    hfa_data{r}{s,ct}{dcount,3} = lab;%[SBJ '_' lab];
+                    hfa_data{r}{s,ct}{dcount,3} = [SBJ '_' lab];
                     for mm = 1:size(model,2)
                         hfa_data{r}{s,ct}{dcount,3 + mm} = model(cdp,mm);
                     end

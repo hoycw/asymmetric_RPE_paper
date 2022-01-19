@@ -46,19 +46,20 @@ for pl = 1:ncols
     ccoef = conn_stats.coefs{pl};
     subplot(1,ncols,pl)
     yline(0); hold on; xline(0); hold on;
-    lgnds = NaN(numel(reg_lab),1);
-    for rg = 1:numel(reg_lab)
+    lgnds = NaN(numel(conn_stats.feature),1);
+    for rg = 1:numel(conn_stats.feature)
+        ccoefrg = ccoef(rg + 1, :);
         coef_error=[conn_stats.lower{pl}(rg + 1,:),fliplr(conn_stats.upper{pl}(rg + 1,:))];
         qmask = double(conn_stats.qvals{pl}(rg + 1,:) < .05);
         qmask(qmask == 0) = Inf;
         if swap_rois == 1
+            ccoefrg = fliplr(ccoefrg);
             coef_error = fliplr(coef_error);
             qmask = fliplr(qmask);
-            ccoef = fliplr(ccoef);
         end
         fill(time_error, coef_error,colors{rg},'LineStyle','none'); alpha(0.05); hold on;
-        lgnds(rg) = plot(conn_stats.time,ccoef(rg + 1,:), 'Color',colors{rg}); hold on;
-        plot(conn_stats.time,ccoef(rg + 1,:).* qmask, 'Color',colors{rg},'LineWidth',3);
+        lgnds(rg) = plot(conn_stats.time,ccoefrg, 'Color',colors{rg}); hold on;
+        plot(conn_stats.time,ccoefrg.* qmask, 'Color',colors{rg},'LineWidth',3);
         hold on
     end
     ylim(ylims)

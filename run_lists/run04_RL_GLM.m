@@ -244,13 +244,15 @@ model_ids = {'EpunRPE_DifFB'};%{'ERPEs_DifFB'};
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 atlas_id  = 'Dx';
 roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
-lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
-                '(1+uRPE + pRPE + nRPE + EV | sub:chan)'];
+% lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
+%                 '(1+uRPE + pRPE + nRPE + EV | sub:chan)'];
+lme_formula = ['y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...
+                '(1+pRPE + nRPE + EV | sub:chan)'];
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         model_id = model_ids{m_ix};
         stat_id = stat_ids{st_ix};
-        %SBJ08a_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
+        SBJ08a_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
         SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
     end
 end
