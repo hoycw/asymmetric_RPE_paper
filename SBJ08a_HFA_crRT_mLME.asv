@@ -184,7 +184,7 @@ for r = 1:numel(hfa_tables)
     end
 end
 %% FDR correction
-fprintf('==================== FDR correction ========================\n');
+fprintf('==================== Fd ========================\n');
 qvals = cell(size(pvals));
 for r = 1:numel(qvals)
     qvals{r} = NaN(size(pvals{r}));
@@ -206,7 +206,6 @@ beta.win_lim   = win_lim;
 beta.win_lim_s = hfa_time(win_lim);
 
 %% Save
-fprintf('==================== Saving results ========================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa.mat'];
 save(out_fname,'-v7.3','beta')
