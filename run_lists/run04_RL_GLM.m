@@ -250,8 +250,8 @@ for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         model_id = model_ids{m_ix};
         stat_id = stat_ids{st_ix};
-        SBJ08a_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
-        SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id)
+        %SBJ08a_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
+        SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
     end
 end
 %% OLDER ANOVA:

@@ -174,8 +174,8 @@ for r = 1:numel(hfa_tables)
     for t = 1:nt
         fprintf('fitting label %d and time point %d\n',r,t)
         ctable = hfa_tables{r}{t};
-        ctable.pRPE(ctable.pRPE == 0) = normrnd(0,0.000001,sum(ctable.pRPE == 0),1);
-        ctable.nRPE(ctable.nRPE == 0) = normrnd(0,0.000001,sum(ctable.nRPE == 0),1);       
+        %ctable.pRPE(ctable.pRPE == 0) = normrnd(0,0.000001,sum(ctable.pRPE == 0),1);
+        %ctable.nRPE(ctable.nRPE == 0) = normrnd(0,0.000001,sum(ctable.nRPE == 0),1);       
         LMEs{r}{t} = fitlme(ctable, lme_formula);%, 'FitMethod','REML');
         pvals{r}(:,t) = LMEs{r}{t}.Coefficients.pValue;
         coefs{r}(:,t) = LMEs{r}{t}.Coefficients.Estimate;

@@ -1,4 +1,4 @@
-function SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id)
+function SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
 
 if exist('/home/knight/hoycw/','dir'); root_dir='/home/knight/hoycw/';ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/'; ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
