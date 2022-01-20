@@ -247,7 +247,9 @@ roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
 % lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
 %                 '(1+uRPE + pRPE + nRPE + EV | sub:chan)'];
 lme_formula = ['y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...
-                '(1+pRPE + nRPE + EV | sub:chan)'];
+                 '(1+pRPE + nRPE + EV | sub:chan)'];
+%lme_formula = 'y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | chan)';
+            
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         model_id = model_ids{m_ix};

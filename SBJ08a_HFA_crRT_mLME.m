@@ -76,7 +76,7 @@ for s = 1:numel(SBJs)
     cfg_trim.channel =  elec.label(r_ix);
     hfa = ft_selectdata(cfg_trim,hfa);
     hfa_time = hfa.time;
-
+    
     roi_labs = elec.(roi_field)(r_ix);
     chan_labs = elec.label(r_ix);
     %% Compute max z score per condition (for later exclusions)
@@ -99,7 +99,7 @@ for s = 1:numel(SBJs)
         cfg_rt.design           = zscore(bhv.rt);
         cfg_rt.ivar             = 1;
         rt = ft_freqstatistics(cfg_rt, hfa);
-    end  
+    end
     %% Regress off Reaction Time
     if st.regress_rt
         fprintf('================== Regressing RT =======================\n');
@@ -116,7 +116,7 @@ for s = 1:numel(SBJs)
     hfa_win = zeros([size(hfa.powspctrm,1) size(hfa.powspctrm,2) size(win_lim,1)]);%size(hfa.powspctrm,3)
     for w_ix = 1:size(win_lim,1)
         hfa_win(:,:,w_ix) = squeeze(nanmean(hfa.powspctrm(:,:,1,win_lim(w_ix,1):win_lim(w_ix,2)),4));
-    end   
+    end
     %% Store data in table per roi
     fprintf('==================== Converting to long format ========================\n');
     ntimes = size(hfa_win,3);
@@ -180,7 +180,7 @@ for r = 1:numel(hfa_tables)
         fprintf('fitting label %d and time point %d\n',r,t)
         ctable = hfa_tables{r}{t};
         %ctable.pRPE(ctable.pRPE == 0) = normrnd(0,0.000001,sum(ctable.pRPE == 0),1);
-        %ctable.nRPE(ctable.nRPE == 0) = normrnd(0,0.000001,sum(ctable.nRPE == 0),1);       
+        %ctable.nRPE(ctable.nRPE == 0) = normrnd(0,0.000001,sum(ctable.nRPE == 0),1);
         LMEs{r}{t} = fitlme(ctable, lme_formula);%, 'FitMethod','REML');
         pvals{r}(:,t) = LMEs{r}{t}.Coefficients.pValue;
         coefs{r}(:,t) = LMEs{r}{t}.Coefficients.Estimate;
@@ -215,4 +215,77 @@ fprintf('==================== Saving results ========================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa.mat'];
 save(out_fname,'-v7.3','beta')
+
+%% Extract electrode-wise coefficients.
+chan_coef = {};
+chan_lower = {};
+chan_upper = {};
+chan_pval = {};
+
+for r = 1:numel(LMEs)
+    chan_coef{r} = NaN(size(model,2) + 1, length(unique(hfa_tables{r}{1}.chan)), numel(LMEs{r}));
+    for t = 1:numel(LMEs{r})
+        [~,~,rndstats] =  randomEffects(LMEs{r}{t});
+        
+        %select channel random effect
+        rndstats = rndstats(strcmp(rndstats.Group,'sub:chan'),:);
+        chan_coef{r}(:,:,t) = reshape(rndstats.Estimate,size(chan_coef{r},1:2));
+        chan_lower{r}(:,:,t) = reshape(rndstats.Lower,size(chan_coef{r},1:2));
+        chan_upper{r}(:,:,t) = reshape(rndstats.Upper,size(chan_coef{r},1:2));
+        chan_pval{r}(:,:,t) = reshape(rndstats.pValue,size(chan_coef{r},1:2));
+    end
+    chan_coef{r} = permute(chan_coef{r},[2,1,3]);
+    chan_lower{r} = permute(chan_lower{r},[2,1,3]);
+    chan_upper{r} = permute(chan_upper{r},[2,1,3]);
+    chan_pval{r} = permute(chan_pval{r},[2,1,3]);
+end
+
+% FDR correction
+chan_qval = {};
+for r = 1:numel(chan_pval)
+    for ch = 1:size(chan_pval{r},1)
+        for rg = 1:size(chan_pval{r},2)
+            [~,~,~,chan_qval{r}(ch,rg,:)] = fdr_bh(chan_pval{r}(ch,rg,:));
+        end
+    end
+end
+
+% Store in a structure
+beta_chan =  [];
+%conn_stats.LMEs = LMEs;
+beta_chan.feature   = reg_lab;
+beta_chan.time      = st.win_center;
+beta_chan.coefs = chan_coef;
+beta_chan.lower = chan_lower;
+beta_chan.upper = chan_upper;
+beta_chan.pvals = chan_pval;
+beta_chan.qvals = chan_qval;
+beta_chan.label = roi_list;
+beta_chan.win_lim   = win_lim;
+beta_chan.win_lim_s = hfa_time(win_lim);
+
+fprintf('=================== Saving channel effects ======================\n');
+stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
+out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
+save(out_fname,'-v7.3','beta_chan')
+%% plot
+for r = 1:numel(beta_chan.coefs)
+    % get mask
+    figure;
+    for rg = 1:length(reg_lab)
+        [ridx,~] = find(squeeze(beta_chan.qvals{r}(:, rg + 1,:) < .05));
+        subplot(1,3,rg)
+        for ch = 1:size(beta_chan.coefs{r},1)
+            %qmask = squeeze(double(beta_chan.pvals{r}(ch, rg + 1,:) < .05));
+            %qmask(qmask == 0) = Inf;
+            
+            hga = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)),'k-'); hold on;
+            hga.Color(4) = 0.1;  hold on;
+            if ismember(ch,ridx)
+                plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch, rg + 1,:)),'k-')
+            end
+        end
+        title(reg_lab{rg})
+    end
+    sgtitle(beta_chan.label{r})
 end
