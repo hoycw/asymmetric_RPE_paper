@@ -15,7 +15,7 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 %% Single SBJ RL Model
 proc_id   = 'main_ft';
 % model_ids = {'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
-model_ids = {'EpunRPE_DifFB'};%'RL3D_DifFB'};
+model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
 
 fig_vis   = 'on';
 save_fig  = 1;
@@ -85,8 +85,8 @@ for m_ix = 1:numel(model_ids)
         end
         
 %         % Plot bar graph showing proprotion of effects by ROI
-        SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08c_HFA_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot histograms of betas by ROI
 %         SBJ08c_HFA_plot_grp_mGLM_ROI_hist(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
@@ -94,11 +94,11 @@ for m_ix = 1:numel(model_ids)
         
         % Plot latency time series per ROI
         plt_id    = 'ts_F0t6_evnts_sigline';
-%         SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        SBJ08d_HFA_plot_grp_GLM_ts_ROI_butt(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
-%         SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        SBJ08d_HFA_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot onset latencies per effect and ROI
         plt_id      = 'onsets_0t6_violin_all';
