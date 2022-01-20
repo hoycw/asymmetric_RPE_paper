@@ -36,7 +36,7 @@ SBJs = SBJs(2:end);
 %% Group-levels stats: LME
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
-model_ids = {'EpunRPE_DifFB'};%;s'ERPEs_DifFB'};
+model_ids = {'EpnRPE_DifFB'};%;s'ERPEs_DifFB'};
 %stat_ids  = {'mGLM_st0t600_conn_MI_win'}; %'mGLM_st0t10_WL05_WS25'};%
 conn_ids = {'Xcorr'};%,'corr_win','MI_win'}; %'MI_win','MI_0lag','corr_win','corr_0lag','Xcorr'};
 swap_Xcorr = 1; % flip Xcorr plot
@@ -50,7 +50,7 @@ for ci = 1:numel(conn_ids)
         model_id = model_ids{mi};
         %stat_id = stat_ids{si};
         conn_id = conn_ids{ci};
-        %SBJ11b_HFA_conn_mLME(SBJs, proc_id, an_id, model_id, conn_id, lme_formula)
+        SBJ11b_HFA_conn_mLME(SBJs, proc_id, an_id, model_id, conn_id, lme_formula)
         SBJ11c_HFA_conn_plot_grp_mLME(proc_id, an_id, model_id, conn_id, swap_Xcorr)
         %end
     end

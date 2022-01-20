@@ -25,8 +25,8 @@ for s = 1:numel(SBJs)
     [reg_lab, ~, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
     
     % select regressors (provisional)
-    model = model(:,1:end-1);
-    reg_lab = reg_lab(1:end-1);
+%     model = model(:,1:end-1);
+%     reg_lab = reg_lab(1:end-1);
     
     pair_labels = conn.pair_labels;
     try time = conn.time; catch; time = 0; end
@@ -105,23 +105,23 @@ for pl = 1:numel(conn_tables)
     end
 end
 %% FDR correction
-% qvals = cell(size(pvals));
-% for pl = 1:numel(pvals)
-%     qvals{pl} = NaN(size(pvals{pl}));
-%     for cf = 1:size(pvals{pl},1)
-%         for b = 1:size(pvals{pl},3)
-%             [~, ~, ~, qvals{pl}(cf,:,b)] = fdr_bh(squeeze(pvals{pl}(cf,:,b)));
-%         end
-%     end
-% end
 qvals = cell(size(pvals));
 for pl = 1:numel(pvals)
     qvals{pl} = NaN(size(pvals{pl}));
-    qvals{pl}(1,:,:) = pvals{pl}(1,:,:);
-    for b = 1:size(pvals{pl},3)
-        [~, ~, ~, qvals{pl}(:,:,b)] = fdr_bh(squeeze(pvals{pl}(:,:,b)));
+    for cf = 1:size(pvals{pl},1)
+        for b = 1:size(pvals{pl},3)
+            [~, ~, ~, qvals{pl}(cf,:,b)] = fdr_bh(squeeze(pvals{pl}(cf,:,b)));
+        end
     end
 end
+% qvals = cell(size(pvals));
+% for pl = 1:numel(pvals)
+%     qvals{pl} = NaN(size(pvals{pl}));
+%     qvals{pl}(1,:,:) = pvals{pl}(1,:,:);
+%     for b = 1:size(pvals{pl},3)
+%         [~, ~, ~, qvals{pl}(:,:,b)] = fdr_bh(squeeze(pvals{pl}(:,:,b)));
+%     end
+% end
 %% Store in a structure and save
 conn_stats =  [];
 %conn_stats.LMEs = LMEs;
@@ -133,7 +133,74 @@ conn_stats.pvals = pvals;
 conn_stats.qvals = qvals;
 conn_stats.pair_labels = pair_labels;
 conn_stats.time = time;
+conn_stats.dimord = 'coef_time_bin';
 
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir proc_id '_' model_id '_' an_id '_' conn_id '.mat'];
 save(out_fname,'-v7.3','conn_stats')
+%% Extract electrode-wise coefficients.
+chan_coef = {};
+chan_lower = {};
+chan_upper = {};
+chan_pval = {};
+chan_labels = {};
+for r = 1:numel(LMEs)
+    chan_coef{r} = NaN(size(model,2) + 1, length(unique(conn_tables{r}{1,1}.chan)),...
+                    size(LMEs{r},1),size(LMEs{r},1));
+    chan_lower{r} = chan_coef{r};
+    chan_upper{r} = chan_coef{r};
+    chan_pval{r} = chan_coef{r};
+    for t = 1:size(LMEs{r},1)
+        for b = 1:size(LMEs{r},2)
+            [~,~,rndstats] =  randomEffects(LMEs{r}{t,b});
+            
+            %select channel random effect
+            rndstats = rndstats(strcmp(rndstats.Group,'sub:chan'),:);
+            if t == 1 & b == 1
+                chan_labels{r} = unique(rndstats.chan); 
+            end
+            chan_coef{r}(:,:,t,b) = reshape(rndstats.Estimate,size(chan_coef{r},1:2));
+            chan_lower{r}(:,:,t,b) = reshape(rndstats.Lower,size(chan_coef{r},1:2));
+            chan_upper{r}(:,:,t,b) = reshape(rndstats.Upper,size(chan_coef{r},1:2));
+            chan_pval{r}(:,:,t,b) = reshape(rndstats.pValue,size(chan_coef{r},1:2));
+        end
+    end
+    chan_coef{r} = permute(chan_coef{r},[2,1,3,4]);
+    chan_lower{r} = permute(chan_lower{r},[2,1,3,4]);
+    chan_upper{r} = permute(chan_upper{r},[2,1,3,4]);
+    chan_pval{r} = permute(chan_pval{r},[2,1,3,4]);
+end
+
+% FDR correction
+chan_qval = {};
+for r = 1:numel(chan_pval)
+    for ch = 1:size(chan_pval{r},1)
+        for rg = 1:size(chan_pval{r},2)
+            for b = 1:size(chan_pval,4)
+                [~,~,~,chan_qval{r}(ch,rg,:,b)] = fdr_bh(chan_pval{r}(ch,rg,:,b));
+            end
+        end
+    end
+end
+
+% Store in a structure
+conn_stats_chan =  [];
+%conn_stats.LMEs = LMEs;
+conn_stats_chan.feature   = reg_lab;
+conn_stats_chan.time      = st.win_center;
+conn_stats_chan.coefs = chan_coef;
+conn_stats_chan.lower = chan_lower;
+conn_stats_chan.upper = chan_upper;
+conn_stats_chan.pvals = chan_pval;
+conn_stats_chan.qvals = chan_qval;
+conn_stats_chan.label = roi_list;
+conn_stats_chan.chan_label = chan_labels;
+conn_stats_chan.win_lim   = win_lim;
+conn_stats_chan.win_lim_s = hfa_time(win_lim);
+conn_stats_chan.dimord = 'chan_coef_time_bin';
+
+% save
+fprintf('=================== Saving channel effects ======================\n');
+stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
+out_fname = [stats_dir model_id '_' stat_id '_' an_id '_conn_chancoef.mat'];
+save(out_fname,'-v7.3','conn_stats_chan')
