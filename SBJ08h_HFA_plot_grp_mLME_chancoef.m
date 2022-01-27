@@ -61,19 +61,11 @@ ntimes = numel(beta_chan.time);
 for r = 1:numel(beta_chan.coefs)
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
         'PaperOrientation','Landscape');
-    [pidx,~] = find(squeeze(beta_chan.qvals{r}(:,3,:) < .05));
-    [nidx,~] = find(squeeze(beta_chan.qvals{r}(:,4,:) < .05));
-    pidx = unique(pidx); nidx = unique(nidx);
-    pchan = pidx(~ismember(pidx,nidx));
-    nchan = nidx(~ismember(nidx,pidx));
+    pchan = beta_chan.chancat_ix{r}{1,1};
+    nchan = beta_chan.chancat_ix{r}{2,1};
+    slnchan = beta_chan.chancat_ix{r}{3,1};
+    rwdchan = beta_chan.chancat_ix{r}{4,1};
     for t = 1:ntimes
-        signcoef = double(beta_chan.coefs{r}(:,3:4,t) >= 0);
-        slnidx = find(signcoef(:,1) ~= signcoef(:,2));
-        rwdidx = find(signcoef(:,1) == signcoef(:,2));
-        slnchan = pidx(ismember(pidx,nidx));
-        slnchan = slnchan(ismember(slnchan,slnidx));
-        rwdchan = pidx(ismember(pidx,nidx));
-        rwdchan = rwdchan(ismember(rwdchan,rwdidx));
         
         subplot(ceil(ntimes / 5),5,t)
         s1= scatter(beta_chan.coefs{r}(pchan,3,t),beta_chan.coefs{r}(pchan,4,t)*-1,[],...
@@ -99,7 +91,7 @@ for r = 1:numel(beta_chan.coefs)
             ylabel('(-) nRPE coefficient (a.u.)', 'FontSize',7)
             hold off;
             
-            legend([s1,s2,s3,s4],{'pRPE','nRPE','uRPE','sRPE'},'FontSize',9,...%'Location','northeast',...
+            legend([s1,s2,s3,s4],beta_chan.chancat_label,'FontSize',9,...%'Location','northeast',...
                 'NumColumns',1, 'Position',[0.625,0.1,0.1,0.1])
             %legend('boxoff')
         end

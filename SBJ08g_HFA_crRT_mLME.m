@@ -262,7 +262,7 @@ for r = 1:numel(chan_pval)
     end
 end
 
-% Store in a structure
+%% Store in a structure
 beta_chan =  [];
 %conn_stats.LMEs = LMEs;
 beta_chan.feature   = reg_lab;
@@ -278,7 +278,114 @@ beta_chan.win_lim   = win_lim;
 beta_chan.win_lim_s = hfa_time(win_lim);
 beta_chan.dimord = 'chan_coef_time';
 
+%% % Estimate channel categories
+
+chan_cat = cell(1,numel(beta_chan.coefs));
+for r = 1:numel(beta_chan.coefs)
+    
+    %array to store values
+    beta_chan.chancat_ix{r} = cell(4,1);
+    
+    % Find positive and negative channels with any significant time points
+    [pidx,~] = find(squeeze(beta_chan.qvals{r}(:,3,:) < .05));
+    [nidx,~] = find(squeeze(beta_chan.qvals{r}(:,4,:) < .05));
+    pidx = unique(pidx); nidx = unique(nidx);
+    
+    % find channels responding to either pRPE or nRPE (not both)
+    pchan = pidx(~ismember(pidx,nidx));
+    nchan = nidx(~ismember(nidx,pidx));
+    
+    % find channels responding to both pRPE and nRPE
+    common_chan = pidx(ismember(pidx,nidx));
+    
+    % calculate channels responding to uRPE (slnchan) and sRPE (rwdchan)
+    slnchan = [];
+    rwdchan = [];
+    for cch = 1:numel(common_chan)
+        % select current common channel
+        cchan = common_chan(cch);
+        
+        % get significant timepoints for pRPE and nRPE in this channel
+        psig = squeeze(beta_chan.qvals{r}(cchan,3,:) < .05);
+        nsig = squeeze(beta_chan.qvals{r}(cchan,4,:) < .05);
+        
+        % evaluate whether coefficients are + or - at significant
+        % timepoints
+        ppos = squeeze(double(beta_chan.coefs{r}(cchan,3,:) > 0));
+        nneg = squeeze(double(beta_chan.coefs{r}(cchan,4,:) < 0));
+        
+        % if channel has only positive coefs for pRPE and any positive coef for
+        % nRPE (or vice versa), then clasify as rwdchan (i.e. sRPE)
+        if (~ismember(0,ppos(psig)) & ismember(0,nneg(nsig))) |...
+           (~ismember(0,nneg(nsig)) & ismember(0,ppos(psig)))
+           rwdchan = [rwdchan,cchan];
+        else
+            % if channel has any sig. negative coef for pRPE and any 
+            % sig. positive coef for nRPE, then clasify as sRPE if not at same 
+            % time points.
+            commtidx = find(double(psig).*double(nsig));
+            if sum(ppos(commtidx) ~= nneg(commtidx)) > 0
+                rwdchan = [rwdchan,cchan];
+            else
+                % Everyhting else is uRPE
+                slnchan = [slnchan,cchan];
+            end           
+        end
+    end
+    beta_chan.chancat_ix{r}{1} = pchan;
+    beta_chan.chancat_ix{r}{2} = nchan;
+    beta_chan.chancat_ix{r}{3} = slnchan;
+    beta_chan.chancat_ix{r}{4} = rwdchan;
+end
+
+beta_chan.chancat_label = {'pRPE','nRPE','uRPE','sRPE'};
+%% Save
 fprintf('=================== Saving channel effects ======================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
 save(out_fname,'-v7.3','beta_chan')
+%% Old way of calculating significant channels
+% chan_cat = cell(1,numel(beta_chan.coefs));
+% for r = 1:numel(beta_chan.coefs)
+%     % Find positive and negative channels with any significant time points
+%        [allpidx,~] = find(squeeze(beta_chan.qvals{r}(:,3,:) < .05));
+%        [allnidx,~] = find(squeeze(beta_chan.qvals{r}(:,4,:) < .05));
+%         allpidx = unique(allpidx); allnidx = unique(allnidx);
+%    
+%     % loop over time points
+%     ntimes = size(beta_chan.coefs{r},3);
+%     beta_chan.chancat_ix{r} = cell(4,ntimes);
+%     for t = 1:ntimes
+%         % Find positive and negative significant channels at current time
+%         [pidx,~] = find(squeeze(beta_chan.qvals{r}(:,3,t) < .05));
+%         [nidx,~] = find(squeeze(beta_chan.qvals{r}(:,4,t) < .05));
+%         pidx = unique(pidx); nidx = unique(nidx);
+%         
+%         % select channels that do not respond to opposite reward category
+%         % in the whole trial
+%         pchan = pidx(~ismember(pidx,allnidx));
+%         nchan = nidx(~ismember(nidx,allpidx));
+%         
+%         % get the sign of channel coefficient at current time
+%         signcoef = double(beta_chan.coefs{r}(:, 3:4, t) >= 0);
+%         
+%         % channels with equal coefficient sign (i.e. sRPE coding)
+%         slnidx = find(signcoef(:,1) ~= signcoef(:,2));
+%         
+%         % channels with different coefficient sign (i.e. uRPE coding)
+%         rwdidx = find(signcoef(:,1) == signcoef(:,2));
+%         
+%         % select significant uRPE channels
+%         slnchan = pidx(ismember(pidx,nidx));
+%         slnchan = slnchan(ismember(slnchan,slnidx));
+%         
+%         % select non-significant 
+%         rwdchan = pidx(ismember(pidx,nidx));
+%         rwdchan = rwdchan(ismember(rwdchan,rwdidx));
+% 
+%         beta_chan.chancat_ix{r}{1,t} = pchan;
+%         beta_chan.chancat_ix{r}{2,t} = nchan;
+%         beta_chan.chancat_ix{r}{3,t} = slnchan;
+%         beta_chan.chancat_ix{r}{4,t} = rwdchan;
+%     end 
+% end
