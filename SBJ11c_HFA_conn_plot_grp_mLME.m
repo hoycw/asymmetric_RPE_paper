@@ -76,3 +76,4 @@ for pl = 1:ncols
 end
 plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_' conn_id '.pdf'];
 print(plot_fname,cf,'-dpdf','-fillpage')
+close all

@@ -50,8 +50,8 @@ for ci = 1:numel(conn_ids)
         model_id = model_ids{mi};
         %stat_id = stat_ids{si};
         conn_id = conn_ids{ci};
-        SBJ11b_HFA_conn_mLME(SBJs, proc_id, an_id, model_id, conn_id, lme_formula)
-        SBJ11c_HFA_conn_plot_grp_mLME(proc_id, an_id, model_id, conn_id, swap_Xcorr)
+        %SBJ11b_HFA_conn_mLME(SBJs, proc_id, an_id, model_id, conn_id, lme_formula)
+        %SBJ11c_HFA_conn_plot_grp_mLME(proc_id, an_id, model_id, conn_id, swap_Xcorr)
         %end
     end
 end
