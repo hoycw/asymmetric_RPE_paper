@@ -102,7 +102,7 @@ else
     [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
 end
 if numel(reg_lab) < 2 || numel(reg_lab) > 3; error('why venn?'); end
-[cat_lab, cat_names, cat_colors, ~, ~] = fn_pnRPE_category_label_styles(cat_id);
+[cat_lab, cat_names, cat_colors, ~, ~] = fn_puns_category_label_styles(cat_id);
 venn_colors = fn_venn_colors(0,'model_lab',mdl.model_lab);
 all_color   = [0.1 0.1 0.1];
 

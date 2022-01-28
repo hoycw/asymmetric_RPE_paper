@@ -1,4 +1,4 @@
-function [labels, names, colors, line_styles, markers] = fn_pnRPE_category_label_styles(cat_id)
+function [labels, names, colors, line_styles, markers] = fn_puns_category_label_styles(cat_id)
 %% Converts the name of a category ID into category labels, plotting colors/styles
 %   Assumes model_id = 'EpnRPEs_DifFB' ~ EV + pRPE + nRPE
 %       RL Features: expected value (logistic regression), positive RPE, negative RPE
@@ -57,9 +57,9 @@ regressor_markers = {...
 
 %% Convert cat_id into set of conditions
 switch cat_id
-    case 'pnsu'
+    case 'puns'
         labels = {'pRPE','nRPE','sRPE','uRPE'};
-    case 'ipnsu'
+    case 'ipuns'
         labels = {'pRPE','nRPE','sRPE','uRPE','ipRPE','inRPE','isRPE','iuRPE'};
         
     case 'pn'
