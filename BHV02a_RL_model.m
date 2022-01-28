@@ -326,7 +326,7 @@ end
 if any(strcmp(reg_lab,'nRPE'))
     sRPE = double(bhv.score)/100 - EV;
     nRPE = zeros(size(sRPE));
-    nRPE(sign(sRPE)==-1) = sRPE(sign(sRPE)==-1);
+    nRPE(sign(sRPE)==-1) = -1*sRPE(sign(sRPE)==-1); % flip sign so positive coefficient means increasing activity for more negative RPE
 end
 
 %% Compute total, cumulative score

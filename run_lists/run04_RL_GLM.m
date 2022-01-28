@@ -242,6 +242,7 @@ proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'EpnRPE_DifFB'};%{'ERPEs_DifFB'};
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
+cat_id    = 'pnsu';
 atlas_id  = 'Dx';
 roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
 % lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
@@ -249,7 +250,11 @@ roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
 lme_formula = ['y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...
                  '(1+pRPE + nRPE + EV | sub:chan)'];
 %lme_formula = 'y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | chan)';
-            
+        
+reg_type  = 'v';
+show_lab  = 0;
+roi_opts  = {{'l','deep',1},{'l','MPFC',1}};%,{'l','lat',1},{'b','OFC',0}
+
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
         model_id = model_ids{m_ix};
@@ -257,6 +262,13 @@ for m_ix = 1:numel(model_ids)
         %SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
         %SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
         %SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
+        
+        % Plot venn recons
+        for roi_ix = 1:numel(roi_opts)
+            fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
+                reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+                roi_opts{roi_ix}{3});
+        end
     end
 end
 %% OLDER ANOVA:
