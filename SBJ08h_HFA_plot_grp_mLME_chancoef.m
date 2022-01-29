@@ -9,6 +9,7 @@ ft_defaults
 
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
 [reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+[labels, names, colors, ~, ~] = fn_puns_category_label_styles('puns');
 
 %% Load stats results:
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
@@ -19,28 +20,37 @@ end
 stats_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
 load(stats_fname)
 
-%% plot channel timecourses
+%% plot channel time courses
 for r = 1:numel(beta_chan.coefs)
     % get mask
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
         'PaperOrientation','Landscape');
-    
+    cplots = NaN(1,length(beta_chan.chancat_label));
     for rg = 1:length(reg_lab)
-        [ridx,~] = find(squeeze(beta_chan.qvals{r}(:, rg + 1,:) < .05));
-        ylims0 = [min(beta_chan.coefs{r}(:,r+1,:),[],'all'),...
-            max(beta_chan.coefs{r}(:,r+1,:),[],'all')];
+        %[ridx,~] = find(squeeze(beta_chan.qvals{r}(:, rg + 1,:) < .05));
+        ylims0 = [min(beta_chan.coefs{r}(:,2:end,:),[],'all'),...
+            max(beta_chan.coefs{r}(:,2:end,:),[],'all')];
         ylims0(1) = min([ylims0(1) - 0.5*abs(ylims0(1)), 0]);
         ylims0(2) = max([ylims0(2) + 0.5*abs(ylims0(2)), 0]);
         ylims = [min(ylims0(1)),max(ylims0(2))];
         subplot(1,3,rg)
         yline(0); hold on; xline(0); hold on;
         for ch = 1:size(beta_chan.coefs{r},1)
-            %qmask = squeeze(double(beta_chan.pvals{r}(ch, rg + 1,:) < .05));
-            %qmask(qmask == 0) = Inf;
-            hga = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)),'k-'); hold on;
-            hga.Color(4) = 0.1;  hold on;
-            if ismember(ch,ridx)
-                plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch, rg + 1,:)),'k-')
+            qmask = squeeze(double(beta_chan.qvals{r}(ch, rg + 1,:) < .05));
+            qmask(qmask == 0) = Inf;
+            ch_cat = [];
+            for ctg = 1:length(beta_chan.chancat_label)
+                ch_cat(ctg) = ismember(ch, beta_chan.chancat_ix{r}{ctg});
+            end
+            if sum(ch_cat) > 0
+                hga = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)),...
+                    'color', colors{find(ch_cat)}); hold on;
+                hga2 = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)).*qmask,...
+                    'color',colors{find(ch_cat)},'LineWidth',1.5); hold on;
+                cplots(find(ch_cat)) = hga2;
+            else
+                hga = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch, rg + 1,:)),'k-');
+                hga.Color(4) = 0.1;  hold on;
             end
         end
         title(reg_names{rg})
@@ -48,15 +58,15 @@ for r = 1:numel(beta_chan.coefs)
         xlabel('time (s)')
         ylabel('coefficient (a.u.)')
     end
+    legend(cplots,names,'FontSize',9,...%'Location','northeast',...
+        'NumColumns',1, 'Position',[0.8,0.75,0.05,0.1])
     sgtitle(beta_chan.label{r})
     plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chancoef_' beta_chan.label{r} '.pdf'];
     print(plot_fname,cf,'-dpdf','-fillpage')
 end
 close all
 
-
 %% plot dynamic scatterplot
-alphav = 0.3;
 ntimes = numel(beta_chan.time);
 for r = 1:numel(beta_chan.coefs)
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
@@ -66,32 +76,30 @@ for r = 1:numel(beta_chan.coefs)
     slnchan = beta_chan.chancat_ix{r}{3,1};
     rwdchan = beta_chan.chancat_ix{r}{4,1};
     for t = 1:ntimes
-        
+        cplots = [];
         subplot(ceil(ntimes / 5),5,t)
-        s1= scatter(beta_chan.coefs{r}(pchan,3,t),beta_chan.coefs{r}(pchan,4,t)*-1,[],...
-            'g','filled', 'LineWidth',1,'MarkerEdgeColor','k');
-        s1.MarkerFaceAlpha = alphav; s1.MarkerEdgeAlpha = alphav; hold on;
-        s2= scatter(beta_chan.coefs{r}(nchan,3,t),beta_chan.coefs{r}(nchan,4,t)*-1,[],...
-            'y','filled', 'LineWidth',1,'MarkerEdgeColor','k');hold on;
-        s2.MarkerFaceAlpha = alphav; s2.MarkerEdgeAlpha = alphav; hold on;
-        s3= scatter(beta_chan.coefs{r}(slnchan,3,t),beta_chan.coefs{r}(slnchan,4,t)*-1,[],...
-            'r','filled', 'LineWidth',1,'MarkerEdgeColor','k');hold on;
-        s3.MarkerFaceAlpha = alphav; s3.MarkerEdgeAlpha = alphav; hold on;
-        s4= scatter(beta_chan.coefs{r}(rwdchan,3,t),beta_chan.coefs{r}(rwdchan,4,t)*-1,[],...
-            'b','filled', 'LineWidth',1,'MarkerEdgeColor','k');
-        s4.MarkerFaceAlpha = alphav; s4.MarkerEdgeAlpha = alphav; hold on;
-        
         yline(0); hold on; xline(0);
+        for ctg = 1:numel(beta_chan.chancat_label)
+            cp = scatter(beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},3,t),...
+                beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},4,t),...
+                [],colors{ctg},'filled','p','LineWidth',1,...
+                'MarkerEdgeColor',colors{ctg});
+            cp.MarkerFaceAlpha = 0.3;
+            cp.MarkerEdgeAlpha = 0.7;
+            cplots(ctg) =  cp;
+            hold on;
+        end
+        
         title(sprintf('%.00f ms',beta_chan.time(t)*1000));
         xlim([-0.7,0.7])
-        ylim([-1,1])
+        ylim([-0.8,0.8])
         
         if t == length(beta_chan.time)
             xlabel('pRPE coefficient (a.u.)', 'FontSize',7)
             ylabel('(-) nRPE coefficient (a.u.)', 'FontSize',7)
             hold off;
             
-            legend([s1,s2,s3,s4],beta_chan.chancat_label,'FontSize',9,...%'Location','northeast',...
+            legend(cplots,names,'FontSize',9,...%'Location','northeast',...
                 'NumColumns',1, 'Position',[0.625,0.1,0.1,0.1])
             %legend('boxoff')
         end
@@ -100,4 +108,47 @@ for r = 1:numel(beta_chan.coefs)
     plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '.pdf'];
     print(plot_fname,cf,'-dpdf','-fillpage')
 end
+close all
+%% plot static scatterplot
+ptime = 0.350;
+t = find(round(beta_chan.time,3) == ptime);
+ntimes = numel(beta_chan.time);
+cf = figure('units','normalized','outerposition',[0 0 1 1],...
+    'PaperOrientation','Landscape');
+for r = 1:numel(beta_chan.coefs)
+    pchan = beta_chan.chancat_ix{r}{1,1};
+    nchan = beta_chan.chancat_ix{r}{2,1};
+    slnchan = beta_chan.chancat_ix{r}{3,1};
+    rwdchan = beta_chan.chancat_ix{r}{4,1};
+    subplot(1,2,r)
+    cplots = [];
+    yline(0); hold on; xline(0);
+    for ctg = 1:numel(beta_chan.chancat_label)
+        cp = scatter(beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},3,t),...
+            beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},4,t),...
+            150,colors{ctg},'filled','p','LineWidth',1,...
+            'MarkerEdgeColor',colors{ctg});
+        cp.MarkerFaceAlpha = 0.3;
+        cp.MarkerEdgeAlpha = 1;
+        
+        cplots(ctg) =  cp;
+        hold on;
+    end
+    
+    title(sprintf('%s (%.00f ms)',beta_chan.label{r},beta_chan.time(t)*1000));
+    xlim([-0.7,0.7])
+    ylim([-0.8,0.8])
+    
+    
+    xlabel('Positive RPE coefficient (a.u.)', 'FontSize',11)
+    ylabel('Negative RPE coefficient (a.u.)', 'FontSize',11)
+    hold off;
+      
+    %legend('boxoff')
+    
+end
+legend(cplots,names,'FontSize',9,...%'Location','northeast',...
+    'NumColumns',1, 'Position',[0.15,0.7,0.1,0.1])
+plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '_static.pdf'];
+print(plot_fname,cf,'-dpdf','-fillpage')
 close all

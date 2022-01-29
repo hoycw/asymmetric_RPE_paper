@@ -57,6 +57,7 @@ for s = 1:numel(SBJs)
     [reg_lab, ~, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
     [cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(st.stat_cond);
     [mdl_cond_lab, ~, ~, ~, ~] = fn_condition_label_styles(mdl.model_cond);
+
     if ~all(contains(cond_lab,mdl_cond_lab))
         error([model_id ' does not cover all conditions in ' stat_id '!']);
     end
@@ -117,7 +118,7 @@ for s = 1:numel(SBJs)
     for w_ix = 1:size(win_lim,1)
         hfa_win(:,:,w_ix) = squeeze(nanmean(hfa.powspctrm(:,:,1,win_lim(w_ix,1):win_lim(w_ix,2)),4));
     end
-    %% Store data in table per roi
+    %% Store data in long format per roi
     fprintf('==================== Converting to long format ========================\n');
     ntimes = size(hfa_win,3);
     
@@ -129,7 +130,7 @@ for s = 1:numel(SBJs)
         cur_chan = chan_labs(strcmp(roi_labs,croi));
         nch = numel(cur_chan);
         for ct = 1:ntimes
-            hfa_data{r}{s,ct} = cell(size(hfa_win,1)*nch,3 + size(model,2));
+            hfa_data{r}{s,ct} = cell(size(hfa_win,1)*nch, 3 + size(model,2));
             dcount = 0;
             for ch = 1:nch
                 lab = cur_chan{ch};
@@ -138,9 +139,9 @@ for s = 1:numel(SBJs)
                     dcount = dcount + 1;
                     hfa_data{r}{s,ct}{dcount,1} = cdata(cdp);
                     hfa_data{r}{s,ct}{dcount,2} = SBJ;
-                    hfa_data{r}{s,ct}{dcount,3} = [SBJ '_' lab];
+                    hfa_data{r}{s,ct}{dcount,3} = lab;
                     for mm = 1:size(model,2)
-                        hfa_data{r}{s,ct}{dcount,3 + mm} = model(cdp,mm);
+                        hfa_data{r}{s,ct}{dcount, 3 + mm} = model(cdp,mm);
                     end
                 end
             end
@@ -168,7 +169,7 @@ coefs = {};
 lower = {};
 upper = {};
 pvals = {};
-rng(090590)
+
 for r = 1:numel(hfa_tables)
     nt = size(hfa_tables{r},1);
     LMEs{r} = cell(nt,1);
@@ -177,8 +178,9 @@ for r = 1:numel(hfa_tables)
     lower{r} = NaN(size(model,2) + 1,nt);
     upper{r} = NaN(size(model,2) + 1,nt);
     for t = 1:nt
+
         fprintf('fitting label %d and time point %d\n',r,t)
-        
+       
         ctable = hfa_tables{r}{t};
         LMEs{r}{t} = fitlme(ctable, lme_formula);%, 'FitMethod','REML');
         pvals{r}(:,t) = LMEs{r}{t}.Coefficients.pValue;
@@ -229,22 +231,24 @@ chan_upper = {};
 chan_pval = {};
 chan_labels = {};
 for r = 1:numel(LMEs)
-    chan_coef{r} = NaN(size(model,2) + 1, length(unique(hfa_tables{r}{1}.chan)), numel(LMEs{r}));
-    chan_lower{r} = chan_coef{r};
-    chan_upper{r} = chan_coef{r};
-    chan_pval{r} = chan_coef{r};
     for t = 1:numel(LMEs{r})
         [~,~,rndstats] =  randomEffects(LMEs{r}{t});
+        
         
         %select channel random effect
         rndstats = rndstats(strcmp(rndstats.Group,'sub:chan'),:);
         if t == 1
             chan_labels{r} = unique(rndstats.Level);
+            chan_coef{r} = NaN(size(model,2) + 1, length(chan_labels{r}), numel(LMEs{r}));
+            chan_lower{r} = chan_coef{r};
+            chan_upper{r} = chan_coef{r};
+            chan_pval{r} = chan_coef{r};
         end
-        chan_coef{r}(:,:,t) = reshape(rndstats.Estimate,size(chan_coef{r},1:2));
-        chan_lower{r}(:,:,t) = reshape(rndstats.Lower,size(chan_coef{r},1:2));
-        chan_upper{r}(:,:,t) = reshape(rndstats.Upper,size(chan_coef{r},1:2));
-        chan_pval{r}(:,:,t) = reshape(rndstats.pValue,size(chan_coef{r},1:2));
+        
+        chan_coef{r}(:,:,t) = reshape(rndstats.Estimate, size(chan_coef{r},1:2));
+        chan_lower{r}(:,:,t) = reshape(rndstats.Lower, size(chan_coef{r},1:2));
+        chan_upper{r}(:,:,t) = reshape(rndstats.Upper, size(chan_coef{r},1:2));
+        chan_pval{r}(:,:,t) = reshape(rndstats.pValue, size(chan_coef{r},1:2));
     end
     chan_coef{r} = permute(chan_coef{r},[2,1,3]);
     chan_lower{r} = permute(chan_lower{r},[2,1,3]);
@@ -279,14 +283,13 @@ beta_chan.win_lim_s = hfa_time(win_lim);
 beta_chan.dimord = 'chan_coef_time';
 
 %% % Estimate channel categories
-
-chan_cat = cell(1,numel(beta_chan.coefs));
+[cat_lab, ~, ~, ~, ~] = fn_puns_category_label_styles('puns');
 for r = 1:numel(beta_chan.coefs)
     
     %array to store values
     beta_chan.chancat_ix{r} = cell(4,1);
     
-    % Find positive and negative channels with any significant time points
+    % Find pRPE and nRPE channels with any significant time points
     [pidx,~] = find(squeeze(beta_chan.qvals{r}(:,3,:) < .05));
     [nidx,~] = find(squeeze(beta_chan.qvals{r}(:,4,:) < .05));
     pidx = unique(pidx); nidx = unique(nidx);
@@ -309,41 +312,56 @@ for r = 1:numel(beta_chan.coefs)
         psig = squeeze(beta_chan.qvals{r}(cchan,3,:) < .05);
         nsig = squeeze(beta_chan.qvals{r}(cchan,4,:) < .05);
         
-        % evaluate whether coefficients are + or - at significant
-        % timepoints
+        % evaluate whether coefficients are +ve or -ve 
         ppos = squeeze(double(beta_chan.coefs{r}(cchan,3,:) > 0));
-        nneg = squeeze(double(beta_chan.coefs{r}(cchan,4,:) < 0));
+        nneg = squeeze(double(beta_chan.coefs{r}(cchan,4,:) > 0));
         
-        % if channel has only positive coefs for pRPE and any positive coef for
-        % nRPE (or vice versa), then clasify as rwdchan (i.e. sRPE)
+        % if channel has only sig. positive coefs for pRPE and any sig. 
+        % negative coef for nRPE (or vice versa), then classify as 
+        % rwdchan (i.e. sRPE)
         if (~ismember(0,ppos(psig)) & ismember(0,nneg(nsig))) |...
            (~ismember(0,nneg(nsig)) & ismember(0,ppos(psig)))
-           rwdchan = [rwdchan,cchan];
+           rwdchan = [rwdchan;cchan];
         else
             % if channel has any sig. negative coef for pRPE and any 
-            % sig. positive coef for nRPE, then clasify as sRPE if not at same 
-            % time points.
+            % sig. negative coef for nRPE, then clasify as sRPE ONLY 
+            % if not at same time points.
+            
+            %common significan times
             commtidx = find(double(psig).*double(nsig));
+            
+            %compare coefficients
             if sum(ppos(commtidx) ~= nneg(commtidx)) > 0
-                rwdchan = [rwdchan,cchan];
+                rwdchan = [rwdchan;cchan];
             else
                 % Everyhting else is uRPE
-                slnchan = [slnchan,cchan];
+                slnchan = [slnchan;cchan];
             end           
         end
     end
-    beta_chan.chancat_ix{r}{1} = pchan;
-    beta_chan.chancat_ix{r}{2} = nchan;
-    beta_chan.chancat_ix{r}{3} = slnchan;
-    beta_chan.chancat_ix{r}{4} = rwdchan;
+    
+    cat_struc = [];
+    cat_struc.pRPE = pchan;
+    cat_struc.nRPE = nchan;
+    cat_struc.sRPE = rwdchan;
+    cat_struc.uRPE = slnchan;
+    
+    for ctg = 1:numel(cat_lab)
+        beta_chan.chancat_ix{r}{ctg} = cat_struc.(cat_lab{ctg});
+    end
+%     beta_chan.chancat_ix{r}{1} = pchan;
+%     beta_chan.chancat_ix{r}{2} = nchan;
+%     beta_chan.chancat_ix{r}{3} = slnchan;
+%     beta_chan.chancat_ix{r}{4} = rwdchan;
 end
 
-beta_chan.chancat_label = {'pRPE','nRPE','uRPE','sRPE'};
+beta_chan.chancat_label = cat_lab;
 %% Save
 fprintf('=================== Saving channel effects ======================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
 save(out_fname,'-v7.3','beta_chan')
+
 %% Old way of calculating significant channels
 % chan_cat = cell(1,numel(beta_chan.coefs));
 % for r = 1:numel(beta_chan.coefs)

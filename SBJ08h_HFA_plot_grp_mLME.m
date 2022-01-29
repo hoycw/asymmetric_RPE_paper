@@ -27,10 +27,11 @@ cf = figure('units','normalized','outerposition',[0 0 1 1],...
             'PaperOrientation','Landscape');
 ylims0 = NaN(ncols,2);
 for r = 1:ncols
-    ccoef = beta.coefs{r};
-    ylims0(r,:) = [min(ccoef(2:end,:),[],'all'), max(ccoef(2:end,:),[],'all')];
-    ylims0(r,1) = min([ylims0(r,1) - 0.5*abs(ylims0(r,1)), 0]);
-    ylims0(r,2) = max([ylims0(r,2) + 0.5*abs(ylims0(r,2)), 0]);
+    clower = beta.lower{r};
+    cupper = beta.upper{r};
+    ylims0(r,:) = [min(clower(2:end,:),[],'all'), max(cupper(2:end,:),[],'all')];
+    ylims0(r,1) = min([ylims0(r,1) - 0.25*abs(ylims0(r,1)), 0]);
+    ylims0(r,2) = max([ylims0(r,2) + 0.25*abs(ylims0(r,2)), 0]);
 end
 ylims = [min(ylims0(:,1)),max(ylims0(:,2))];
 
