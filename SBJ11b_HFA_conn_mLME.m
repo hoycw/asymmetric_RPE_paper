@@ -52,7 +52,7 @@ for s = 1:numel(SBJs)
                             dcount = dcount + 1;
                             conn_data{pl}{s,cnt,cb}{dcount,1} = cdata(cdp);
                             conn_data{pl}{s,cnt,cb}{dcount,2} = SBJ;
-                            conn_data{pl}{s,cnt,cb}{dcount,3} = [SBJ '_' lab1 '_to_' lab2];
+                            conn_data{pl}{s,cnt,cb}{dcount,3} = [lab1 '_to_' lab2];
                             for mm = 1:size(model,2)
                                 conn_data{pl}{s,cnt,cb}{dcount,3 + mm} = model(cdp,mm);
                             end
@@ -143,13 +143,8 @@ chan_coef = {};
 chan_lower = {};
 chan_upper = {};
 chan_pval = {};
-chan_labels = {};
+chan_labels = cell(size(LMEs));
 for r = 1:numel(LMEs)
-    chan_coef{r} = NaN(size(model,2) + 1, length(unique(conn_tables{r}{1,1}.chan)),...
-                    size(LMEs{r},1),size(LMEs{r},2));
-    chan_lower{r} = chan_coef{r};
-    chan_upper{r} = chan_coef{r};
-    chan_pval{r} = chan_coef{r};
     for t = 1:size(LMEs{r},1)
         for b = 1:size(LMEs{r},2)
             [~,~,rndstats] =  randomEffects(LMEs{r}{t,b});
@@ -157,7 +152,12 @@ for r = 1:numel(LMEs)
             %select channel random effect
             rndstats = rndstats(strcmp(rndstats.Group,'sub:chan'),:);
             if t == 1 & b == 1
-                chan_labels{r} = unique(rndstats.Level); 
+                chan_labels{r} = unique(rndstats.Level);
+                chan_coef{r} = NaN(size(model,2) + 1, length(chan_labels{r}),...
+                                   size(LMEs{r},1),size(LMEs{r},2));
+                chan_lower{r} = chan_coef{r};
+                chan_upper{r} = chan_coef{r};
+                chan_pval{r} = chan_coef{r};
             end
             chan_coef{r}(:,:,t,b) = reshape(rndstats.Estimate,size(chan_coef{r},1:2));
             chan_lower{r}(:,:,t,b) = reshape(rndstats.Lower,size(chan_coef{r},1:2));
@@ -197,7 +197,80 @@ conn_stats_chan.pair_label = pair_labels;
 conn_stats_chan.chan_label = chan_labels;
 conn_stats_chan.dimord = 'chan_coef_time_bin';
 
-% save
+%% % Estimate channel categories
+[cat_lab, ~, ~, ~, ~] = fn_puns_category_label_styles('puns');
+
+for r = 1:numel(conn_stats_chan.coefs)
+
+    %array to store values
+    conn_stats_chan.chancat_ix{r} = cell(4,size(conn_stats.coefs{r},4));
+    for b = 1:size(conn_stats_chan.coefs{r},4)
+        % Find pRPE and nRPE channels with any significant time points
+        [pidx,~] = find(squeeze(conn_stats_chan.qvals{r}(:,3,:,b) < .05));
+        [nidx,~] = find(squeeze(conn_stats_chan.qvals{r}(:,4,:,b) < .05));
+        pidx = unique(pidx); nidx = unique(nidx);
+        
+        % find channels responding to either pRPE or nRPE (not both)
+        pchan = pidx(~ismember(pidx,nidx));
+        nchan = nidx(~ismember(nidx,pidx));
+        
+        % find channels responding to both pRPE and nRPE
+        common_chan = pidx(ismember(pidx,nidx));
+        
+        % calculate channels responding to uRPE (slnchan) and sRPE (rwdchan)
+        slnchan = [];
+        rwdchan = [];
+        for cch = 1:numel(common_chan)
+            % select current common channel
+            cchan = common_chan(cch);
+            
+            % get significant timepoints for pRPE and nRPE in this channel
+            psig = squeeze(conn_stats_chan.qvals{r}(cchan,3,:,b) < .05);
+            nsig = squeeze(conn_stats_chan.qvals{r}(cchan,4,:,b) < .05);
+            
+            % evaluate whether coefficients are +ve or -ve
+            ppos = squeeze(double(conn_stats_chan.coefs{r}(cchan,3,:,b) > 0));
+            nneg = squeeze(double(conn_stats_chan.coefs{r}(cchan,4,:,b) > 0));
+            
+            % if channel has only sig. positive coefs for pRPE and any sig.
+            % negative coef for nRPE (or vice versa), then classify as
+            % rwdchan (i.e. sRPE)
+            if (~ismember(0,ppos(psig)) & ismember(0,nneg(nsig))) |...
+                    (~ismember(0,nneg(nsig)) & ismember(0,ppos(psig)))
+                rwdchan = [rwdchan;cchan];
+            else
+                % if channel has any sig. negative coef for pRPE and any
+                % sig. negative coef for nRPE, then clasify as sRPE ONLY
+                % if not at same time points.
+                
+                %common significant times
+                commtidx = find(double(psig).*double(nsig));
+                
+                %compare coefficients
+                if sum(ppos(commtidx) ~= nneg(commtidx)) > 0
+                    rwdchan = [rwdchan;cchan];
+                else
+                    % Everyhting else is uRPE
+                    slnchan = [slnchan;cchan];
+                end
+            end
+        end
+
+        cat_struc = [];
+        cat_struc.pRPE = pchan;
+        cat_struc.nRPE = nchan;
+        cat_struc.sRPE = rwdchan;
+        cat_struc.uRPE = slnchan;
+        
+        for ctg = 1:numel(cat_lab)
+            conn_stats_chan.chancat_ix{r}{ctg,b} = cat_struc.(cat_lab{ctg});
+        end
+    end
+end
+
+conn_stats_chan.chancat_label = cat_lab;
+
+%% save
 fprintf('=================== Saving channel effects ======================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir proc_id '_' model_id '_' an_id '_' conn_id '_chancoef.mat'];

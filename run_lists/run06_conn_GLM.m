@@ -40,6 +40,7 @@ model_ids = {'EpnRPE_DifFB'};%;s'ERPEs_DifFB'};
 %stat_ids  = {'mGLM_st0t600_conn_MI_win'}; %'mGLM_st0t10_WL05_WS25'};%
 conn_ids = {'Xcorr'};%,'corr_win','MI_win'}; %'MI_win','MI_0lag','corr_win','corr_0lag','Xcorr'};
 swap_Xcorr = 1; % flip Xcorr plot
+group_colors = 1;
 % pmask = 1;
 % nbins = 8;
 lme_formula = ['y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...

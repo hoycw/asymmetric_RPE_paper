@@ -29,7 +29,7 @@ for r = 1:numel(beta_chan.coefs)
     for rg = 1:length(reg_lab)
         %[ridx,~] = find(squeeze(beta_chan.qvals{r}(:, rg + 1,:) < .05));
         ylims0 = [min(beta_chan.coefs{r}(:,2:end,:),[],'all'),...
-            max(beta_chan.coefs{r}(:,2:end,:),[],'all')];
+                   max(beta_chan.coefs{r}(:,2:end,:),[],'all')];
         ylims0(1) = min([ylims0(1) - 0.5*abs(ylims0(1)), 0]);
         ylims0(2) = max([ylims0(2) + 0.5*abs(ylims0(2)), 0]);
         ylims = [min(ylims0(1)),max(ylims0(2))];

@@ -35,10 +35,11 @@ cf = figure('units','normalized','outerposition',[0 0 1 1],...
             'PaperOrientation','Landscape');
 ylims0 = NaN(ncols,2);
 for pl = 1:ncols
-    ccoef = conn_stats.coefs{pl};
-    ylims0(pl,:) = [min(ccoef(2:end,:),[],'all'), max(ccoef(2:end,:),[],'all')];
-    ylims0(pl,1) = min([ylims0(pl,1) - 0.9*abs(ylims0(pl,1)), 0]);
-    ylims0(pl,2) = max([ylims0(pl,2) + 0.9*abs(ylims0(pl,2)), 0]);
+    cupper = conn_stats.upper{pl};
+    clower = conn_stats.lower{pl};
+    ylims0(pl,:) = [min(clower(2:end,:),[],'all'), max(cupper(2:end,:),[],'all')];
+    ylims0(pl,1) = min([ylims0(pl,1) - 0.2*abs(ylims0(pl,1)), 0]);
+    ylims0(pl,2) = max([ylims0(pl,2) + 0.2*abs(ylims0(pl,2)), 0]);
 end
 ylims = [min(ylims0(:,1)),max(ylims0(:,2))];
 
