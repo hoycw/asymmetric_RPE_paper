@@ -37,6 +37,7 @@ SBJs = SBJs(2:end);
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'EpnRPE_DifFB'};%;s'ERPEs_DifFB'};
+stat_id = 'mLME_st0t6_WL05_WS25';
 %stat_ids  = {'mGLM_st0t600_conn_MI_win'}; %'mGLM_st0t10_WL05_WS25'};%
 conn_ids = {'Xcorr'};%,'corr_win','MI_win'}; %'MI_win','MI_0lag','corr_win','corr_0lag','Xcorr'};
 swap_Xcorr = 1; % flip Xcorr plot

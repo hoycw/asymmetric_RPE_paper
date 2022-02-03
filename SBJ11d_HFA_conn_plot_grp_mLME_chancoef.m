@@ -9,7 +9,7 @@ ft_defaults
 
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
 [reg_lab, reg_names, ~, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
-[labels, names, colors, ~, ~] = fn_puns_category_label_styles('puns');
+[~, names, colors, ~, ~] = fn_puns_category_label_styles('puns');
 
 %% Load stats results:
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
@@ -20,7 +20,7 @@ end
 stats_fname = [stats_dir proc_id '_' model_id '_' an_id '_' conn_id '_chancoef.mat'];
 load(stats_fname)
 
-if swapXcorr == 1
+if swap_Xcorr == 1
     for r = 1:numel(conn_stats_chan.coefs)
         conn_stats_chan.pair_label{r} = conn_stats_chan.pair_label{r}(1,[2,1]);
         for b = 1:size(conn_stats_chan.coefs{r},4)
@@ -132,23 +132,80 @@ for r = 1:numel(conn_stats_chan.coefs)
     end
 end
 close all
+%% Plot channel predicted values 
+% coef_lims = [-1.7,1.7];
+% for r = 1:numel(conn_stats_chan.coefs)
+%     for b = 1:size(conn_stats_chan.coefs{r},5)
+%         for cl = 1:length(coef_lims)
+%             cf = figure('units','normalized','outerposition',[0 0 1 1],...
+%                 'PaperOrientation','Landscape');
+%             for rg = 1:length(reg_lab)
+%                 tcourses1 = squeeze(conn_stats_chan.coefs{r}(:,1,:,b));% + conn_stats_chan.coefs{r}(:,rg+1,:,b) * -1.7;
+%                 tcourses2 = squeeze(conn_stats_chan.coefs{r}(:,rg+1,:,b)) * coef_lims(cl);
+%                 [cchans,~] = find(tcourses2 < 0 & (tcourses1 + tcourses2) < 0);
+%                 cchans = unique(cchans);
+%                 subplot(1,3,rg)
+%                 yline(0); hold on; xline(0); hold on;
+%                 hga1 = plot(conn_stats_chan.time, tcourses1(cchans,:) + tcourses2(cchans,:), 'color','k');hold on;
+%                 %hga2 = plot(conn_stats_chan.time, tcourses1(cchans,:), 'color','k');
+%                 for hg = 1:length(hga1)
+%                     hga1(hg).Color(4) = 0.1;  hold on;
+%                     %hga2(hg).Color(4) = 0.1;  hold on;
+%                 end
+%                 ylim([-0.1,0.1])
+%             end
+%         end
+%     end
+% end
 %% Plot channel predicted values (to be continued)
-
+ptime = 0.05;
+t = find(round(conn_stats_chan.time,3) == ptime);
 for r = 1:numel(conn_stats_chan.coefs)
-    for b = 1:size(conn_stats_chan.coefs{r},5)
+    for b = 1:size(conn_stats_chan.coefs{r},4)
+        tcourses1 = squeeze(conn_stats_chan.coefs{r}(:,1,t,b));% + conn_stats_chan.coefs{r}(:,rg+1,:,b) * -1.7;
         cf = figure('units','normalized','outerposition',[0 0 1 1],...
-        'PaperOrientation','Landscape');
-        for rg = 1:length(reg_lab)
-            tcourses1 = conn_stats_chan.coefs{r}(:,1,:,b);% + conn_stats_chan.coefs{r}(:,rg+1,:,b) * -1.7;
-            tcourses2 = conn_stats_chan.coefs{r}(:,1,:,b) + conn_stats_chan.coefs{r}(:,rg+1,:,b) * -1.7;
-            subplot(1,3,rg)
-            hga1 = plot(conn_stats_chan.time, squeeze(tcourses1), 'color','k');hold on;
-            hga2 = plot(conn_stats_chan.time, squeeze(tcourses2), 'color','r');
+            'PaperOrientation','Landscape');
+        for rg = 2:length(reg_lab)
+            tcourses2 = squeeze(conn_stats_chan.coefs{r}(:,rg+1,t,1)) * 1.7;
+            %nidx = find((tcourses1 + tcourses2) < 0 & tcourses2 < 0 & conn_stats_chan.qvals{1}(:,rg+1,t,1) < .05);
+            nidx = find(conn_stats_chan.qvals{r}(:,rg+1,t,1) < .05); % significant channels
+            subplot(1,2,rg-1)
+            yline(0); hold on;
+            hga1 = plot([0,1],[tcourses1, tcourses1 + tcourses2],'.k');hold on;
+            hga2 = plot([0,1],[tcourses1, tcourses1 + tcourses2],'-k');hold on;
+            
             for hg = 1:length(hga1)
-                hga1(hg).Color(4) = 0.1;  hold on;
-                hga2(hg).Color(4) = 0.1;  hold on;
+                hga1(hg).Color(4) = 0.05;
+                hga2(hg).Color(4) = 0.05;
+            end
+            if ~isempty(nidx)
+                hga3 = plot([0,1],[tcourses1(nidx), tcourses1(nidx) + tcourses2(nidx)],'.r');hold on;
+                hga4 = plot([0,1],[tcourses1(nidx), tcourses1(nidx) + tcourses2(nidx)],'-r');hold on;
+                
+                for hg = 1:length(hga3)
+                    hga3(hg).Color(4) = 0.5;
+                    hga4(hg).Color(4) = 0.5;
+                end
+            end
+            xlim([-0.5,1.5])
+            ylim([-0.15,0.25])
+            ax = gca;
+            ax.XTick = [0,1];
+            ax.XTickLabels = {'Intercept',['Intercept + ' reg_lab{rg} ' * 1.7' ]};
+            ylabel('cross-correlation coefficient (r)')
+            if rg == 3
+            legend([hga1(1),hga3(1)],{'all channel pairs','significant channel pairs'},...
+                    'FontSize',9,'Location','northeast',...
+                    'NumColumns',1)%, 'Position',[0.45,0.02,0.1,0.03])
             end
         end
+        sgtitle(sprintf('Predicted connectivity from %s to %s at %.00f ms lag',...
+                        conn_stats_chan.pair_label{r}{1},...
+                        conn_stats_chan.pair_label{r}{2}, ptime*1000))
+        plot_fname = sprintf('%s%s_%s_%s_hfa_chancoef_%s_to_%s_%d_prediction.pdf', fig_dir,...
+                        proc_id, model_id, an_id, conn_stats_chan.pair_label{r}{1},...
+                         conn_stats_chan.pair_label{r}{2},b);
+        print(plot_fname,cf,'-dpdf','-fillpage')
     end
 end
 %% plot channel pairs time courses
@@ -196,7 +253,7 @@ for r = 1:numel(conn_stats_chan.coefs)
             end
         end
         if group_colors == 1
-            legend(cplots,names,'FontSize',9,...%'Location','northeast',...
+            legend(cplots,names,'FontSize',9,... %'Location','northeast',...
                 'NumColumns',1, 'Position',[0.8,0.75,0.05,0.1])
         end
         sgtitle([conn_stats_chan.pair_label{r}{1} ' to ' conn_stats_chan.pair_label{r}{2}])
