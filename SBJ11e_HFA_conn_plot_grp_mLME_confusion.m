@@ -39,7 +39,7 @@ end
 %%
 hfa_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
 load(hfa_fname)
-%% plot confusion matrix
+%% select and classify channel pairs
 confarray = cell(numel(beta_chan.chancat_label));
 maskarray = cell(numel(beta_chan.chancat_label));
 for b = 1:size(beta_chan.coefs{1},4)
@@ -64,7 +64,7 @@ for b = 1:size(beta_chan.coefs{1},4)
         end
     end
 end
-%%
+%% plot confusion matrix
 for rg = 3:4
     plotix = 0;
     cf = figure('units','normalized','outerposition',[0 0 1 1],...

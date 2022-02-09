@@ -35,7 +35,78 @@ if swap_Xcorr == 1
         end
     end
 end
-
+%% plot scatterhistogram
+%ntimes = numel(conn_stats_chan.time);
+for r = 1:numel(conn_stats_chan.coefs)
+    for b = 1:size(conn_stats_chan.coefs{r},4)
+        pchan = conn_stats_chan.chancat_ix{r}{1,b};
+        nchan = conn_stats_chan.chancat_ix{r}{2,b};
+        slnchan = conn_stats_chan.chancat_ix{r}{3,b};
+        rwdchan = conn_stats_chan.chancat_ix{r}{4,b};
+        % findpeaks
+        cpeaks = NaN(size(conn_stats_chan.coefs{r},1),3);
+        clats = cpeaks;
+        clabs = cell(length(cpeaks),1);
+        for ch =  1:length(cpeaks)
+            for creg = 2:4
+                cchdata = squeeze(conn_stats_chan.coefs{r}(ch,creg,:,b));
+                [cpeak, latix] = findpeaks(abs(cchdata));
+                [~,pidx] = max(cpeak);
+                cpeaks(ch,creg-1) = cchdata(latix(pidx(1)));
+                clats(ch,creg-1) =  conn_stats_chan.time(latix(pidx(1)));
+            end
+        end
+        sps = [];
+        bwidths = [0.05;0.005];
+        histcolors = 'mrb';
+        for rg = 1:3
+            ccols = ['k' histcolors(rg)];
+            [sigchans, ~] = find(squeeze(conn_stats_chan.qvals{r}(:,rg+1,:,b)) < .05);
+            sigchans = unique(sigchans);
+            clabs(sigchans) = {'significant'};
+            clabs(~ismember(1:length(clabs),sigchans)) = {'non-significant'};
+            alphas = zeros(length(clabs),1) + 0.1;
+            alphas(sigchans,1) = 0.65;
+            cf = figure('units','normalized','outerposition',[0 0 1 1],...
+                'PaperOrientation','Landscape');
+            sh = scatterhist(clats(:,rg),cpeaks(:,rg),'group',clabs,...
+                'Direction','out','color',ccols,'Style','bar',...
+                'Location','NorthEast'); hold on;
+            sh(1).XAxisLocation = 'bottom';
+            sh(1).YAxisLocation = 'left';
+            hd1 = get(gca,'children');
+            set(hd1,'MarkerEdgeColor','none');hold on;
+            sctr1 = scatter(hd1(1).XData, hd1(1).YData, 'MarkerEdgeColor',ccols(2),...
+                'MarkerFaceColor',ccols(2),'MarkerFaceAlpha',0.65,...
+                'MarkerEdgeAlpha',0.65);hold on;
+            sctr2 = scatter(hd1(2).XData, hd1(2).YData,'MarkerEdgeColor',ccols(1),...
+                'MarkerFaceColor',ccols(1),'MarkerFaceAlpha',0.05,...
+                'MarkerEdgeAlpha',0.05);hold on;
+            sh(1).Legend.Visible = 'off';
+            yline(0,'parent',sh(1)); xline(0,'parent',sh(1));
+            xlim([-0.61,0.61]);ylim([-0.07,0.07]);
+            xlabel('peak time lag (s)')
+            ylabel('peak connectivity change (a.u.)')
+            for nh = 2:3
+                for ng = 1:2
+                    sh(nh).Children(ng).BinWidth = bwidths(nh - 1);
+                    if nh == 2
+                        sh(nh).Children(ng).BinLimits = sh(nh).Children(ng).BinLimits + [-0.01 0.51];
+                        sh(nh).Children(ng).BinEdges = sh(nh).Children(ng).BinEdges -0.02;
+                    end
+                end
+            end
+            legend([sctr1,sctr2],...
+                {'significant electrode pairs','non-significant electrode pairs'},...
+                'Position',sh(1).Legend.Position)
+            title(reg_names{rg})
+            plot_fname = sprintf('%s%s_%s_%s_hfa_scatterhist_%s_to_%s_%s_%d.pdf', fig_dir,...
+                proc_id, model_id, an_id, conn_stats_chan.pair_label{r}{1},...
+                conn_stats_chan.pair_label{r}{2},reg_names{rg},b);
+            print(plot_fname,cf,'-dpdf','-fillpage')
+        end
+    end
+end
 %% plot dynamic scatterplot
 ntimes = numel(conn_stats_chan.time);
 for r = 1:numel(conn_stats_chan.coefs)
@@ -128,11 +199,11 @@ for r = 1:numel(conn_stats_chan.coefs)
             proc_id, model_id, an_id, conn_stats_chan.pair_label{r}{1},...
             conn_stats_chan.pair_label{r}{2},b);
         print(plot_fname,cf,'-dpdf','-fillpage')
-       
+        
     end
 end
 close all
-%% Plot channel predicted values 
+%% Plot channel predicted values
 % coef_lims = [-1.7,1.7];
 % for r = 1:numel(conn_stats_chan.coefs)
 %     for b = 1:size(conn_stats_chan.coefs{r},5)
@@ -194,17 +265,17 @@ for r = 1:numel(conn_stats_chan.coefs)
             ax.XTickLabels = {'Intercept',['Intercept + ' reg_lab{rg} ' * 1.7' ]};
             ylabel('cross-correlation coefficient (r)')
             if rg == 3
-            legend([hga1(1),hga3(1)],{'all channel pairs','significant channel pairs'},...
+                legend([hga1(1),hga3(1)],{'all channel pairs','significant channel pairs'},...
                     'FontSize',9,'Location','northeast',...
                     'NumColumns',1)%, 'Position',[0.45,0.02,0.1,0.03])
             end
         end
         sgtitle(sprintf('Predicted connectivity from %s to %s at %.00f ms lag',...
-                        conn_stats_chan.pair_label{r}{1},...
-                        conn_stats_chan.pair_label{r}{2}, ptime*1000))
+            conn_stats_chan.pair_label{r}{1},...
+            conn_stats_chan.pair_label{r}{2}, ptime*1000))
         plot_fname = sprintf('%s%s_%s_%s_hfa_chancoef_%s_to_%s_%d_prediction.pdf', fig_dir,...
-                        proc_id, model_id, an_id, conn_stats_chan.pair_label{r}{1},...
-                         conn_stats_chan.pair_label{r}{2},b);
+            proc_id, model_id, an_id, conn_stats_chan.pair_label{r}{1},...
+            conn_stats_chan.pair_label{r}{2},b);
         print(plot_fname,cf,'-dpdf','-fillpage')
     end
 end
@@ -213,7 +284,7 @@ for r = 1:numel(conn_stats_chan.coefs)
     % get mask
     for b = 1:size(conn_stats_chan.coefs{r},5)
         cf = figure('units','normalized','outerposition',[0 0 1 1],...
-        'PaperOrientation','Landscape');
+            'PaperOrientation','Landscape');
         cplots = NaN(1,length(conn_stats_chan.chancat_label));
         for rg = 1:length(reg_lab)
             [ridx,~] = find(squeeze(conn_stats_chan.qvals{r}(:, rg + 1,:,b) < .05));
@@ -225,11 +296,11 @@ for r = 1:numel(conn_stats_chan.coefs)
             subplot(1,3,rg)
             yline(0); hold on; xline(0); hold on;
             for ch = 1:size(conn_stats_chan.coefs{r},1)
-                qmask = squeeze(double(conn_stats_chan.pvals{r}(ch, rg + 1,:) < .05));
+                qmask = squeeze(double(conn_stats_chan.qvals{r}(ch, rg + 1,:,b) < .05));
                 qmask(qmask == 0) = Inf;
-                ch_cat = [];
+                ch_cat = zeros(length(conn_stats_chan.chancat_label),1);
                 for ctg = 1:length(conn_stats_chan.chancat_label)
-                    ch_cat(ctg) = ismember(ch, conn_stats_chan.chancat_ix{r}{ctg});
+                    ch_cat(ctg) = double(ismember(ch, conn_stats_chan.chancat_ix{r}{ctg}));
                 end
                 if sum(ch_cat) > 0
                     if group_colors == 1
