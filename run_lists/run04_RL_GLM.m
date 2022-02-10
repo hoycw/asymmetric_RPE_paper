@@ -242,7 +242,7 @@ proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
 model_ids = {'EpnRPE_DifFB'};%{'ERPEs_DifFB'};
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
-cat_id    = 'pnsu';
+cat_id    = 'puns';
 atlas_id  = 'Dx';
 roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
 % lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
@@ -263,6 +263,10 @@ for m_ix = 1:numel(model_ids)
 %         SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
 %         SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
         
+        % Plot ROI spider plot comparison
+        SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
+                                          roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+        
         % Plot venn recons
 %         for roi_ix = 1:numel(roi_opts)
 %             fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
@@ -271,25 +275,4 @@ for m_ix = 1:numel(model_ids)
 %         end
     end
 end
-%% OLDER ANOVA:
-% stat_id = 'corrRT_DifOutTimDO_WL200_WS50';
-% SBJ08a_corrRT_regressRT_ANOVA_terms(SBJ,an_id,stat_id);
-% 
-% %
-% plt_id = 'ts_S0to3_evnts_sigline';
-% fig_vis = 'off';
-% SBJ08b_HFA_plot_corrRT_ANOVA(SBJ, proc_id, an_id, stat_id, plt_id, save_fig, fig_vis, fig_ftype);
-% 
-% %
-% roi_id = 'gROI';
-% atlas_id = 'Dx';
-% gm_thresh = 0;
-% plot_out = 0;
-% plot_scat = 1;
-% plt_id      = '';
-% fig_ftype = 'png';
-% SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
-%                                                             atlas_id,gm_thresh,plt_id,plot_out,plot_scat,save_fig,fig_vis,fig_ftype);
-% SBJ08c_HFA_GRP_summary_errbar_perc_GMlim_actv_RT_ANOVA_ROI_DO(SBJs,stat_id,proc_id,an_id,actv_win,roi_id,...
-%                                                             atlas_id,gm_thresh,plt_id,plot_out,plot_scat,save_fig,fig_vis,fig_ftype);
 

@@ -3,7 +3,7 @@ function fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_
 %% Plot a reconstruction with electrodes colored according to statistics
 %   This version uses categories based on EpnRPE model
 % INPUTS:
-%   SBJ [str] - subject ID to plot
+%   SBJ_id [str] - ID of subject list to load
 %   proc_id [str] - name of analysis pipeline, used to pick elec file
 %   stat_id [str] - ID of the stats
 %       'actv': red for active, blue for deactive, yellow for both
