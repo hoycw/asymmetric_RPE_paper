@@ -2,3 +2,5 @@ data/
 NotBackedUp/
 ._*
 *.asv
+*.swo
+*.swp

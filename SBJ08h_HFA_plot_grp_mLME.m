@@ -8,7 +8,7 @@ addpath(ft_dir);
 ft_defaults
 
 eval(['run ' root_dir 'PRJ_Error/scripts/model_vars/' model_id '_vars.m']);
-[reg_lab, reg_names, colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
+[~, reg_names, colors, ~, ~] = fn_regressor_label_styles(mdl.model_lab);
 
 %% Load stats results:
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
