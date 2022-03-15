@@ -240,22 +240,26 @@ end
 %% Linear mixed-effects model per region
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
-model_ids = {'EsRPE_DifFB','EuRPE_DifFB'};%{'EpnRPE_DifFB', 'ERPEs_DifFB'};
+model_ids = {'EpnRPE_DifFB'};%, 'ERPEs_DifFB'};%{'EsRPE_DifFB','EuRPE_DifFB'};%
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 cat_id    = 'puns';
 atlas_id  = 'Dx';
 roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
+
+lme_formulas = {['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +',...
+                '(1+pRPE + nRPE + EV | sub:chan)']};
+chpval_type = 'p'; % or q for qvals
 % lme_formulas = {['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +',...
 %     '(1+pRPE + nRPE + EV | sub:chan)'];
 %     ['y~uRPE + sRPE + EV + (1 + uRPE + sRPE + EV | sub) +', ...
 %     '(1+uRPE + sRPE + EV | sub:chan)']
 %     };
-
-lme_formulas = {['y~sRPE + EV + (1 + sRPE + EV | sub) +',...
-    '(1+sRPE + EV | sub:chan)'];
-    ['y~uRPE  + EV + (1 + uRPE + EV | sub) +', ...
-    '(1+uRPE + EV | sub:chan)']
-    };
+% 
+% lme_formulas = {['y~sRPE + EV + (1 + sRPE + EV | sub) +',...
+%     '(1+sRPE + EV | sub:chan)'];
+%     ['y~uRPE  + EV + (1 + uRPE + EV | sub) +', ...
+%     '(1+uRPE + EV | sub:chan)']
+%     };
 
 %lme_formula = 'y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | chan)';
         
@@ -271,18 +275,17 @@ for m_ix = 1:numel(model_ids)
         lme_formula = lme_formulas{m_ix};
         
         % run LME
-        SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
+        %SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
 
         % Plot fixed effects
-        SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
-
-       % Plot single channel time courses and trace plot
-        SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
+        %SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
         
-        if strcmp(model_id, 'Epn_RPE_DifFB')
+        if strcmp(model_id, 'EpnRPE_DifFB')
+            % SBJ08g_HFA_add_channel_categories(an_id, model_id, stat_id, chpval_type)
+            
             % Plot ROI spider plot comparison
-             SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
-                                               roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%               SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
+%                                                 roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
 
             % Plot venn recons
     %         for roi_ix = 1:numel(roi_opts)
@@ -291,6 +294,8 @@ for m_ix = 1:numel(model_ids)
     %                 roi_opts{roi_ix}{3});
     %         end
         end
+        % Plot single channel time courses and trace plot
+        %SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
     end
 end
 

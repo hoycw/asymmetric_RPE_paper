@@ -25,9 +25,10 @@ else
     colors = {'k'};
     for r = 1:numel(beta_chan.coefs)
         beta_chan.chancat_label = {'sigchan'};
-        [sig_ix, ~] = find(beta_chan.qvals{r}(:,3:end,:) < 0.05);
-        beta_chan.chancat_ix{r} = {unique(sig_ix)};
+        [csig_ix, ~] = find(beta_chan.qvals{r}(:,3:end,:) < 0.05);
+        beta_chan.chancat_ix{r} = {unique(csig_ix)};
     end
+    beta_chan.pval_type = 'q';
 end
 %% plot channel time courses
 for r = 1:numel(beta_chan.coefs)
@@ -46,7 +47,7 @@ for r = 1:numel(beta_chan.coefs)
         subplot(1,3,rg)
         yline(0); hold on; xline(0); hold on;
         for ch = 1:size(beta_chan.coefs{r},1)
-            qmask = squeeze(double(beta_chan.qvals{r}(ch, rg + 1,:) < .05));
+            qmask = squeeze(double(beta_chan.([beta_chan.pval_type 'vals']){r}(ch, rg + 1,:) < .05));
             qmask(qmask == 0) = Inf;
             ch_cat = [];
             for ctg = 1:length(beta_chan.chancat_label)
@@ -55,6 +56,7 @@ for r = 1:numel(beta_chan.coefs)
             if sum(ch_cat) > 0
                 hga = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)),...
                     'color', colors{find(ch_cat)}); hold on;
+                    hga.Color(4) = 0.6;
                 hga2 = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)).*qmask,...
                        'color',colors{find(ch_cat)},'LineWidth',1.5); hold on;
                 hga3 = plot(beta_chan.time, squeeze(beta_chan.coefs{r}(ch,rg+1,:)).*qmask,...
@@ -73,7 +75,7 @@ for r = 1:numel(beta_chan.coefs)
     legend(cplots,names,'FontSize',9,...%'Location','northeast',...
         'NumColumns',1, 'Position',[0.8,0.75,0.05,0.1])
     sgtitle(beta_chan.label{r})
-    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chancoef_' beta_chan.label{r} '.pdf'];
+    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chancoef_' beta_chan.label{r} '_' beta_chan.pval_type 'vals.pdf'];
     print(plot_fname,cf,'-dpdf','-fillpage')
 end
 close all
@@ -84,10 +86,6 @@ if strcmp(model_id,'EpnRPE_DifFB')
     for r = 1:numel(beta_chan.coefs)
         cf = figure('units','normalized','outerposition',[0 0 1 1],...
             'PaperOrientation','Landscape');
-        pchan = beta_chan.chancat_ix{r}{1,1};
-        nchan = beta_chan.chancat_ix{r}{2,1};
-        slnchan = beta_chan.chancat_ix{r}{3,1};
-        rwdchan = beta_chan.chancat_ix{r}{4,1};
         for t = 1:ntimes
             cplots = [];
             subplot(ceil(ntimes / 5),5,t)
@@ -118,29 +116,45 @@ if strcmp(model_id,'EpnRPE_DifFB')
             end
         end
         sgtitle(beta_chan.label{r})
-        plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '.pdf'];
+        plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '_' beta_chan.pval_type 'vals.pdf'];
         print(plot_fname,cf,'-dpdf','-fillpage')
     end
     close all
     %% plot static scatterplot
     ptime = 0.350;
     t = find(round(beta_chan.time,3) == ptime);
-    ntimes = numel(beta_chan.time);
+    
+    % Find peaks per channel
+    peaks = {};
+    for r = 1:numel(beta_chan.coefs)
+        peaks{r} = NaN(size(beta_chan.coefs{r},1),2);
+        for ch = 1:size(beta_chan.coefs{r},1)
+            for reg = 3:4
+                csig_ix = beta_chan.([beta_chan.pval_type 'vals']){r}(ch,reg,:) < 0.05;
+                if sum(double(csig_ix)) == 0
+                    csig_ix = double(csig_ix) + 1;
+                end
+                [~, cpidx] = max(abs(beta_chan.coefs{r}(ch,reg,:)).*double(csig_ix));
+                peaks{r}(ch,reg-2) = beta_chan.coefs{r}(ch,reg,cpidx);
+            end
+        end
+    end
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
         'PaperOrientation','Landscape');
     for r = 1:numel(beta_chan.coefs)
-        pchan = beta_chan.chancat_ix{r}{1,1};
-        nchan = beta_chan.chancat_ix{r}{2,1};
-        slnchan = beta_chan.chancat_ix{r}{3,1};
-        rwdchan = beta_chan.chancat_ix{r}{4,1};
+        
         subplot(1,2,r)
         cplots = [];
         yline(0); hold on; xline(0);
         for ctg = 1:numel(beta_chan.chancat_label)
-            cp = scatter(beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},3,t),...
-                beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},4,t),...
-                150,colors{ctg},'filled','p','LineWidth',1,...
-                'MarkerEdgeColor',colors{ctg});
+            cp = scatter(peaks{r}(beta_chan.chancat_ix{r}{ctg,1},1),...
+                         peaks{r}(beta_chan.chancat_ix{r}{ctg,1},2),...
+                         150,colors{ctg},'filled','p','LineWidth',1,...
+                        'MarkerEdgeColor',colors{ctg});
+                %beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},3,t),...
+                %beta_chan.coefs{r}(beta_chan.chancat_ix{r}{ctg,1},4,t),...
+                
+
             cp.MarkerFaceAlpha = 0.3;
             cp.MarkerEdgeAlpha = 1;
             
@@ -148,10 +162,10 @@ if strcmp(model_id,'EpnRPE_DifFB')
             hold on;
         end
         
-        title(sprintf('%s (%.00f ms)',beta_chan.label{r},beta_chan.time(t)*1000));
+        %title(sprintf('%s (%.00f ms)',beta_chan.label{r},beta_chan.time(t)*1000));
+        title(sprintf('%s - peak coefficient', beta_chan.label{r}))
         xlim([-0.7,0.7])
         ylim([-0.8,0.8])
-        
         
         xlabel('Positive RPE coefficient (a.u.)', 'FontSize',11)
         ylabel('Negative RPE coefficient (a.u.)', 'FontSize',11)
@@ -162,21 +176,15 @@ if strcmp(model_id,'EpnRPE_DifFB')
     end
     legend(cplots,names,'FontSize',9,...%'Location','northeast',...
         'NumColumns',1, 'Position',[0.15,0.7,0.1,0.1])
-    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '_static.pdf'];
+    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_chanscatter_' beta_chan.label{r} '_static_' beta_chan.pval_type 'vals.pdf'];
     print(plot_fname,cf,'-dpdf','-fillpage')
-    close all
+    %close all
     
     %% Plot trajectories
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
         'PaperOrientation','Landscape');
-    ntimes = numel(beta_chan.time);
     for r = 1:numel(beta_chan.coefs)
-        
-        pchan = beta_chan.chancat_ix{r}{1,1};
-        nchan = beta_chan.chancat_ix{r}{2,1};
-        slnchan = beta_chan.chancat_ix{r}{3,1};
-        rwdchan = beta_chan.chancat_ix{r}{4,1};
-        
+                
         cplots = [];
         subplot(1,2,r)
         yline(0); hold on; xline(0);
@@ -230,7 +238,7 @@ if strcmp(model_id,'EpnRPE_DifFB')
         %sgtitle(beta_chan.label{r})
         
     end
-    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_trajectories.pdf'];
+    plot_fname = [fig_dir proc_id '_' model_id '_' an_id '_hfa_trajectories_' beta_chan.pval_type 'vals.pdf'];
     print(plot_fname,cf,'-dpdf','-fillpage','-r300')
     close all
 end

@@ -36,7 +36,7 @@ if swap_Xcorr == 1
     end
 end
 %% plot scatterhistogram
-%ntimes = numel(conn_stats_chan.time);
+% ntimes = numel(conn_stats_chan.time);
 for r = 1:numel(conn_stats_chan.coefs)
     for b = 1:size(conn_stats_chan.coefs{r},4)
         pchan = conn_stats_chan.chancat_ix{r}{1,b};
