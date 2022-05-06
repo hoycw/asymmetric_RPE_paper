@@ -164,7 +164,7 @@ SBJ08e_HFA_plot_grp_GLM_reg_venn_ROI(SBJ_id, proc_id, stat_regs, hemi, roi_id,..
                                    
 %% ERPs: Run models and Plot Group GLM Proportion of Effects by ROI
 proc_id   = 'main_ft';
-an_id     = 'ERP_F25t1';
+% an_id     = 'ERP_F25t1';
 model_ids = {'ERPEs_DifFB'};
 stat_ids  = {'mGLM_st0t10_ds200'};
 atlas_id  = 'Dx';
@@ -190,7 +190,7 @@ roi_opts  = {{'l','deep',1},{'l','lat',1},{'l','MPFC',1},{'b','OFC',0}};
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
-        for s = 2:numel(SBJs)
+        for s = 1:numel(SBJs)
             % Run Mass GLM Stats
 %             SBJ06c_ERP_crRT_mGLM(SBJs{s},proc_id,an_id,model_ids{m_ix},stat_ids{st_ix});
             
@@ -200,21 +200,21 @@ for m_ix = 1:numel(model_ids)
 %                 plt_id, save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
 %             close all;
         end
-        
-        % Plot bar graph showing proprotion of effects by ROI
-        SBJ06e_ERP_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
-        % Plot latency time series per ROI
-        plt_id    = 'ts_F0t1_evnts_sigline';
-        SBJ06f_ERP_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
-        % Plot onset latencies per effect and ROI
-        plt_id      = 'onsets_0t1_violin_all';
-        SBJ06g_ERP_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
-            roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
+%         
+%         % Plot bar graph showing proprotion of effects by ROI
+%         SBJ06e_ERP_grp_errbar_ROI_mGLM(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plot_scat,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         % Plot latency time series per ROI
+%         plt_id    = 'ts_F0t1_evnts_sigline';
+%         SBJ06f_ERP_plot_grp_GLM_ts_gROIcomb(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
+%         % Plot onset latencies per effect and ROI
+%         plt_id      = 'onsets_0t1_violin_all';
+%         SBJ06g_ERP_plot_grp_GLM_onsets_ROI(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},...
+%             roi_id,plt_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         
         % flip it and do within ROI regressor onsets!
         
         % Stat Recons
@@ -224,12 +224,12 @@ for m_ix = 1:numel(model_ids)
 %                 reg_type, show_labels, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
 %                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
             
-            % Plot venn recons
-            fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
-                reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);%, 'skip_reg', skip_reg);
-            
-            % Skip EV
+%             % Plot venn recons
+%             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+%                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);%, 'skip_reg', skip_reg);
+%             
+%             % Skip EV
 %             fn_view_recon_atlas_grp_stat_venn_ROI_GLM(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
 %                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
 %                 roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype, 'skip_reg', skip_reg);
@@ -254,6 +254,9 @@ lme_formula = ['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...
 reg_type  = 'v';
 show_lab  = 0;
 roi_opts  = {{'l','deep',1},{'l','MPFC',1}};%,{'l','lat',1},{'b','OFC',0}
+save_fig  = 1;
+fig_vis   = 'on';
+fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
     for st_ix = 1:numel(stat_ids)
@@ -264,15 +267,20 @@ for m_ix = 1:numel(model_ids)
 %         SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
         
         % Plot ROI spider plot comparison
-        SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
-                                          roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+%         SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
+%                                           roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
         
         % Plot venn recons
-%         for roi_ix = 1:numel(roi_opts)
-%             fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
-%                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-%                 roi_opts{roi_ix}{3});
-%         end
+        for roi_ix = 1:numel(roi_opts)
+            fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
+                reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+                roi_opts{roi_ix}{3});
+        end
+
+        % Plot example LME results in single electrode
+%         SBJ08h_HFA_plot_crRT_LME('IR87', proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
+%             'ts_F2t1_evnts_sigline', save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,...
+%             'fig_ftype',fig_ftype, 'elec_lab', {'LIN3-4'});
     end
 end
 
