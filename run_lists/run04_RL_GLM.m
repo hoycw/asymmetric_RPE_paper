@@ -14,8 +14,8 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
 proc_id   = 'main_ft';
-% model_ids = {'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
-model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
+model_ids = {'EsRPE_DifFB','EuRPE_DifFB'};%{'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
+%model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
 
 fig_vis   = 'on';
 save_fig  = 1;
@@ -240,15 +240,27 @@ end
 %% Linear mixed-effects model per region
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
-model_ids = {'EpnRPE_DifFB'};%{'ERPEs_DifFB'};
+model_ids = {'EpnRPE_DifFB'};%, 'ERPEs_DifFB'};%{'EsRPE_DifFB','EuRPE_DifFB'};%
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 cat_id    = 'puns';
 atlas_id  = 'Dx';
 roi_id    = 'MPFCINS';%'gROI';%'mgROI';%'MPFCINS';%
-% lme_formula = ['y~uRPE + nRPE + pRPE + EV + (1 + uRPE + pRPE + nRPE + EV | sub) +', ...
-%                 '(1+uRPE + pRPE + nRPE + EV | sub:chan)'];
-lme_formula = ['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +', ...
-                 '(1+pRPE + nRPE + EV | sub:chan)'];
+
+lme_formulas = {['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +',...
+                '(1+pRPE + nRPE + EV | sub:chan)']};
+chpval_type = 'p'; % or q for qvals
+% lme_formulas = {['y~pRPE + nRPE + EV + (1 + pRPE + nRPE + EV | sub) +',...
+%     '(1+pRPE + nRPE + EV | sub:chan)'];
+%     ['y~uRPE + sRPE + EV + (1 + uRPE + sRPE + EV | sub) +', ...
+%     '(1+uRPE + sRPE + EV | sub:chan)']
+%     };
+% 
+% lme_formulas = {['y~sRPE + EV + (1 + sRPE + EV | sub) +',...
+%     '(1+sRPE + EV | sub:chan)'];
+%     ['y~uRPE  + EV + (1 + uRPE + EV | sub) +', ...
+%     '(1+uRPE + EV | sub:chan)']
+%     };
+
 %lme_formula = 'y~nRPE + pRPE + EV + (1 + pRPE + nRPE + EV | chan)';
         
 reg_type  = 'v';
@@ -259,28 +271,61 @@ fig_vis   = 'on';
 fig_ftype = 'png';
 
 for m_ix = 1:numel(model_ids)
+    model_id = model_ids{m_ix};
+    
     for st_ix = 1:numel(stat_ids)
-        model_id = model_ids{m_ix};
         stat_id = stat_ids{st_ix};
+        lme_formula = lme_formulas{m_ix};
+        
+        % run LME
         %SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
-%         SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
-%         SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
-        
-        % Plot ROI spider plot comparison
-%         SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
-%                                           roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
-        
-        % Plot venn recons
-        for roi_ix = 1:numel(roi_opts)
-            fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
-                reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-                roi_opts{roi_ix}{3});
-        end
 
+        % Plot fixed effects
+        %SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
+        
+        if strcmp(model_id, 'EpnRPE_DifFB')
+            % SBJ08g_HFA_add_channel_categories(an_id, model_id, stat_id, chpval_type)
+            
+            % Plot ROI spider plot comparison
+%               SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
+%                                                 roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+
+            % Plot venn recons
+    %         for roi_ix = 1:numel(roi_opts)
+    %             fn_view_recon_atlas_grp_stat_ROI_LME_cat(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
+    %                 reg_type, show_lab, roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
+    %                 roi_opts{roi_ix}{3});
+    %         end
+        end
+        % Plot single channel time courses and trace plot
+        %SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
         % Plot example LME results in single electrode
 %         SBJ08h_HFA_plot_crRT_LME('IR87', proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
 %             'ts_F2t1_evnts_sigline', save_fig, 'atlas_id',atlas_id,'fig_vis',fig_vis,...
 %             'fig_ftype',fig_ftype, 'elec_lab', {'LIN3-4'});
     end
+end
+
+%% Plot LME comparison
+proc_id   = 'main_ft';
+an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
+stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
+
+model_ids = {
+    'EsRPE_DifFB'
+    'EuRPE_DifFB';
+    'ERPEs_DifFB';
+    'EpnRPE_DifFB';   
+    };
+
+model_names = {
+    'sRPE';
+    'uRPE';
+    'sRPE + uRPE';
+    'pRPE + nRPE'
+    };
+
+for s = 1:numel(stat_ids)
+    SBJ08j_HFA_plot_grp_mLME_model_comparison(model_ids, model_names, an_id, stat_ids{s})
 end
 
