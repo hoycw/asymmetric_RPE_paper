@@ -44,7 +44,7 @@ if ~isempty(varargin)
 end
 
 %% Implement the default options
-if ~exist('save_fig','var');    save_fig = 0; end
+if ~exist('save_fig','var');    save_fig = 1; end
 if ~exist('fig_ftype','var');   fig_ftype = 'fig'; end
 
 % ROI info
@@ -145,7 +145,7 @@ fig = fn_plot_recon_mesh(elec, roi_mesh, roi_mesh_lab, rcn, plot_name);
 if save_fig
     fig_fname = [out_dir plot_name '.' fig_ftype];
     fig_fname = strrep(fig_fname,'*','x');
-    saveas(f,fig_fname);
+    saveas(fig,fig_fname);
 end
 
 end

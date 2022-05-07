@@ -100,10 +100,10 @@ for m_ix = 1:numel(model_ids)
             % Plot venn recons for INS and MPFC
             rcn.plot_roi = 'INS';
             SBJ08h_HFA_plot_grp_mLME_cat_recon(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
-            	atlas_id, roi_id, rcn);
+            	atlas_id, roi_id, rcn,'save_fig',save_fig,'fig_ftype',fig_ftype);
             rcn.plot_roi = 'MPFC';
             SBJ08h_HFA_plot_grp_mLME_cat_recon(SBJ_id, proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix}, cat_id,...
-                atlas_id, roi_id, rcn);
+                atlas_id, roi_id, rcn,'save_fig',save_fig,'fig_ftype',fig_ftype);
         end
         % Plot single channel time courses and trace plot
         %SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
