@@ -67,13 +67,23 @@ end
 % SBJ = 'IR21';
 % 
 % % Compare patient and MNI in ortho
-% fn_view_recon(SBJ,'main_ft','ortho','pat','',1,'b',1);
-% fn_view_recon(SBJ,'main_ft','ortho','mni','v',1,'b',1);
+% proc_id = 'main_ft';
+% rcn = [];
+% rcn.plot_type = 'ortho';
+% rcn.show_lab   = 1;
+% rcn.hemi       = 'b';
+% rcn.plot_out   = 1;
 % 
-% % Check atlas assignments
-% fn_view_recon_atlas(SBJ,proc_id,'pat','',1,'b','DK','gROI');
-% fn_view_recon_atlas(SBJ,proc_id,'pat','',1,'b','Dx','gROI');
-% fn_view_recon_atlas(SBJ,proc_id,'mni','v',1,'b','Yeo7','Yeo7');
+% rcn.view_space = 'pat';
+% fn_view_recon(SBJ,proc_id,rcn);
+% rcn.view_space = 'mni';
+% fn_view_recon(SBJ,proc_id,rcn);
+% 
+% % Check atlas assignments (this doesn't exist anymore!!!)
+% rcn.view_space = 'pat';
+% fn_view_recon_atlas(SBJ,proc_id,rcn,'DK','gROI');
+% fn_view_recon_atlas(SBJ,proc_id,rcn,'Dx','gROI');
+% fn_view_recon_atlas(SBJ,proc_id,rcn,'Yeo7','Yeo7');
 
 %% ================================================================================
 %  PLOT ANATOMY
@@ -82,20 +92,25 @@ end
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'l','Dx','mgROI',0);
 % fn_view_recon_atlas_grp(SBJs,proc_id,'v',0,'r','Dx','mgROI',0);
 
-roi_opts  = {{'l','INS',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};,{'l','deep',1}};
+% roi_opts  = {{'l','INS',1},{'l','lat',1},{'l','MPFC',1}};%,{'b','OFC',0}};,{'l','deep',1}};
 proc_id   = 'main_ft';
 roi_id    = 'main3';%'mgROI';
 atlas_id  = 'Dx';
-reg_type  = 'v';
-show_lab  = 0;
+
+rcn.reg_type = 'v';
+rcn.show_lab = 0;
+rcn.hemi     = 'l';
+rcn.mirror   = 1;
+
 save_fig  = 1;
 fig_ftype = 'png';
 
-for roi_ix = 1:numel(roi_opts)
-    fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, reg_type, show_lab,...
-                                roi_opts{roi_ix}{1}, atlas_id, roi_id, roi_opts{roi_ix}{2},...
-                                roi_opts{roi_ix}{3},'save_fig', save_fig, 'fig_ftype', fig_ftype);
-end
+% rcn.plot_roi = 'INS';
+% fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, atlas_id, roi_id, rcn, 'save_fig', save_fig, 'fig_ftype', fig_ftype);
+% rcn.plot_roi = 'lat';
+% fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, atlas_id, roi_id, rcn, 'save_fig', save_fig, 'fig_ftype', fig_ftype);
+% rcn.plot_roi = 'MPFC';
+% fn_view_recon_atlas_grp_ROI(SBJ_id, proc_id, atlas_id, roi_id, rcn, 'save_fig', save_fig, 'fig_ftype', fig_ftype);
 
 %% Plot Single Electrode
 SBJ = 'IR57';

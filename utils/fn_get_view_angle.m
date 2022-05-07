@@ -4,7 +4,12 @@ function view_angle = fn_get_view_angle(hemi,roi_id)
 
 % If no ROI, assume lateral view
 if isempty(roi_id)
-    roi_id = 'LPFC';
+    if strcmp(hemi,'b')
+        view_angle = [-90 0]; %likely an ortho plot, so just skip
+        return
+    else
+        roi_id = 'lat';
+    end
 end
 
 if strcmp(roi_id,'OFC')
