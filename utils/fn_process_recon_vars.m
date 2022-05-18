@@ -31,6 +31,7 @@ if ~isfield(rcn,'plot_out');    rcn.plot_out = 0; end
 if ~isfield(rcn,'show_lab');    rcn.show_lab = 0; end
 if ~isfield(rcn,'plot_roi');    rcn.plot_roi = ''; end
 if ~isfield(rcn,'mesh_alpha');  rcn.mesh_alpha = 0.25; end   % assume SEEG
+if ~isfield(rcn,'roi_field');   rcn.roi_field = 'gROI'; end
 if ~isfield(rcn,'reg_type')
     if strcmp(rcn.view_space,'pat'); rcn.reg_type = ''; else; rcn.reg_type = 'v'; end
 end
@@ -43,8 +44,8 @@ if rcn.mirror && strcmp(rcn.hemi,'b'); error('why mirror if hemi b?'); end
 if strcmp(rcn.hemi,'b') && ~any(strcmp(rcn.plot_roi,{'OFC',''}))
     error('hemi must be l or r for all non-OFC plots');
 end
-if ~any(strcmp(rcn.plot_roi,{'LPFC','MPFC','INS','OFC','TMP','PAR','MTL','lat','deep',''}))
-    error('roi_id needs to be a lobe, "MTL", "lat", or "deep"');
+if ~any(strcmp(rcn.plot_roi,{'LPFC','MPFC','INS','OFC','TMP','PAR','MTL','lat','deep','','MPFCINS'}))
+    error('roi_id needs to be a lobe, "MPFCINS", "MTL", "lat", or "deep"');
 end
 
 %% View Angle
@@ -64,7 +65,7 @@ if ischar(rcn.view_angle)
 end
 
 %% Convert plot_roi into list of general or specific ROIs
-if any(strcmp(rcn.plot_roi,{'deep','lat'}))
+if any(strcmp(rcn.plot_roi,{'deep','lat','MPFCINS'}))   % multi-ROI cases
     [rcn.plot_roi_list, ~] = fn_roi_label_styles(rcn.plot_roi);
 else
     rcn.plot_roi_list = {rcn.plot_roi};
@@ -82,5 +83,6 @@ else
     rcn.reg_suffix = '';
 end
 if rcn.mirror; rcn.hemi_str = [rcn.hemi 'b']; else; rcn.hemi_str = rcn.hemi; end
+if strcmp(rcn.plot_roi,'MPFCINS'); rcn.hemi_str = [rcn.hemi_str 'mix']; end
 
 end

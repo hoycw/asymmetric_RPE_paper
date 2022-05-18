@@ -81,17 +81,21 @@ if strcmp(rcn.plot_roi,'INS')
     roi_label = 'INS';
 elseif strcmp(rcn.plot_roi,'MPFC')
     roi_label = 'MPFC';
+elseif strcmp(rcn.plot_roi,'MPFCINS')
+    roi_label = {'MPFC','INS'};
 else
     error('SBJ08g not run yet for anything except MPFCINS');
 end
 
 %% Get significant channel labels
-beta_roi_ix = strcmp(beta_chan.label,roi_label);
+beta_roi_ix = find(strcmp(beta_chan.label,roi_label));
 if ~all(strcmp(beta_chan.chancat_label,cat_lab)); error('category label order mismatch'); end
 sig_cat_elecs = cell(size(cat_lab));
-for cat_ix = 1:length(cat_lab)
-    elec_ix = beta_chan.chancat_ix{beta_roi_ix}{cat_ix,1};
-    sig_cat_elecs{cat_ix} = beta_chan.chan_label{beta_roi_ix}(elec_ix);
+for roi_ix = beta_roi_ix
+    for cat_ix = 1:length(cat_lab)
+        elec_ix = beta_chan.chancat_ix{roi_ix}{cat_ix,1};
+        sig_cat_elecs{cat_ix} = [sig_cat_elecs{cat_ix}; beta_chan.chan_label{roi_ix}(elec_ix)];
+    end
 end
 
 %% Load elec and select within ROI and hemisphere
@@ -107,12 +111,12 @@ for sbj_ix = 1:numel(SBJs)
         if ~isempty(sig_cat_roi_elecs)
             cfgs = []; cfgs.channel = sig_cat_roi_elecs;
             elec_sig{sbj_ix} = fn_select_elec(cfgs, elec_sbj{sbj_ix});
-            fprintf('\t%s has %i sig channels in %s (hemi %s)\n',SBJs{sbj_ix},size(sig_cat_roi_elecs,1),rcn.plot_roi,rcn.hemi);
+            fprintf('\t%s has %i sig channels in %s (hemi %s)\n',SBJs{sbj_ix},size(sig_cat_roi_elecs,1),rcn.plot_roi,rcn.hemi_str);
         else
             % Print no significant elecs
             good_sbj(sbj_ix) = false;
             fprintf(2,'\t%s has %i channels in %s (hemi %s), but none are significant\n',...
-                SBJs{sbj_ix},numel(elec_sbj{sbj_ix}.label),rcn.plot_roi,rcn.hemi);
+                SBJs{sbj_ix},numel(elec_sbj{sbj_ix}.label),rcn.plot_roi,rcn.hemi_str);
         end
     else
         % Print no ROI match

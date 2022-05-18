@@ -41,7 +41,6 @@ if ~exist('fig_ftype','var');   fig_ftype = 'fig'; end
 
 % ROI info
 rcn = fn_process_recon_vars(rcn);
-[~, ~, roi_field] = fn_roi_label_styles(roi_id);
 
 %% Load elec struct
 SBJs = fn_load_SBJ_list(SBJ_id);
@@ -53,7 +52,7 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 all_roi_labels = {};
 all_roi_colors = [];
 for sbj_ix = 1:numel(SBJs)
-    all_roi_labels = [all_roi_labels; elec_sbj{sbj_ix}.(roi_field)];
+    all_roi_labels = [all_roi_labels; elec_sbj{sbj_ix}.(rcn.roi_field)];
     all_roi_colors = [all_roi_colors; elec_sbj{sbj_ix}.color];
 end
 elec = ft_appendsens([],elec_sbj{good_sbj});

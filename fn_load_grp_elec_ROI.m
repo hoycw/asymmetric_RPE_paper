@@ -59,8 +59,19 @@ for sbj_ix = 1:numel(SBJs)
         fprintf('\t%s has %i channels in %s (hemi %s)\n',SBJ,size(elec_sbj{sbj_ix}.label,1),rcn.plot_roi,rcn.hemi_str);
         % Mirror hemispheres
         if rcn.mirror
-            elec_sbj{sbj_ix}.chanpos(~strcmp(elec_sbj{sbj_ix}.hemi,rcn.hemi),1) = ...
-                -elec_sbj{sbj_ix}.chanpos(~strcmp(elec_sbj{sbj_ix}.hemi,rcn.hemi),1);
+            hemi_match_idx = strcmp(elec_sbj{sbj_ix}.hemi,rcn.hemi);
+            if strcmp(rcn.plot_roi,'MPFCINS')
+                ins_idx = strcmp(elec_sbj{sbj_ix}.gROI,'INS');
+                % Flip INS to match rcn.hemi
+                elec_sbj{sbj_ix}.chanpos(ins_idx & ~hemi_match_idx,1) = ...
+                    -elec_sbj{sbj_ix}.chanpos(ins_idx & ~hemi_match_idx,1);
+                % Flip MPFC to match opposite of rcn.hemi
+                elec_sbj{sbj_ix}.chanpos(~ins_idx & hemi_match_idx,1) = ...
+                    -elec_sbj{sbj_ix}.chanpos(~ins_idx & hemi_match_idx,1);
+            else
+                elec_sbj{sbj_ix}.chanpos(~hemi_match_idx,1) = ...
+                    -elec_sbj{sbj_ix}.chanpos(~hemi_match_idx,1);
+            end
         end
     else
         good_sbj(sbj_ix) = false;

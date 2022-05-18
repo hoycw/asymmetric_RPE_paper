@@ -17,10 +17,17 @@ function [roi_mesh, roi_mesh_lab] = fn_load_recon_mesh_ROI(atlas_id,plot_roi,hem
 atlas = fn_load_recon_atlas([],atlas_id);
 
 % Get Atlas-ROI mapping
-atlas_labels = fn_atlas_roi_select_mesh(atlas_id, plot_roi, hemi);
+if strcmp(plot_roi,'MPFCINS')
+    ins_atlas_labels = fn_atlas_roi_select_mesh(atlas_id, 'INS', hemi);
+    if strcmp(hemi,'r'); other_hemi = 'l'; else other_hemi = 'r'; end
+    mpfc_atlas_labels = fn_atlas_roi_select_mesh(atlas_id, 'MPFC', other_hemi);
+    atlas_labels = [mpfc_atlas_labels; ins_atlas_labels];
+else
+    atlas_labels = fn_atlas_roi_select_mesh(atlas_id, plot_roi, hemi);
+end
 
 % Can't plot unconnected meshes (I think), so create two meshes
-if strcmp(plot_roi,'OFC')
+if any(strcmp(plot_roi,{'OFC','MPFCINS'}))
     % Treat R hemi as new ROI
     r_ix = contains(atlas_labels,'rh');
     r_labels = atlas_labels(r_ix);
