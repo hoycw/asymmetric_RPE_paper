@@ -4,13 +4,18 @@ function view_angle = fn_get_view_angle(hemi,roi_id)
 
 % If no ROI, assume lateral view
 if isempty(roi_id)
-    roi_id = 'LPFC';
+    if strcmp(hemi,'b')
+        view_angle = [-90 0]; %likely an ortho plot, so just skip
+        return
+    else
+        roi_id = 'lat';
+    end
 end
 
 if strcmp(roi_id,'OFC')
     view_angle = [0 -90];   % from the bottom
 elseif strcmp(hemi,'l')
-    if any(strcmp(roi_id,{'LPFC','INS','TMP','PAR','MTL','lat','deep','ROI'}))
+    if any(strcmp(roi_id,{'LPFC','INS','TMP','PAR','MTL','lat','deep','ROI','MPFCINS'}))
         view_angle = [-90 0];    % from the left
     elseif strcmp(roi_id,'MPFC')
         view_angle = [90 0];    % from the right
@@ -18,7 +23,7 @@ elseif strcmp(hemi,'l')
         error(['Bad combo of hemi (' hemi ') and roi_id (' roi_id ')']);
     end
 elseif strcmp(hemi,'r')
-    if any(strcmp(roi_id,{'LPFC','INS','TMP','PAR','MTL','lat','deep','ROI'}))
+    if any(strcmp(roi_id,{'LPFC','INS','TMP','PAR','MTL','lat','deep','ROI','MPFCINS'}))
         view_angle = [90 0];    % from the right
     elseif strcmp(roi_id,'MPFC')
         view_angle = [-90 0];    % from the left
