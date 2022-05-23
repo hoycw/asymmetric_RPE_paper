@@ -21,6 +21,7 @@ end
 for e = 1:numel(elec.label)
     cfgs = []; cfgs.channel = elec.label(e);
     elec_tmp = fn_select_elec(cfgs,elec);
+    elec_tmp = fn_align_elec2mesh(elec_tmp,roi_mesh); % align elec to mesh
     ft_plot_sens(elec_tmp, 'elecshape', 'sphere', 'facecolor', elec_tmp.color, 'label', rcn.lab_arg);
 end
 
