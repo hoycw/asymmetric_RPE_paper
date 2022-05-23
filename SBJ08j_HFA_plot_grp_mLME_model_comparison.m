@@ -1,4 +1,4 @@
-function SBJ08j_HFA_plot_grp_mLME_model_comparison(model_ids, model_names, an_id, stat_id)
+function SBJ08j_HFA_plot_grp_mLME_model_comparison(model_ids, model_names, an_id, stat_id, colors)
 %% set directories
 if exist('/home/knight/hoycw/','dir'); root_dir='/home/knight/hoycw/'; ft_dir=[root_dir 'Apps/fieldtrip/'];
 else root_dir='/Volumes/hoycw_clust/'; ft_dir='/Users/colinhoy/Code/Apps/fieldtrip/';end
@@ -41,17 +41,18 @@ end
 %% Make a plot
 %model_names = cellfun(@(x) x(1:end-6), model_ids,'UniformOutput',false);
 criteria = fieldnames(crit);
-markers = 'dhs*';
+%markers = 'dhs*';
 lty = {'-.','--','-',':'};
 for c = 1:numel(criteria)
     cf = figure('units','normalized','outerposition',[0 0 1 1],...
-        'PaperOrientation','Landscape');
+        'PaperOrientation','Portrait', 'PaperUnits','centimeters','PaperSize',[25,15]);
     ccrit = criteria{c};
     for r = 1:numel(crit.(ccrit))
         subplot(ceil(numel(crit.(ccrit)) / 2), 2, r)
         for m = 1:size(crit.(ccrit){r},1)
             cformat = lty{m};% markers(m)];
-            cp = plot(time, crit.(ccrit){r}(m,:), cformat, 'LineWidth',1.5); hold on;
+            cp = plot(time, crit.(ccrit){r}(m,:), cformat, 'LineWidth',1.5,...
+                'Color',colors{m}); hold on;
             cp.Color(4) = 0.8;
         end
         title(label{r})

@@ -55,24 +55,25 @@ for r = 1:numel(conn_stats_chan.coefs)
             end
         end
     end
-    sig_ix{r,b} = mean(conn_stats_chan.qvals{r}(:,3:4,:,b) < 0.05, 3) > 0;
+    sig_ix{r,b} = mean(conn_stats_chan.pvals{r}(:,3:4,:,b) < 0.05, 3) > 0;
 end
 
 %% Do stats and report
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 stats_file = sprintf('%s%s_%s_%s_%s_hfa_peak_lags_stats_%s_to_%s.txt', stats_dir,...
-                proc_id, model_id, an_id, conn_id, conn_stats_chan.pair_label{r}{1},...
-                conn_stats_chan.pair_label{r}{2});
+    proc_id, model_id, an_id, conn_id, conn_stats_chan.pair_label{r}{1},...
+    conn_stats_chan.pair_label{r}{2});
 fid = fopen(stats_file,'w');
 for r = 1:size(lags,1)
     for b = 1:size(lags,2)
         nbins = conn_stats_chan.nbins(b);
         stitle = sprintf('Tests of peak connectivity lags from %s to %s (nbis = %d):\n\n',...
-                        conn_stats_chan.pair_label{r}{1},conn_stats_chan.pair_label{r}{2},nbins);
+            conn_stats_chan.pair_label{r}{1},conn_stats_chan.pair_label{r}{2},nbins);
         [~,p,ci,stats] = ttest(lags{r,b}(:,1), lags{r,b}(:,2));
         [~,p2,ci2,stats2] = ttest2(lags{r,b}(:,1), lags{r,b}(:,2));
         [~,p3,ci3,stats3] = ttest2(lags{r,b}(sig_ix{r,b}(:,1),1),  lags{r,b}(sig_ix{r,b}(:,2),2));
-        
+        ippeaks = sum(peaks{r,b}(sig_ix{r,b}(:,1),1) < 0);
+        inpeaks = sum(peaks{r,b}(sig_ix{r,b}(:,2),2) < 0);
         % report
         line1 = ['paired t-test between pRPE and nRPE peak lags (all channel pairs): ',...
             sprintf('\n\nt(%d) = %f\nM = %f s\nCI = [%f %f]\np = %f\n\n',...
@@ -84,11 +85,14 @@ for r = 1:size(lags,1)
             sprintf('\n\nt(%d) = %f\nM = %f s\nCI = [%f %f]\np = %f\n\n',...
             stats3.df, stats3.tstat,...
             mean(lags{r,b}(sig_ix{r,b}(:,1),1)) - mean(lags{r,b}(sig_ix{r,b}(:,2),2)),...
-            ci3(1), ci3(2), p3)];
+            ci3(1), ci3(2), p3)];       
+        line4 = sprintf('Proportion of inhibitory positive RPE peaks: %d / %d = %.2f\n',...
+            ippeaks, sum(sig_ix{r,b}(:,1)), ippeaks / sum(sig_ix{r,b}(:,1)));
+        line5 = sprintf('Proportion of inhibitory negative RPE peaks: %d / %d = %.2f\n',...
+            inpeaks, sum(sig_ix{r,b}(:,2)), inpeaks / sum(sig_ix{r,b}(:,2)));
         
-        disp([stitle, line1, line2, line3]);
-        fprintf(fid,[stitle, line1, line2, line3])
+        fprintf([stitle, line1, line2, line3, line4, line5]);
+        fprintf(fid,[stitle, line1, line2, line3, line4, line5]);
     end
 end
 fclose(fid);
-%% Save to text file

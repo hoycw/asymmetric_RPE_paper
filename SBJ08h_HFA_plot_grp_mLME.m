@@ -33,8 +33,8 @@ for r = 1:ncols
     ylims0(r,1) = min([ylims0(r,1) - 0.25*abs(ylims0(r,1)), 0]);
     ylims0(r,2) = max([ylims0(r,2) + 0.25*abs(ylims0(r,2)), 0]);
 end
-ylims = [min(ylims0(:,1)),max(ylims0(:,2))];
-
+%ylims = [min(ylims0(:,1)),max(ylims0(:,2))];
+ylims = [-0.05,0.2];
 for r = 1:ncols
     ccoef = beta.coefs{r};
     subplot(1,ncols,r)
@@ -51,7 +51,7 @@ for r = 1:ncols
     end
     ylim(ylims)
     title(sprintf('%s',beta.label{r}))
-    xlabel('time lag (s)')
+    xlabel('time (s)')
     ylabel('model coefficient (a.u.)')
     legend(lgnds,reg_names)  
 end
