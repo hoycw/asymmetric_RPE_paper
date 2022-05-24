@@ -1,5 +1,5 @@
-function SBJ11f_HFA_conn_plot_grp_mLME_recon(SBJ_id, proc_id, an_id, model_id, conn_id,... 
-                            atlas_id, roi_id, rcn, varargin)
+function SBJ11f_HFA_conn_plot_grp_mLME_recon(SBJ_id, proc_id, an_id, model_id, conn_id,...
+    atlas_id, roi_id, rcn, varargin)
 %% Plot a reconstruction with electrodes colored according to statistics
 %   This version uses categories based on EpnRPE model
 % INPUTS:
@@ -142,16 +142,41 @@ for reg = 1:length(regs)
     elec.color(sig_ix,:) = repmat(reg_colors{reg},length(sig_ix),1);
     
     %elec.color = ;
-    plot_name = [SBJ_id '_' model_id '_' an_id '_' conn_id '_' rcn.plot_roi '_' rcn.hemi_str '_' rcn.view_str];
+    plot_name = [SBJ_id '_' model_id '_' an_id '_' conn_id '_' rcn.plot_roi '_' regs{reg}...
+                '_' rcn.hemi_str '_' rcn.view_str];
     
     fig = fn_plot_recon_mesh(elec, roi_mesh, roi_mesh_lab, rcn, plot_name);
     hold on;
     for pix = 1:size(sig_reg_elecs{reg},1)
-        pos1 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,1}),:);
-        pos2 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,2}),:);
-        plot3([pos1(1);pos2(1)],[pos1(2);pos2(2)],[pos1(3);pos2(3)],'-',...
-             'color',reg_colors{reg})   
-         hold on
+        if dirs{reg}(pix) == -1
+            dix1 = 2;dix2 = 1;
+        else
+            dix1 = 1; dix2 = 2;
+        end
+        pos1 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,dix1}),:);
+        pos2 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,dix2}),:);
+        l1 = plot3([pos1(1);pos2(1)],[pos1(2);pos2(2)],[pos1(3);pos2(3)],'-',...
+             'color',reg_colors{reg},'LineWidth',0.5);
+        l1.Color(4) = 0.75;
+%         if dirs{reg}(pix) == 0
+%             sah = 0;
+%         else
+%             sah = 1;
+%         end
+%         [cx,cy,cz] = cylinder([1,0]);
+%         cz = cz*5;
+%         %xangle = acosd(max(min(dot([cx(1,end),cy(1,end)],pos2(1:2))/(norm([cx(1,end),cy(1,end)])*norm(pos2(1:2))),1),-1));
+%         %yangle = acosd(max(min(dot([cy(1,end),cz(1,end)],pos2(1:2))/(norm([cy(1,end),cz(1,end)])*norm(pos2(2:3))),1),-1));
+%         %M=makehgtform('translate',pos2*0.5);%,'xrotate',xangle,'yrotate',yangle);
+%         cx = cx + pos2(1)*0.5;
+%         cy = cy + pos2(2)*0.5;
+%         cz = cz + pos2(3)*0.5;
+%         surf(cx,cy,cz,'FaceColor',reg_colors{reg})%,'Parent',hgtransform('Matrix',M))
+% %         q = quiver3(pos1(1),pos1(2),pos1(3),pos2(1)-pos1(1),pos2(2)-pos1(2),pos2(3)-pos1(3),0,...
+% %             'color',reg_colors{reg},'ShowArrowHead',sah,'AutoScale','off','LineWidth',.75,...
+% %                 'MaxHeadSize',0.5);
+% %         disp(q)
+%         hold on
     end
     if save_fig
         fig_fname = [out_dir plot_name '.' fig_ftype];

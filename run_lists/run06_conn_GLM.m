@@ -54,7 +54,7 @@ rcn.mirror   = 1;
 
 save_fig  = 1;
 fig_vis   = 'on';
-fig_ftype = 'png';
+fig_ftype = 'pdf';
 atlas_id = 'Dx';
 for ci = 1:numel(conn_ids)
     for mi = 1:numel(model_ids)

@@ -75,7 +75,7 @@ rcn.mirror   = 1;
 
 save_fig  = 1;
 fig_vis   = 'on';
-fig_ftype = 'png';
+fig_ftype = 'pdf';
 
 for m_ix = 1:numel(model_ids)
     model_id = model_ids{m_ix};
