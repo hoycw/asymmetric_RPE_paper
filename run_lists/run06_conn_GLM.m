@@ -51,10 +51,13 @@ rcn.reg_type = 'v';
 rcn.show_lab = 0;
 rcn.hemi     = 'l';
 rcn.mirror   = 1;
+rcn.view_angle = [-125,0];%rcn.view_angle = [-130,45];
+rcn.view_str = sprintf('%d_%d',rcn.view_angle(1),rcn.view_angle(2)); 
 
-save_fig  = 1;
+fig_res = 600;
+save_fig  = 1;%1;
 fig_vis   = 'on';
-fig_ftype = 'pdf';
+fig_ftype = 'png';
 atlas_id = 'Dx';
 for ci = 1:numel(conn_ids)
     for mi = 1:numel(model_ids)
@@ -70,7 +73,7 @@ for ci = 1:numel(conn_ids)
         roi_id = 'MPFCINS';
         rcn.plot_roi='MPFCINS';
         SBJ11f_HFA_conn_plot_grp_mLME_recon(SBJ_id, proc_id, an_id, model_id, conn_id,...
-                atlas_id, roi_id, rcn,'save_fig',save_fig,'fig_ftype',fig_ftype)
+                atlas_id, roi_id, rcn,'save_fig',save_fig,'fig_ftype',fig_ftype,'fig_res',fig_res)
         %end
     end
 end

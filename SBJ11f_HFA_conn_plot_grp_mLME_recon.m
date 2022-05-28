@@ -37,6 +37,8 @@ if ~isempty(varargin)
             save_fig = varargin{v+1};
         elseif strcmp(varargin{v},'fig_ftype')
             fig_ftype = varargin{v+1};
+        elseif strcmp(varargin{v},'fig_res')
+            fig_res = varargin{v+1};
         else
             error(['Unknown varargin ' num2str(v) ': ' varargin{v}]);
         end
@@ -46,10 +48,12 @@ end
 %% Implement the default options
 if ~exist('save_fig','var');    save_fig = 1; end
 if ~exist('fig_ftype','var');   fig_ftype = 'fig'; end
-
+if ~exist('fig_res','var');     fig_res = 300; end
 % ROI info
 rcn = fn_process_recon_vars(rcn);
-rcn.view_angle = [-130,45];
+% rcn.view_angle = [-90,0];
+%rcn.view_angle = [-130,45];
+
 [~, ~, roi_field] = fn_roi_label_styles(roi_id);
 
 %% Load data
@@ -60,6 +64,7 @@ if strcmp(mdl.model_lab,'RL3D')
 else
     [reg_lab, reg_names, reg_colors, reg_styles, reg_mrkrs] = fn_regressor_label_styles(mdl.model_lab);
 end
+reg_cmaps = {'bone','autumn','winter'};
 if numel(reg_lab) < 2 || numel(reg_lab) > 3; error('why venn?'); end
 %[cat_lab, cat_names, cat_colors, ~, ~] = fn_puns_category_label_styles(cat_id);
 
@@ -146,6 +151,12 @@ for reg = 1:length(regs)
                 '_' rcn.hemi_str '_' rcn.view_str];
     
     fig = fn_plot_recon_mesh(elec, roi_mesh, roi_mesh_lab, rcn, plot_name);
+    max_peak = max(abs(peaks{reg}));
+    cclim = [-max_peak-max_peak*0.05, max_peak+max_peak*0.05];
+    ccmap = flipud(colormap(reg_cmaps{reg}));
+    colvals = linspace(cclim(1),cclim(2),size(ccmap,1));
+    colormap(fig,ccmap)
+
     hold on;
     for pix = 1:size(sig_reg_elecs{reg},1)
         if dirs{reg}(pix) == -1
@@ -153,11 +164,14 @@ for reg = 1:length(regs)
         else
             dix1 = 1; dix2 = 2;
         end
+        %ccolor =  colormap(reg_colors{reg};
+        [~,ccolix] = min(abs(colvals-peaks{reg}(pix)));
+        ccolor = ccmap(ccolix,:);
         pos1 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,dix1}),:);
         pos2 = elec.chanpos(strcmp(elec.label,sig_reg_elecs{reg}{pix,dix2}),:);
         l1 = plot3([pos1(1);pos2(1)],[pos1(2);pos2(2)],[pos1(3);pos2(3)],'-',...
-             'color',reg_colors{reg},'LineWidth',0.5);
-        l1.Color(4) = 0.75;
+             'color',ccolor,'LineWidth',0.6);
+        l1.Color(4) = 0.8;
 %         if dirs{reg}(pix) == 0
 %             sah = 0;
 %         else
@@ -176,12 +190,21 @@ for reg = 1:length(regs)
 % %             'color',reg_colors{reg},'ShowArrowHead',sah,'AutoScale','off','LineWidth',.75,...
 % %                 'MaxHeadSize',0.5);
 % %         disp(q)
-%         hold on
+         hold on
     end
+    colorbar
+    ax = gca;
+    ax.CLim = cclim;
     if save_fig
         fig_fname = [out_dir plot_name '.' fig_ftype];
         fig_fname = strrep(fig_fname,'*','x');
-        saveas(fig,fig_fname);
+        if strcmp(fig_ftype,'fig')
+            saveas(fig,fig_fname);
+        else
+            print(fig_fname,sprintf('-d%s',fig_ftype), sprintf('-r%d',fig_res));
+        end
     end
+    hold off
+    clear ax
 end
 end
