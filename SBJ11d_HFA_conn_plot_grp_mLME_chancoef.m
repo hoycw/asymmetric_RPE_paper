@@ -39,10 +39,6 @@ end
 % ntimes = numel(conn_stats_chan.time);
 for r = 1:numel(conn_stats_chan.coefs)
     for b = 1:size(conn_stats_chan.coefs{r},4)
-        pchan = conn_stats_chan.chancat_ix{r}{1,b};
-        nchan = conn_stats_chan.chancat_ix{r}{2,b};
-        slnchan = conn_stats_chan.chancat_ix{r}{3,b};
-        rwdchan = conn_stats_chan.chancat_ix{r}{4,b};
         % findpeaks
         cpeaks = NaN(size(conn_stats_chan.coefs{r},1),3);
         clats = cpeaks;
@@ -61,7 +57,7 @@ for r = 1:numel(conn_stats_chan.coefs)
         histcolors = 'mrb';
         for rg = 1:3
             ccols = ['k' histcolors(rg)];
-            [sigchans, ~] = find(squeeze(conn_stats_chan.qvals{r}(:,rg+1,:,b)) < .05);
+            [sigchans, ~] = find(squeeze(conn_stats_chan.pvals{r}(:,rg+1,:,b)) < .05);
             sigchans = unique(sigchans);
             clabs(sigchans) = {'significant'};
             clabs(~ismember(1:length(clabs),sigchans)) = {'non-significant'};
@@ -113,10 +109,6 @@ for r = 1:numel(conn_stats_chan.coefs)
     for b = 1:size(conn_stats_chan.coefs{r},4)
         cf = figure('units','normalized','outerposition',[0 0 1 1],...
             'PaperOrientation','Landscape');
-        pchan = conn_stats_chan.chancat_ix{r}{1,b};
-        nchan = conn_stats_chan.chancat_ix{r}{2,b};
-        slnchan = conn_stats_chan.chancat_ix{r}{3,b};
-        rwdchan = conn_stats_chan.chancat_ix{r}{4,b};
         for t = 1:ntimes
             cplots = [];
             subplot(ceil(ntimes / 5),5,t)
@@ -164,10 +156,6 @@ for r = 1:numel(conn_stats_chan.coefs)
     for b = 1:size(conn_stats_chan.coefs{r},4)
         cf = figure('units','normalized','outerposition',[0 0 1 1],...
             'PaperOrientation','Landscape');
-        pchan = conn_stats_chan.chancat_ix{r}{1,b};
-        nchan = conn_stats_chan.chancat_ix{r}{2,b};
-        slnchan = conn_stats_chan.chancat_ix{r}{3,b};
-        rwdchan = conn_stats_chan.chancat_ix{r}{4,b};
         cplots = [];
         yline(0); hold on; xline(0);
         for ctg = 1:numel(conn_stats_chan.chancat_label)

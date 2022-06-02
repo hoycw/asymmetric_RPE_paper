@@ -240,7 +240,7 @@ end
 %% Linear mixed-effects model per region
 proc_id   = 'main_ft';
 an_id     = 'HGm_F25t121_zbtS_sm0_l1_wn50';%'HGm_F25t121_zbtS_sm0_l1_wn100';%'HGh_F25t121_zbtS_sm0_l1';%
-model_ids = {'EpnRPE_DifFB'};%, 'ERPEs_DifFB'};%{'EsRPE_DifFB','EuRPE_DifFB'};%
+model_ids = {'EpnRPE_DifFB'};%,'EsRPE_DifFB','EuRPE_DifFB'};%, 'ERPEs_DifFB'};%{'EsRPE_DifFB','EuRPE_DifFB'};%
 stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 cat_id    = 'puns';
 atlas_id  = 'Dx';
@@ -275,7 +275,7 @@ for m_ix = 1:numel(model_ids)
     
     for st_ix = 1:numel(stat_ids)
         stat_id = stat_ids{st_ix};
-        lme_formula = lme_formulas{m_ix};
+        %lme_formula = lme_formulas{m_ix};
         
         % run LME
         %SBJ08g_HFA_crRT_mLME(SBJs, proc_id, an_id, model_id, stat_id, atlas_id, roi_id, lme_formula)
@@ -284,8 +284,9 @@ for m_ix = 1:numel(model_ids)
         %SBJ08h_HFA_plot_grp_mLME(proc_id, an_id, model_id, stat_id)
         
         if strcmp(model_id, 'EpnRPE_DifFB')
-            % SBJ08g_HFA_add_channel_categories(an_id, model_id, stat_id, chpval_type)
-            
+            %SBJ08g_HFA_add_channel_categories(an_id, model_id, stat_id, chpval_type)
+            SBJ08k_HFA_channel_categories_stats(an_id, model_id, stat_id)
+
             % Plot ROI spider plot comparison
 %               SBJ08i_HFA_plot_grp_mLME_ROI_spider(SBJ_id,proc_id,an_id,model_ids{m_ix},stat_ids{st_ix},cat_id,...
 %                                                 roi_id,save_fig,'atlas_id',atlas_id,'fig_vis',fig_vis,'fig_ftype',fig_ftype);
@@ -297,7 +298,8 @@ for m_ix = 1:numel(model_ids)
     %                 roi_opts{roi_ix}{3});
     %         end
         end
-        % Plot single channel time courses and trace plot
+        % Plot single channel time courses, trace plot and star plots
+        
         %SBJ08h_HFA_plot_grp_mLME_chancoef(proc_id, an_id, model_id, stat_id)
         % Plot example LME results in single electrode
 %         SBJ08h_HFA_plot_crRT_LME('IR87', proc_id, an_id, model_ids{m_ix}, stat_ids{st_ix},...
@@ -314,18 +316,21 @@ stat_ids  = {'mLME_st0t6_WL05_WS25'};%'mGLM_st0t10_WL05_WS25'};%
 model_ids = {
     'EsRPE_DifFB'
     'EuRPE_DifFB';
-    'ERPEs_DifFB';
+    %'ERPEs_DifFB';
     'EpnRPE_DifFB';   
     };
 
 model_names = {
-    'sRPE';
-    'uRPE';
-    'sRPE + uRPE';
-    'pRPE + nRPE'
+    'Signed RPE';
+    'Unsigned RPE';
+    %'sRPE + uRPE';
+    'Distributional RPE'
     };
-
+colors = {[209 151 105]./255, [0 158 115]./255, [126   47  142]./255};
+      
 for s = 1:numel(stat_ids)
-    SBJ08j_HFA_plot_grp_mLME_model_comparison(model_ids, model_names, an_id, stat_ids{s})
+    stat_id = stat_ids{s};
+    SBJ08j_HFA_plot_grp_mLME_model_comparison(model_ids, model_names, an_id, stat_id, colors)
 end
+
 

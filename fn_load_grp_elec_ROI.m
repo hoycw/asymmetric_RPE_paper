@@ -27,7 +27,7 @@ for sbj_ix = 1:numel(SBJs)
     % Load elec
     elec_fname = [SBJ_vars.dirs.recon,SBJ,'_elec_',proc_id,'_mni',rcn.reg_suffix,'_',atlas_id,'_final.mat'];
     tmp = load(elec_fname); elec_sbj{sbj_ix} = tmp.elec;
-    
+
     % Append SBJ name to labels
     for e_ix = 1:numel(elec_sbj{sbj_ix}.label)
         elec_sbj{sbj_ix}.label{e_ix} = [SBJ ' ' elec_sbj{sbj_ix}.label{e_ix}];
@@ -35,25 +35,25 @@ for sbj_ix = 1:numel(SBJs)
     
     % Match ROIs to colors
     elec_sbj{sbj_ix}.color = fn_roi2color(elec_sbj{sbj_ix}.(roi_field));
-    
+
     % Find electrodes within atlas ROIs & hemisphere
     if rcn.mirror
         roi_elecs = fn_select_elec_lab_match(elec_sbj{sbj_ix}, 'b', atlas_id, roi_id);
     else
         roi_elecs = fn_select_elec_lab_match(elec_sbj{sbj_ix}, rcn.hemi, atlas_id, roi_id);
     end
-    
+
     % Find elecrodes specifically within ROIs on plot_roi_list for mesh plotting
     plot_elecs = zeros([numel(elec_sbj{sbj_ix}.label) numel(rcn.plot_roi_list)]);
     for roi_ix = 1:numel(rcn.plot_roi_list)
         plot_elecs(:,roi_ix) = strcmp(elec_sbj{sbj_ix}.(roi_field),rcn.plot_roi_list{roi_ix});
     end
-    
+
     % Select electrodes only within both categories
     cfgs = [];
     cfgs.channel = intersect(roi_elecs, elec_sbj{sbj_ix}.label(any(plot_elecs,2)));
     elec_sbj{sbj_ix} = fn_select_elec(cfgs, elec_sbj{sbj_ix});
-    
+
     % Report outcome (and flip hemispheres if mirroring)
     if ~isempty(elec_sbj{sbj_ix}.label)
         fprintf('\t%s has %i channels in %s (hemi %s)\n',SBJ,size(elec_sbj{sbj_ix}.label,1),rcn.plot_roi,rcn.hemi_str);
