@@ -14,17 +14,17 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 
 %% Single SBJ RL Model
 proc_id   = 'main_ft';
-model_ids = {'EsRPE_DifFB','EuRPE_DifFB'};%{'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
-%model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
+%model_ids = {'EsRPE_DifFB','EuRPE_DifFB'};%{'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
+model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
 
 fig_vis   = 'on';
 save_fig  = 1;
-fig_ftype = 'png';
+fig_ftype = 'svg';
 
 for mdl_ix = 1:numel(model_ids)
     for s = 1:numel(SBJs)
         % Run model
-        BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
+%         BHV02a_RL_model(SBJs{s},proc_id,model_ids{mdl_ix});
 
         % Plot model fit to tolerance and outcomes/accuracy
 %         BHV02b_RL_model_plot(SBJs{s},proc_id,model_ids{mdl_ix},...
