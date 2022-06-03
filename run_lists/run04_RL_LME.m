@@ -15,7 +15,7 @@ SBJs = fn_load_SBJ_list(SBJ_id);
 %% Single SBJ RL Model
 proc_id   = 'main_ft';
 %model_ids = {'EsRPE_DifFB','EuRPE_DifFB'};%{'ERPEs_DifFB'};%'ERB_DifFB'};%'ERBuRPE_DifFB'};%
-model_ids = {'EpnRPE_DifFB'};%'RL3D_DifFB'};
+model_ids = {'ERPEs_DifFB'};%{'EpnRPE_DifFB'};%'RL3D_DifFB'};
 
 fig_vis   = 'on';
 save_fig  = 1;
@@ -37,7 +37,9 @@ for mdl_ix = 1:numel(model_ids)
     
     % Plot model predicitons by condition across group
     plt_id    = 'line_cond';
-    BHV02d_RL_model_plot_grp_predictions(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
+%     BHV02d_RL_model_plot_grp_predictions(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
+%         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
+    BHV02d_RL_model_plot_grp_predictions_bar(SBJ_id,proc_id,model_ids{mdl_ix},plt_id,save_fig,...
         'fig_vis',fig_vis,'fig_ftype',fig_ftype);
     %close all;
 end
