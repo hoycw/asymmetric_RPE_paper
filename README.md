@@ -4,6 +4,7 @@ This code repository is for all preprocessing, analysis, and plotting scripts re
 ## Data and Experimental Paradigm:
 PsychoPy code for the paradigm is available at https://github.com/hoycw/target_time_scripts.git
 All raw datasets are provided under Creative Commons Attrubition 4.0 license on Zenodo at https://doi.org/10.5281/zenodo.10023443.
+This repo is citable via Zenodo: https://doi.org/10.5281/zenodo.10032478
 
 ## Manuscript: 
 Manuscript has been accepted for publication at Nature Communications and is in press.
