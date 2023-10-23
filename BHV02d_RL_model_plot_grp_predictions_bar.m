@@ -95,16 +95,21 @@ ax = gca; hold on;
 % Plot Activations by ROI
 bars = cell(size(reg_lab));
 bar_offsets  = linspace(-0.25,0.25,numel(cond_lab));   %bar for each condition
+sbj_offsets = linspace(-0.02,0.02,numel(SBJs));
+scat_sz = 25; scat_color = [0.3 0.3 0.3];
 for reg_ix = 1:numel(reg_lab)
     % Use "stacked" bars that have empty elements to trick MATLAB into
     % thinking there are multiple elements, which lets me change properties of individual bars
     bars{reg_ix} = bar(bar_offsets+reg_ix,diag(plot_means(reg_ix,sRPE_order)),0.9,'stacked');
     for cond_ix = 1:numel(cond_lab)
         if contains(cond_lab(sRPE_order(cond_ix)),'Ez')
-            set(bars{reg_ix}(cond_ix),'FaceColor',cond_colors{sRPE_order(cond_ix)},'EdgeColor','k','FaceAlpha',0.5);
-        else
             set(bars{reg_ix}(cond_ix),'FaceColor',cond_colors{sRPE_order(cond_ix)},'EdgeColor','k');
+        else
+            set(bars{reg_ix}(cond_ix),'FaceColor',cond_colors{sRPE_order(cond_ix)},'EdgeColor','k','FaceAlpha',0.5);
         end
+        
+        % Plot SBJ mean datapoints
+        scatter(sbj_offsets+bar_offsets(cond_ix)+reg_ix,model(reg_ix,sRPE_order(cond_ix),:),scat_sz,scat_color);
         
         % Plot standard error of the mean across subjects
         line([bar_offsets(cond_ix) bar_offsets(cond_ix)]+reg_ix,...
@@ -123,7 +128,7 @@ ylim([-2 2]);
 
 model_str = mdl.model_id;
 title(model_str,'Interpreter','none');
-legend(bars{1},cond_names{:},'Location','southeast');
+legend(bars{1},cond_names{sRPE_order},'Location','southeast');
 set(gca,'FontSize',16);
 
 %% Save Figure
