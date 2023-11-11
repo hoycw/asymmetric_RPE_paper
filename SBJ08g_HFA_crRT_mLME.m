@@ -22,6 +22,7 @@ addpath([root_dir 'PRJ_Error/scripts/']);
 addpath([root_dir 'PRJ_Error/scripts/utils/']);
 addpath(ft_dir);
 ft_defaults
+fig_dir = [root_dir 'PRJ_Error/results/HFA/GRP/'];
 
 % rng('shuffle'); % seed randi with time
 
@@ -157,6 +158,15 @@ for r = 1:numel(hfa_data)
     for ct = 1:size(hfa_data{r},2)
         ctable = cell2table(vertcat(hfa_data{r}{:,ct}));
         ctable.Properties.VariableNames = [{'y','sub','chan'},reg_lab];
+        if st.rank_transform == 1
+            disp('transforming to rankit')
+            ctable.y = norminv((tiedrank(ctable.y)-.5) / height(ctable))*std(ctable.y)+mean(ctable.y);
+        end
+        % mean center
+%         for rl = 1:length(reg_lab)
+%              creg = reg_lab{rl};
+%              ctable.(creg) = ctable.(creg) - mean(ctable.(creg));
+%         end
         hfa_tables{r}{ct} = ctable;
     end
 end
@@ -164,6 +174,12 @@ clear hfa_data
 
 %% Run LMEs
 fprintf('==================== Fitting LME ========================\n');
+options = statset('LinearMixedModel');
+if st.robust == 1 
+    disp('using robust estimation')
+    options.RobustWgtFun = 'bisquare';
+end
+
 LMEs = {};
 coefs = {};
 lower = {};
@@ -173,6 +189,9 @@ AIC = {};
 BIC = {};
 MSE = {};
 r2 = {};
+resid = {};
+fittedv = {};
+
 for r = 1:numel(hfa_tables)
     nt = size(hfa_tables{r},1);
     LMEs{r} = cell(nt,1);
@@ -182,23 +201,29 @@ for r = 1:numel(hfa_tables)
     upper{r} = NaN(size(model,2) + 1,nt);
     AIC{r} = NaN(1,nt);
     BIC{r} = NaN(1,nt);
-    
+    LL{r} = NaN(1,nt);
     MSE{r} = NaN(1,nt);
     r2{r} = NaN(1,nt);
+    resid{r} = NaN(height(hfa_tables{r}{1}),nt);
+    fittedv{r} = NaN(height(hfa_tables{r}{1}),nt);
+    
     for t = 1:nt
         
         fprintf('fitting label %d and time point %d\n',r,t)
         
         ctable = hfa_tables{r}{t};
-        LMEs{r}{t} = fitlme(ctable, lme_formula);%, 'FitMethod','REML');
+        LMEs{r}{t} = fitlme(ctable, lme_formula,'OptimizerOptions',options, 'FitMethod','REML');
         pvals{r}(:,t) = LMEs{r}{t}.Coefficients.pValue;
         coefs{r}(:,t) = LMEs{r}{t}.Coefficients.Estimate;
         lower{r}(:,t) = LMEs{r}{t}.Coefficients.Lower;
         upper{r}(:,t) = LMEs{r}{t}.Coefficients.Upper;
         AIC{r}(1,t) = LMEs{r}{t}.ModelCriterion.AIC;
         BIC{r}(1,t) = LMEs{r}{t}.ModelCriterion.BIC;
+        LL{r}(1,t) = LMEs{r}{t}.LogLikelihood;
         MSE{r}(1,t) = LMEs{r}{t}.MSE;
         r2{r}(1,t) = LMEs{r}{t}.Rsquared.Adjusted;
+        resid{r}(:,t) = residuals(LMEs{r}{t});
+        fittedv{r}(:,t) = fitted(LMEs{r}{t});
     end
 end
 %% FDR correction
@@ -227,6 +252,7 @@ beta.pvals = pvals;
 beta.qvals = qvals;
 beta.AIC = AIC;
 beta.BIC = BIC;
+beta.LL = LL;
 beta.MSE = MSE;
 beta.r2 = r2;
 beta.label = roi_list;
@@ -234,44 +260,183 @@ beta.win_lim   = win_lim;
 beta.win_lim_s = hfa_time(win_lim);
 beta.dimord = 'coef_time';
 
+%% Plot residuals qqplot
+for r = 1:numel(hfa_tables)
+    [~,lpval,~,~] = lillietest(reshape(resid{r},[numel(resid{r}),1]));
+
+    cf = figure('units','normalized','outerposition',[0 0 1 1],...
+                'PaperOrientation','Landscape');
+    subplot(1,2,1)
+    qqplot(reshape(resid{r},[numel(resid{r}),1])./std(resid{r},[],'all'))
+    %ylim([-5,5])
+    title(sprintf('Lillefors pval = %.3f',lpval))
+
+    subplot(1,2,2)
+    [f, x] = hist(resid{r}, 50); % Create histogram from a normal distribution.
+    g = 1 / sqrt(2 * pi) * exp(-0.5 * (x/std(resid{r},[],'all') ) .^ 2); % pdf of the normal distribution
+
+    bar(x, f / trapz(x, f)); hold on
+    plot(x, g / trapz(x, g), 'r'); hold off  
+    xlim([-5*std(resid{r},[],'all'), 5*std(resid{r},[],'all')])
+
+    %histfit(reshape(resid{r},[numel(resid{r}),1]))
+    title(sprintf('median = %.3f',median(resid{r},'all')))
+    
+    plot_fname1 = [fig_dir proc_id '_' model_id '_' an_id '_' stat_id '_hfa_'...
+                  beta.label{r} '_residuals_qqplot.pdf'];
+    
+    print(plot_fname1,cf,'-dpdf','-fillpage')
+end
+%close all
+%% Residuals vs fitted
+for r = 1:numel(hfa_tables)
+    cf = figure('units','normalized','outerposition',[0 0 1 1],...
+                'PaperOrientation','Landscape');
+    s = scatter(reshape(fittedv{r},[numel(fittedv{r}),1]),...
+            reshape(resid{r},[numel(resid{r}),1]),'.k');
+    s.MarkerEdgeAlpha = .05;
+    s.MarkerFaceAlpha = .05;
+    title(beta.label{r})
+    xlabel('fitted')
+    ylabel('residuals')
+    plot_fname2 = [fig_dir proc_id '_' model_id '_' an_id '_' stat_id '_hfa_'...
+                  beta.label{r} '_residuals_vs_fitted.png'];
+    
+    print(plot_fname2,cf,'-dpng')%,'-fillpage')
+end
+close all
+%% Residuals vs predictors
+for r = 1:numel(hfa_tables)
+    cf = figure('units','normalized','outerposition',[0 0 1 1],...
+                'PaperOrientation','Landscape');
+    for creg = 1:length(reg_lab) 
+        subplot(1,length(reg_lab),creg)
+        s = scatter(repmat(hfa_tables{r}{1}.(reg_lab{creg}),[size(resid{r},2),1]),...
+             reshape(resid{r},[numel(resid{r}),1]),'.k');
+        xlabel(reg_lab{creg})
+        ylabel('residuals')
+        title(reg_lab{creg})
+        s.MarkerEdgeAlpha = .05;
+        s.MarkerFaceAlpha = .05;
+    end
+    
+    plot_fname3 = [fig_dir proc_id '_' model_id '_' an_id '_' stat_id '_hfa_'...
+                  beta.label{r} '_residuals_vs_predictors.png'];
+    
+    print(plot_fname3,cf,'-dpng')%,'-fillpage')
+end
+%%
+close all
 %% Save
 fprintf('==================== Saving results ========================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa.mat'];
+%out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_REML.mat'];
 save(out_fname,'-v7.3','beta')
 
 %% Extract electrode-wise coefficients.
 chan_coef = {};
-chan_lower = {};
-chan_upper = {};
+% chan_lower = {};
+% chan_upper = {};
 chan_pval = {};
 chan_labels = {};
+
 for r = 1:numel(LMEs)
     for t = 1:numel(LMEs{r})
-        [~,~,rndstats] =  randomEffects(LMEs{r}{t},'DFMethod','residual');%'satterthwaite')%;
-               
-        %select channel random effect
-        rndstats = rndstats(strcmp(rndstats.Group,'sub:chan'),:);
+        [~,~,re] = randomEffects(LMEs{r}{t},'DFMethod','residual');%'satterthwaite')%;
+        [~,~,fe] = fixedEffects(LMEs{r}{t});
+        fprintf('estimating random effects for region %d and timepoint %d\n',r,t)
+        
+        nr = length(re.Estimate);
+        nf = length(fe.Estimate);
+
+        %Compute additive estimates and p-values
+        comp_Estimate = nan(nr,1);
+        comp_pValue = nan(nr,1);
+%        rlevels = unique(rnames.Level);
+%             for f = 1:height(fnames)
+%                 cfname = fnames.Name{f};
+%                 disp(cfname)
+%            fmat = zeros(1,height(fnames));
+%                 fmat(f) = 1;
+        cfnames=fe.Name;
+        crnames=re.Name;
+        crlevels=re.Level;
+        for l = 1:nr
+            crname = crnames{l};
+            fmat = zeros(1,nf);
+            rmat = zeros(1,nr);
+            fmat(1,strcmp(cfnames,crname)) = 1;
+            rmat(1,l) = 1;
+            clevel = crlevels{l};
+            %disp(clevel)
+%            cslevels = split(clevel,' ');
+%             if length(cslevels) > 1
+%                 rmat(1,strcmp(crlevels,cslevels{1}) & strcmp(crnames,crname)) = 1;
+%             end
+            comp_Estimate(l) = rmat*re.Estimate + fmat*fe.Estimate;
+            comp_pValue(l) = coefTest(LMEs{r}{t},fmat,0,'REContrast',rmat,'DFMethod','residual');
+        end
+        for cfe = 1:length(fe.Name)
+            cfname = fe.Name{cfe};
+            fprintf('%s %f %f\n', cfname, mean(comp_Estimate(strcmp(re.Group,"sub:chan") &...
+                strcmp(re.Name,cfname))), fe.Estimate(cfe))
+%             csubs = unique(re.Level(strcmp(re.Group,'sub')));
+%             remeans =[];
+%             for csubix = 1:length(csubs)
+%                 csub = csubs{csubix};
+%                 remeans(end+1) = mean(comp_Estimate(contains(re.Level,csub) & strcmp(re.Group,'sub:chan') & strcmp(re.Name,cfname)));                
+%                 fprintf('%s %s %f %f\n', cfname, csub, remeans(end), comp_Estimate(strcmp(re.Level,csub) & strcmp(re.Group,'sub') & strcmp(re.Name,cfname)))
+%             end
+%             fprintf('%s %f %f\n', cfname, mean(remeans), fe.Estimate(cfe))
+        end
+
+        %%Compute additive estimates and p-values
+%         comp_Estimate = nan(length(re),1);
+%         comp_pValue = nan(length(re),1);
+%         rlevels = unique(rnames.Level);
+%         for f = 1:height(fnames)
+%             cfname = fnames.Name{f};
+%             fmat = zeros(1,height(fnames));
+%             fmat(f) = 1;
+%             for l = 1:length(rlevels)
+%                 rmat = zeros(1,height(rnames));
+%                 clevel = rlevels{l};
+%                 cr = find(strcmp(rnames.Level,clevel) & strcmp(rnames.Name,cfname));
+%                 cslevels = split(clevel,' ');
+%                 rmat(1,cr) = 1;
+%                 if length(cslevels) > 1
+%                     rmat(strcmp(rnames.Level,cslevels{1}) & strcmp(rnames.Name,cfname)) = 1;
+%                 end
+%                 comp_Estimate(cr) = rmat*re + fmat*fe;
+%                 comp_pValue(cr) = coefTest(LMEs{r}{t},fmat,0,'REContrast',rmat);%, 'DFMethod','residual');
+%             end
+%         end
+        
+        %%select channel random effect
+        re = re(strcmp(re.Group,'sub:chan'),:);
+        comp_Estimate = comp_Estimate(strcmp(re.Group,'sub:chan'));
+        comp_pValue = comp_pValue(strcmp(re.Group,'sub:chan'));
         if t == 1
-            chan_labels{r} = unique(rndstats.Level);
+            chan_labels{r} = unique(re.Level);
             chan_coef{r} = NaN(size(model,2) + 1, length(chan_labels{r}), numel(LMEs{r}));
-            chan_lower{r} = chan_coef{r};
-            chan_upper{r} = chan_coef{r};
+%             chan_lower{r} = chan_coef{r};
+%             chan_upper{r} = chan_coef{r};
             chan_pval{r} = chan_coef{r};
         end
         
-        chan_coef{r}(:,:,t) = reshape(rndstats.Estimate, size(chan_coef{r},1:2));
-        chan_lower{r}(:,:,t) = reshape(rndstats.Lower, size(chan_coef{r},1:2));
-        chan_upper{r}(:,:,t) = reshape(rndstats.Upper, size(chan_coef{r},1:2));
-        chan_pval{r}(:,:,t) = reshape(rndstats.pValue, size(chan_coef{r},1:2));
+        chan_coef{r}(:,:,t) = reshape(comp_Estimate, size(chan_coef{r},1:2));
+%         chan_lower{r}(:,:,t) = reshape(rndstats.Lower, size(chan_coef{r},1:2));
+%         chan_upper{r}(:,:,t) = reshape(rndstats.Upper, size(chan_coef{r},1:2));
+        chan_pval{r}(:,:,t) = reshape(comp_pValue, size(chan_coef{r},1:2));
     end
     chan_coef{r} = permute(chan_coef{r},[2,1,3]);
-    chan_lower{r} = permute(chan_lower{r},[2,1,3]);
-    chan_upper{r} = permute(chan_upper{r},[2,1,3]);
+%     chan_lower{r} = permute(chan_lower{r},[2,1,3]);
+%     chan_upper{r} = permute(chan_upper{r},[2,1,3]);
     chan_pval{r} = permute(chan_pval{r},[2,1,3]);
 end
 
-% FDR correction
+%% FDR correction
 chan_qval = {};
 for r = 1:numel(chan_pval)
     for ch = 1:size(chan_pval{r},1)
@@ -280,15 +445,14 @@ for r = 1:numel(chan_pval)
         end
     end
 end
-
 %% Store in a structure
 beta_chan =  [];
 %conn_stats.LMEs = LMEs;
 beta_chan.feature   = reg_lab;
 beta_chan.time      = st.win_center;
 beta_chan.coefs = chan_coef;
-beta_chan.lower = chan_lower;
-beta_chan.upper = chan_upper;
+% beta_chan.lower = chan_lower;
+% beta_chan.upper = chan_upper;
 beta_chan.pvals = chan_pval;
 beta_chan.qvals = chan_qval;
 beta_chan.label = roi_list;
@@ -372,6 +536,7 @@ beta_chan.dimord = 'chan_coef_time';
 fprintf('=================== Saving channel effects ======================\n');
 stats_dir = [root_dir 'PRJ_Error/data/GRP/stats/'];
 out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef.mat'];
+%out_fname = [stats_dir model_id '_' stat_id '_' an_id '_hfa_chancoef_REML.mat'];
 save(out_fname,'-v7.3','beta_chan')
 %save(out_fname,'beta_chan')
 %% Old way of calculating significant channels
